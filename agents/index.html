@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent profile · tauten</title>
+<meta name="description" content="The instructions an adopting project gives its coding agent, written by cargo tauten init --write.">
+<link rel="canonical" href="https://tauten.dev/agents/">
+<meta property="og:title" content="Agent profile · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/agents/">
+<meta property="og:description" content="The instructions an adopting project gives its coding agent, written by cargo tauten init --write.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141922">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=c0d78355">
+<script src="/assets/theme.js?v=c0d78355"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/crates/">Crates</a></li><li><a href="/rules/">Rules</a></li><li><a href="/agents/" aria-current="page">Agents</a></li><li><a href="/benchmark/">Benchmark</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+</div></header>
+<main id="main">
+<div class="wrap page-head"><p class="eyebrow">Agent profile</p><h1>The agent profile</h1>
+<p class="lede">This is the text an adopting project gives its agent. <code>cargo tauten init --write</code> writes it to <code>AGENTS.tauten.md</code>; point your <code>AGENTS.md</code> or <code>CLAUDE.md</code> at it.</p>
+<p><span class="tag">Designed</span>Whether it changes agent behaviour has not been measured.</p></div>
+<div class="wrap">
+<div class="actions"><button class="copy-btn" type="button" hidden data-src="/agents/AGENTS.tauten.md">Copy as Markdown</button><a href="/agents/AGENTS.tauten.md">Raw file</a></div>
+<p class="small muted">Reproduced from <code>crates/tauten-check/agents.md</code> at <code>736c335</code>.</p>
+<div class="card prose" style="max-width:76ch"><!-- tauten agent profile v0. Paste into your project's AGENTS.md / CLAUDE.md. -->
+<h3 id="strictness-profile-tauten">Strictness profile (tauten)</h3>
+<p>This workspace uses the tauten profile. <code>cargo tauten check</code> must pass before
+you report a task as done. Run it with <code>--format json</code> to get one diagnostic
+per line; each has a rule <code>id</code>, the <code>file</code>/<code>line</code>, and a <code>fix</code>.
+<code>cargo tauten explain &lt;ID&gt;</code> prints the full rule.</p>
+<p><strong>Tiers.</strong> Every crate declares <code>[package.metadata.tauten] tier</code>:
+- <code>kernel</code>: pure decisions. <code>no_std</code>, no IO, no floats, no <code>HashMap</code>, no
+  shared mutability, no lint exceptions at all.
+- <code>core</code>: library logic. No direct filesystem, environment, process, clock,
+  randomness, network, stdout/stderr or global state. These arrive as
+  parameters (a capability, a <code>&amp;mut impl Write</code>, a <code>Clock</code> trait).
+- <code>edge</code>: <code>main</code>, startup, adapters. The only place that touches the world
+  or creates capabilities. Keep it thin.</p>
+<p>Dependencies point inward only: edge → core → kernel.</p>
+<p><strong>When a rule fires, fix the cause.</strong>
+- Do not add <code>#[allow]</code>. If an exception is truly correct, use
+  <code>#[expect(lint, reason = "why this is safe here")]</code> on the smallest item,
+  and say so in your report. Some rules (stubs, <code>unsafe</code> outside the edge,
+  anything in a kernel crate) admit no exceptions.
+- Do not move code to the edge tier, change a crate's tier, or edit
+  <code>[lints]</code>/<code>clippy.toml</code> to make a finding go away.
+- Replace <code>unwrap</code>/<code>expect</code> with <code>?</code> and a typed error enum.
+- Replace <code>a + b</code> with <code>checked_add</code> (or <code>saturating_*</code> when that is the
+  specified behaviour), <code>v[i]</code> with <code>.get(i)</code>, <code>as</code> with <code>try_from</code>.
+- List every enum variant instead of <code>_ =&gt;</code>.
+- Never leave <code>todo!()</code>, <code>unimplemented!()</code>, <code>dbg!()</code> or "for now" comments.</p>
+<p><strong>Tests.</strong> Tests may panic, index, do arithmetic, use temp files and print.
+They may not silently drop a <code>Result</code>, use stubs, or use <code>#[allow]</code>. Put
+helpers used only by tests inside <code>#[cfg(test)]</code> modules. Never delete,
+weaken or <code>#[ignore]</code> a test to make a task pass; report the conflict instead.</p></div>
+<h2 id="arms" style="margin-top:48px">Three arms</h2>
+<p class="prose">Whether instructions alone help is an open question, and the benchmark tests it: arm B gets the same rules in prose, without the check.</p>
+<p class="small muted">Reproduced from <code>bench/README.md</code> at <code>736c335</code>.</p>
+<div class="prose"><div class="table-scroll" tabindex="0" role="region" aria-label="Benchmark arms"><table>
+<thead>
+<tr>
+<th scope="col">Arm</th>
+<th scope="col">The agent gets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>The repo and "run <code>cargo test</code>"</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>A plus the same rules in prose (told, not enforced)</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Tiers declared in the manifests, the tauten agent profile, and "<code>cargo tauten check</code> must pass"</td>
+</tr>
+</tbody>
+</table></div>
+<p>B separates the effect of <em>being told</em> from the effect of <em>being checked</em>.</p></div>
+</div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>736c335</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<script src="/assets/copy.js?v=c0d78355" defer></script>
+</body>
+</html>

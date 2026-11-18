@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proof tier · tauten</title>
+<meta name="description" content="The planned proof tier for kernel crates: Charon/Aeneas to Lean. Not started.">
+<link rel="canonical" href="https://tauten.dev/proofs/">
+<meta property="og:title" content="Proof tier · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/proofs/">
+<meta property="og:description" content="The planned proof tier for kernel crates: Charon/Aeneas to Lean. Not started.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141922">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=c0d78355">
+<script src="/assets/theme.js?v=c0d78355"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/crates/">Crates</a></li><li><a href="/rules/">Rules</a></li><li><a href="/agents/">Agents</a></li><li><a href="/benchmark/">Benchmark</a></li><li><a href="/proofs/" aria-current="page">Proofs</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+</div></header>
+<main id="main">
+<div class="wrap page-head"><p class="eyebrow">Proof tier</p><h1>The proof tier</h1>
+<p><span class="badge b-planned">Not started</span> <span class="qual">planned for M3</span></p></div>
+<div class="wrap prose-wrap">
+<div class="banner-pending" role="note"><p>Nothing on this page exists yet. Every sentence describes a plan.</p></div>
+<h2 id="pipeline">The planned pipeline</h2>
+<p class="prose">For crates declared <code>kernel</code>, a gate would run five steps. None of them is built.</p>
+<ol class="flow" aria-label="Planned proof pipeline"><li><b>1 · extract</b>Extract the kernel crate with Charon/Aeneas.</li><li><b>2 · drift</b>Check the extraction against the committed <code>proofs/Extracted/</code>.</li><li><b>3 · build</b><code>lake build</code> the Lean proofs.</li><li><b>4 · audit</b><code>Audit.lean</code>: an axiom allowlist and the required claims.</li><li><b>5 · mutants</b>Each mutant must break exactly its named theorem.</li></ol>
+<p class="small muted">Reproduced from <code>docs/PLAN.md</code> at <code>736c335</code>.</p>
+<div class="prose"><p>Generalise writfold's gate: Charon/Aeneas extraction of the <code>kernel</code> crate →
+drift check against committed <code>proofs/Extracted/</code> → <code>lake build</code> →
+<code>Audit.lean</code> (axiom allowlist + required claims) → mutants (each mutant must
+break exactly its named theorem). Three rungs: <strong>P0</strong> property tests +
+cargo-mutants; <strong>P1</strong> Kani from contracts ("bounded model-checked"); <strong>P2</strong>
+Aeneas/Lean ("proved over the shipped Rust"). No Verus/Creusot.</p></div>
+<h2 id="rungs">Three rungs</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Proof rungs"><table class=""><caption>From <code>docs/PLAN.md</code> §4. None is in place.</caption><thead><tr><th scope="col">Rung</th><th scope="col">Method</th><th scope="col">What it would let the site say</th></tr></thead><tbody><tr><td>P0</td><td>Property tests and cargo-mutants</td><td>tested</td></tr><tr><td>P1</td><td>Kani harnesses from contracts</td><td>bounded model-checked</td></tr><tr><td>P2</td><td>Aeneas extraction to Lean</td><td>proved over the shipped Rust</td></tr></tbody></table></div>
+<h2 id="writfold">Modelled on writfold</h2>
+<p class="prose">The gate would generalise the one <a href="https://writfold.dev">writfold</a> uses for its own kernel. Those are writfold's proofs, not tauten's.</p>
+<h2 id="why-kernel">Why the kernel tier exists</h2>
+<p class="prose">A kernel crate is <code>no_std</code>, has no floats, no <code>HashMap</code>, no shared mutability and no lint exceptions. That is the shape of code the proof tier is meant for:</p>
+<div class="panel tier-kernel"><div class="panel-head"><span class="path">acc-kernel/src/lib.rs</span><span class="meta"><span class="chip chip-tier k">kernel</span><span class="chip prov">From the repo</span></span></div><pre class="code" tabindex="0" aria-label="Source of fixture acc-kernel"><code><span class="line"><span class="t-cp">#![</span><span class="t-cp">no_std</span><span class="t-cp">]</span></span><span class="line"><span class="t-sd">//! A pure decision kernel: exact, total, no IO.</span></span><span class="line"> </span><span class="line"><span class="t-sd">/// Why a withdrawal was refused.</span></span><span class="line"><span class="t-cp">#[</span><span class="t-cp">derive(Debug, Clone, Copy, PartialEq, Eq)</span><span class="t-cp">]</span></span><span class="line"><span class="t-k">pub</span><span class="t-w"> </span><span class="t-k">enum</span><span class="t-w"> </span><span class="t-nc">Refusal</span><span class="t-w"> </span><span class="t-p">{</span></span><span class="line"><span class="t-w">    </span><span class="t-sd">/// Not enough balance.</span></span><span class="line"><span class="t-w">    </span><span class="t-n">Insufficient</span><span class="t-p">,</span></span><span class="line"><span class="t-w">    </span><span class="t-sd">/// The account is frozen.</span></span><span class="line"><span class="t-w">    </span><span class="t-n">Frozen</span><span class="t-p">,</span></span><span class="line"><span class="t-p">}</span></span><span class="line"> </span><span class="line"><span class="t-sd">/// Account state.</span></span><span class="line"><span class="t-cp">#[</span><span class="t-cp">derive(Debug, Clone, Copy, PartialEq, Eq)</span><span class="t-cp">]</span></span><span class="line"><span class="t-k">pub</span><span class="t-w"> </span><span class="t-k">enum</span><span class="t-w"> </span><span class="t-nc">State</span><span class="t-w"> </span><span class="t-p">{</span></span><span class="line"><span class="t-w">    </span><span class="t-sd">/// Normal.</span></span><span class="line"><span class="t-w">    </span><span class="t-n">Open</span><span class="t-p">,</span></span><span class="line"><span class="t-w">    </span><span class="t-sd">/// No withdrawals.</span></span><span class="line"><span class="t-w">    </span><span class="t-n">Frozen</span><span class="t-p">,</span></span><span class="line"><span class="t-p">}</span></span><span class="line"> </span><span class="line"><span class="t-sd">/// Decide a withdrawal; returns the new balance.</span></span><span class="line"><span class="t-sd">///</span></span><span class="line"><span class="t-sd">/// # Errors</span></span><span class="line"><span class="t-sd">/// Returns a [`Refusal`] naming why the withdrawal is not allowed.</span></span><span class="line"><span class="t-k">pub</span><span class="t-w"> </span><span class="t-k">fn</span><span class="t-w"> </span><span class="t-nf">withdraw</span><span class="t-p">(</span><span class="t-n">state</span><span class="t-p">:</span><span class="t-w"> </span><span class="t-nc">State</span><span class="t-p">,</span><span class="t-w"> </span><span class="t-n">balance</span><span class="t-p">:</span><span class="t-w"> </span><span class="t-kt">u64</span><span class="t-p">,</span><span class="t-w"> </span><span class="t-n">amount</span><span class="t-p">:</span><span class="t-w"> </span><span class="t-kt">u64</span><span class="t-p">)</span><span class="t-w"> </span><span class="t-p">-&gt;</span><span class="t-w"> </span><span class="t-nb">Result</span><span class="t-o">&lt;</span><span class="t-kt">u64</span><span class="t-p">,</span><span class="t-w"> </span><span class="t-n">Refusal</span><span class="t-o">&gt;</span><span class="t-w"> </span><span class="t-p">{</span></span><span class="line"><span class="t-w">    </span><span class="t-k">match</span><span class="t-w"> </span><span class="t-n">state</span><span class="t-w"> </span><span class="t-p">{</span></span><span class="line"><span class="t-w">        </span><span class="t-n">State</span><span class="t-p">::</span><span class="t-n">Frozen</span><span class="t-w"> </span><span class="t-o">=</span><span class="t-o">&gt;</span><span class="t-w"> </span><span class="t-nb">Err</span><span class="t-p">(</span><span class="t-n">Refusal</span><span class="t-p">::</span><span class="t-n">Frozen</span><span class="t-p">)</span><span class="t-p">,</span></span><span class="line"><span class="t-w">        </span><span class="t-n">State</span><span class="t-p">::</span><span class="t-n">Open</span><span class="t-w"> </span><span class="t-o">=</span><span class="t-o">&gt;</span><span class="t-w"> </span><span class="t-n">balance</span><span class="t-p">.</span><span class="t-n">checked_sub</span><span class="t-p">(</span><span class="t-n">amount</span><span class="t-p">)</span><span class="t-p">.</span><span class="t-n">ok_or</span><span class="t-p">(</span><span class="t-n">Refusal</span><span class="t-p">::</span><span class="t-n">Insufficient</span><span class="t-p">)</span><span class="t-p">,</span></span><span class="line"><span class="t-w">    </span><span class="t-p">}</span></span><span class="line"><span class="t-p">}</span></span></code></pre><div class="panel-foot"><a href="https://github.com/tauten-dev/tauten/blob/736c335e62b7392bdf156ce57eba146a032029df/fixtures/cases/acc-kernel/src/lib.rs"><code>fixtures/cases/acc-kernel/src/lib.rs</code></a> at <code>736c335</code></div></div>
+<p class="boundary">The kernel's arithmetic and indexing rules duplicate what an Aeneas proof already establishes. The proof tier should subsume them; see the dry-run report. <span class="small muted">(docs/STATUS.md, Known gaps)</span></p>
+<h2 id="claims">What it will claim</h2>
+<p class="prose">Only listed kernel theorems will be called proved, each named in a gate that runs on every commit. Nothing else on this site will be described that way.</p>
+<h2 id="kill">Kill criterion</h2>
+<p class="prose">Proof tier can't be templated in 3 agent-days: ship without it. <span class="small muted">(docs/PLAN.md §9)</span></p>
+</div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>736c335</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<script src="/assets/copy.js?v=c0d78355" defer></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enforcement · tauten</title>
+<meta name="description" content="What tauten enforces, with what, and what it does not enforce: the mapping table and known gaps.">
+<link rel="canonical" href="https://tauten.dev/enforcement/">
+<meta property="og:title" content="Enforcement · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/enforcement/">
+<meta property="og:description" content="What tauten enforces, with what, and what it does not enforce: the mapping table and known gaps.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141922">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=c0d78355">
+<script src="/assets/theme.js?v=c0d78355"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/crates/">Crates</a></li><li><a href="/rules/">Rules</a></li><li><a href="/agents/">Agents</a></li><li><a href="/benchmark/">Benchmark</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+</div></header>
+<main id="main">
+<div class="wrap page-head"><p class="eyebrow">Enforcement</p><h1>What is enforced, and what is not</h1>
+<p class="lede">Every mechanism, what enforces it, how far it has got, and the honest gap. The table is the core repository's, reproduced unedited.</p></div>
+<div class="wrap">
+<p class="small muted">Reproduced from <code>docs/MAPPING.md</code> at <code>736c335</code>. Strength codes are explained in its first paragraphs.</p>
+<div class="prose wide"><h2 id="sovel-idea-rust-mechanism">Sovel idea → Rust mechanism</h2>
+<p>This is the enforcement table the website will reproduce unedited. "Status"
+says what exists in this repository today; "Strength" says what does the
+enforcing.</p>
+<p><strong>Strength:</strong> <strong>C</strong> = rustc type system · <strong>L</strong> = lint or tauten check (escapable
+only by a visible, reasoned <code>#[expect]</code>, and not at all where marked
+"no exceptions") · <strong>P</strong> = proved for kernel functions (proof tier, planned) ·
+<strong>V</strong> = convention/review only.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Enforcement table"><table class="mapping sticky">
+<thead>
+<tr>
+<th scope="col">Sovel idea</th>
+<th scope="col">Rust mechanism</th>
+<th scope="col">Strength</th>
+<th scope="col">Status</th>
+<th scope="col">Honest gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No ambient authority (<code>using</code>)</td>
+<td>Banned fs/env/process/clock/rand/net/stdio APIs in <code>kernel</code>/<code>core</code> (TAU-A001, generated <code>disallowed-methods</code>); authority minted only in <code>edge</code> (TAU-A002: <code>Authority::acquire</code> and cap-std's ambient constructors are banned by resolved path, so aliases and function pointers are caught)</td>
+<td>L</td>
+<td><strong>Exercised</strong> on fixtures (incl. <code>rej-authority-alias</code>) and writfold dry run</td>
+<td>Not confinement: dependencies, <code>unsafe</code>, FFI, build scripts and unlisted crates keep ambient access. Claim "discipline", never "sandbox".</td>
+</tr>
+<tr>
+<td>Contextual forwarding</td>
+<td>Explicit capability parameters; no globals (TAU-G001)</td>
+<td>L</td>
+<td>Exercised (globals)</td>
+<td>More verbose than Sovel's <code>using</code>; no implicit forwarding.</td>
+</tr>
+<tr>
+<td>Retained dependencies (<code>from</code>)</td>
+<td>Lifetimes, borrow checker</td>
+<td>C</td>
+<td>Rust</td>
+<td>Sovel's graph-ID brands are not covered.</td>
+</tr>
+<tr>
+<td>Instance identity (which pool/arena a handle came from)</td>
+<td>None</td>
+<td>—</td>
+<td>Not enforced</td>
+<td>A handle from one instance used on another compiles. Generative brands exist in Rust but cannot leave their scope; decided by benchmark data.</td>
+</tr>
+<tr>
+<td>Provenance / freshness (a value checked against state that later changed)</td>
+<td>None</td>
+<td>—</td>
+<td>Not enforced</td>
+<td>Check-then-use races and stale validations compile.</td>
+</tr>
+<tr>
+<td>Captured authority (a closure holding a capability)</td>
+<td>None</td>
+<td>—</td>
+<td>Not enforced</td>
+<td>Closures and trait objects can carry capabilities invisibly in their types.</td>
+</tr>
+<tr>
+<td>Effect rows (<code>! {…}</code>)</td>
+<td>Tiers as coarse effect classes; <code>Result</code> for <code>fail</code>; <code>async</code> for <code>suspend</code></td>
+<td>C for fail/suspend, L for tier</td>
+<td>Tiers exercised</td>
+<td><strong>Rust cannot express per-function effect rows or effect polymorphism.</strong></td>
+</tr>
+<tr>
+<td>Typed failure</td>
+<td><code>Result</code> + error enums; <code>Result&lt;_, ()&gt;</code> and type-erased errors banned outside edge (TAU-E002); silent drops (TAU-E001) and unexplained discards (TAU-E003) rejected</td>
+<td>C + L</td>
+<td>Exercised</td>
+<td>Banned-type list is finite.</td>
+</tr>
+<tr>
+<td>No panic</td>
+<td>unwrap/expect (P001), panic/unreachable (P002), indexing/slicing (P003), panics in <code>Result</code> fns (P004), exit/abort (P005)</td>
+<td>L; P for kernel (planned)</td>
+<td>Exercised</td>
+<td>Syntactic only. Panics inside dependencies and allocation failure are not covered.</td>
+</tr>
+<tr>
+<td>Checked arithmetic</td>
+<td><code>arithmetic_side_effects</code>, <code>integer_division</code> (N001); lossy casts (N002); kernel floats (N003)</td>
+<td>L</td>
+<td>Exercised</td>
+<td>A runtime overflow check is still a panic unless <code>checked_*</code> is used.</td>
+</tr>
+<tr>
+<td>Exhaustive matching</td>
+<td>rustc exhaustiveness + no wildcard over enums (M001)</td>
+<td>C + L</td>
+<td>Exercised</td>
+<td>Foreign <code>#[non_exhaustive]</code> enums need a wildcard (excused with a reason).</td>
+</tr>
+<tr>
+<td>Nominal newtypes</td>
+<td><code>#[newtype]</code> (private field in a generated module, no <code>Deref</code>/<code>From</code>)</td>
+<td>C</td>
+<td><strong>Exercised</strong> (runtime + compile-fail tests)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Refinements</td>
+<td><code>#[refined(pred)]</code>: validated constructor only; derives that construct values (<code>Default</code>, <code>Deserialize</code>, ...) rejected</td>
+<td>C</td>
+<td><strong>Exercised</strong> (runtime + compile-fail tests)</td>
+<td>Runtime check, no static predicate propagation. <code>unsafe</code> transmutes in edge crates can still forge one.</td>
+</tr>
+<tr>
+<td><code>requires</code>/<code>ensures</code>/<code>old</code></td>
+<td>Always-on contract attributes on <code>Result</code>-returning functions (violation = returned error); Lean for kernel (planned)</td>
+<td>runtime; P for kernel (planned)</td>
+<td><strong>Exercised</strong> (runtime + compile-fail tests); Kani lowering not built</td>
+<td>Not static outside the kernel; <code>old</code> limited to <code>Copy</code> values; no <code>async</code>.</td>
+</tr>
+<tr>
+<td>Structured concurrency</td>
+<td><code>thread::spawn</code>/<code>tokio::spawn</code> banned in kernel/core (C001); await-holding-lock etc. (C002)</td>
+<td>L</td>
+<td>Exercised (C001)</td>
+<td>Async cancellation safety not enforceable.</td>
+</tr>
+<tr>
+<td>No implicit repair (alloc/clone/refcount)</td>
+<td><code>Rc</code>/<code>RefCell</code>/<code>Arc</code>/<code>Mutex</code> banned in kernel (K001)</td>
+<td>L (kernel), V elsewhere</td>
+<td>Exercised</td>
+<td>An agent can still add <code>.clone()</code> to quiet the borrow checker.</td>
+</tr>
+<tr>
+<td>Determinism</td>
+<td><code>HashMap</code>/<code>HashSet</code> banned in kernel (K001); pinned toolchain; <code>--locked</code></td>
+<td>L</td>
+<td>Exercised</td>
+<td>No bit-for-bit reproducibility claim.</td>
+</tr>
+<tr>
+<td>Termination</td>
+<td><code>infinite_loop</code> outside edge (L001); Lean totality for kernel</td>
+<td>L, P (planned)</td>
+<td>Exercised (L001)</td>
+<td>No general termination checking.</td>
+</tr>
+<tr>
+<td>No stubs</td>
+<td><code>todo!</code>/<code>unimplemented!</code>/<code>dbg!</code> (S001, no exceptions); placeholder comments (S002, warning)</td>
+<td>L</td>
+<td>Exercised</td>
+<td>S002 is a heuristic.</td>
+</tr>
+<tr>
+<td>Visible exceptions</td>
+<td><code>#[allow]</code> banned in favour of <code>#[expect(.., reason)]</code> (X001); no crate-wide opt-outs (X002); loosening <code>[lints]</code> reported (X003); no exceptions in kernel or for no-exception rules (X004)</td>
+<td>L</td>
+<td>Exercised</td>
+<td>An agent with write access can still add a reasoned <code>#[expect]</code> (visible in review; ratchet planned).</td>
+</tr>
+<tr>
+<td><code>unsafe</code> honesty</td>
+<td><code>unsafe_code</code> in kernel/core, no exceptions (U001); documented single-op blocks in edge (U002)</td>
+<td>L</td>
+<td>Exercised (U001)</td>
+<td>No containment of C.</td>
+</tr>
+<tr>
+<td>Tier structure</td>
+<td>Every crate declares a tier (T001); dependencies point inward (T002); kernel deps allowlisted (T003); kernel is <code>no_std</code> (K003)</td>
+<td>L</td>
+<td>Exercised</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Contracts/tests on public items</td>
+<td>Presence check per <code>pub fn</code></td>
+<td>L</td>
+<td>Planned</td>
+<td>Presence, not quality (mutation testing covers quality).</td>
+</tr>
+<tr>
+<td>Anti test-tampering</td>
+<td>Protected-path manifest, test/<code>#[expect]</code> ratchet, <code>cargo-mutants</code></td>
+<td>L</td>
+<td>Planned (mutants gate exists for tauten itself)</td>
+<td>Needs owner/CI to own the manifest.</td>
+</tr>
+<tr>
+<td>Repair-hint diagnostics</td>
+<td><code>--format json</code> stable schema; <code>explain</code></td>
+<td>tooling</td>
+<td>Exercised</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Proof tier</td>
+<td>Charon/Aeneas → Lean for kernel crates, generalised from writfold</td>
+<td>P</td>
+<td>Planned (M3)</td>
+<td>Only listed kernel theorems are "proved".</td>
+</tr>
+</tbody>
+</table></div></div>
+<h2 id="known-gaps">Known gaps</h2>
+<p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>736c335</code>.</p>
+<div class="prose"><ul>
+<li>The capability rule is discipline, not confinement (see MAPPING.md).</li>
+<li>The kernel's arithmetic and indexing rules duplicate what an Aeneas proof
+  already establishes. The proof tier should subsume them; see the dry-run
+  report.</li>
+<li>S002 (placeholder comments) is a heuristic.</li>
+<li>The benchmark has 4 dev tasks on one host. The plan needs about 24 across
+  3 hosts, with ≥ 16 held out, and no real agent has been run.</li>
+<li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no
+  Kani (<code>cfg(kani)</code>) lowering yet.</li>
+<li><strong>No measurement of agent behaviour yet. Nothing here supports a claim that
+  agents make fewer mistakes.</strong></li>
+</ul></div>
+<h2 id="dropped">Dropped as not portable to Rust</h2>
+<div class="prose"><p>Dropped as not portable to Rust: regions and arena brands, effect
+polymorphism, hidden-authority capture tracking in closures, staged macros,
+cleanup effects.</p></div>
+</div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>736c335</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<script src="/assets/copy.js?v=c0d78355" defer></script>
+</body>
+</html>

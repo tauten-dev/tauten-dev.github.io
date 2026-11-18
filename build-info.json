@@ -1,0 +1,12 @@
+{
+  "core_commit": "736c335e62b7392bdf156ce57eba146a032029df",
+  "core_date": "2026-11-18",
+  "built_at": "2026-11-18T21:59:46+00:00",
+  "rules": 37,
+  "fixtures": {
+    "reject": 27,
+    "accept": 3
+  },
+  "published": true,
+  "allow_stale_captures": false
+}

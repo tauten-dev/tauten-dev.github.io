@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benchmark · tauten</title>
+<meta name="description" content="The tauten benchmark: arms, measurements, harness validation and preregistration. No real agent has been run yet.">
+<link rel="canonical" href="https://tauten.dev/benchmark/">
+<meta property="og:title" content="Benchmark · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/benchmark/">
+<meta property="og:description" content="The tauten benchmark: arms, measurements, harness validation and preregistration. No real agent has been run yet.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141922">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=c0d78355">
+<script src="/assets/theme.js?v=c0d78355"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/crates/">Crates</a></li><li><a href="/rules/">Rules</a></li><li><a href="/agents/">Agents</a></li><li><a href="/benchmark/" aria-current="page">Benchmark</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+</div></header>
+<main id="main">
+<div class="wrap page-head"><p class="eyebrow">Benchmark</p><h1>Does the profile reduce escaped defects?</h1></div>
+<div class="wrap">
+<div class="banner-pending" role="note"><p><span class="badge b-pending">Pending</span> <strong>No real agent has been run yet; there are no results.</strong></p></div>
+<div class="prose"><p><strong>Question.</strong> When an AI coding agent reports a task as done, does working
+under the tauten profile reduce the defects that escape, and at what cost in
+success rate and time?</p></div>
+<p class="small muted">Reproduced from <code>bench/README.md</code> at <code>736c335</code>.</p>
+<h2 id="arms">Arms</h2>
+<div class="prose"><div class="table-scroll" tabindex="0" role="region" aria-label="Benchmark arms"><table>
+<thead>
+<tr>
+<th scope="col">Arm</th>
+<th scope="col">The agent gets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>The repo and "run <code>cargo test</code>"</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>A plus the same rules in prose (told, not enforced)</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Tiers declared in the manifests, the tauten agent profile, and "<code>cargo tauten check</code> must pass"</td>
+</tr>
+</tbody>
+</table></div>
+<p>B separates the effect of <em>being told</em> from the effect of <em>being checked</em>.</p></div>
+<h2 id="measured">What is measured</h2>
+<div class="prose"><ul>
+<li><strong>Escaped defect (primary):</strong> a hidden-oracle failure on the finished repo.
+  The oracle is black-box (it runs the binary), so it judges behaviour, never
+  lint counts or architecture.</li>
+<li><strong>Reachable panic:</strong> the binary panicked on oracle input.</li>
+<li><strong>Test tampering:</strong> visible <code>#[test]</code>s removed, or <code>#[ignore]</code> added.</li>
+<li><strong>Stubs:</strong> <code>todo!</code>/<code>unimplemented!</code> added.</li>
+<li><strong>Profile findings:</strong> <code>cargo tauten check</code> is run in every arm, as a
+  measurement.</li>
+<li><strong>Cost:</strong> agent wall time and exit status. Token usage is planned, taken
+  from the agent's JSON output.</li>
+</ul></div>
+<h2 id="results">Results</h2>
+<div class="pending"><p><span class="badge b-pending">Pending</span> No real agent has been run yet; there are no results.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Benchmark results (not measured)"><table class="results"><caption>What will be reported for each run. Nothing has been measured.</caption><thead><tr><th scope="col">Metric</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">C − A (95% CI)</th><th scope="col">B − A (95% CI)</th></tr></thead><tbody><tr><td>Escaped-defect rate <span class="chip">primary</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr><tr><td>Reachable-panic rate</td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr><tr><td>Visible tests pass</td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr><tr><td>Test tampering</td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr><tr><td>Stubs added</td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr><tr><td>Profile errors in the final repo</td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr><tr><td>Agent wall time (s)</td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td><td><span class="dash" aria-label="not measured">—</span></td></tr></tbody></table></div><p class="small">Blocked on: model budget and model choice (owner).</p></div>
+<h2 id="validation" style="margin-top:48px">Harness validation with built-in agents (not a result about AI agents)</h2>
+<p><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">with built-in agents only</span> <span class="small muted">dated 2026-11-18 in <code>bench/README.md</code></span></p>
+<p class="prose">Three built-in agents check the harness itself before any model is paid for. <strong>reference</strong> applies the task's known-good solution, <strong>null</strong> changes nothing, and <strong>sloppy</strong> applies a hand-written plausible solution with the typical mistake. A task is admitted only when each produces what the table requires: the oracle must pass the reference and catch the other two, and the profile must name the sloppy mistake.</p>
+<div class="prose"><div class="panel wrapped"><pre class="code" tabindex="0" aria-label="console example"><code><span class="line"><span class="t-gp">$ </span>python3<span class="t-w"> </span>-I<span class="t-w"> </span>bench/run.py<span class="t-w"> </span>--agent<span class="t-w"> </span>reference<span class="t-w"> </span>--tasks<span class="t-w"> </span>dev<span class="t-w"> </span>--out<span class="t-w"> </span>results/validate.jsonl</span><span class="line"><span class="t-gp">$ </span>python3<span class="t-w"> </span>-I<span class="t-w"> </span>bench/run.py<span class="t-w"> </span>--agent<span class="t-w"> </span>null<span class="t-w">      </span>--tasks<span class="t-w"> </span>dev<span class="t-w"> </span>--out<span class="t-w"> </span>results/validate.jsonl</span><span class="line"> </span></code></pre></div>
+<p>Required before a task is admitted:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Harness validation"><table>
+<thead>
+<tr>
+<th scope="col">Agent</th>
+<th scope="col">Must produce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>reference</td>
+<td>oracle 100%, 0 profile errors, in arms A and C</td>
+</tr>
+<tr>
+<td>null</td>
+<td>an escaped defect</td>
+</tr>
+<tr>
+<td>sloppy</td>
+<td>an escaped defect <strong>and</strong> at least one profile error naming the mistake</td>
+</tr>
+</tbody>
+</table></div>
+<p>Result on 2026-11-18, all four dev tasks:</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Harness validation"><table>
+<thead>
+<tr>
+<th scope="col">Task</th>
+<th scope="col">reference</th>
+<th scope="col">null</th>
+<th scope="col">sloppy oracle</th>
+<th scope="col">sloppy profile finding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01-fee</td>
+<td>5/5, 0 errors</td>
+<td>defect</td>
+<td>3/5, binary panicked</td>
+<td>TAU-N001 ×3 (overflowing <code>*</code> and <code>-</code>)</td>
+</tr>
+<tr>
+<td>T02-stats</td>
+<td>5/5, 0 errors</td>
+<td>defect</td>
+<td>4/5, binary panicked</td>
+<td>TAU-P001 (<code>unwrap</code>)</td>
+</tr>
+<tr>
+<td>T03-cents</td>
+<td>5/5, 0 errors</td>
+<td>defect</td>
+<td>3/5</td>
+<td>TAU-N002 ×3 (<code>f64 as u64</code>), TAU-X001 ×2</td>
+</tr>
+<tr>
+<td>T04-undo</td>
+<td>6/6, 0 errors</td>
+<td>defect</td>
+<td>5/6, binary panicked</td>
+<td>TAU-P001 (<code>pop().unwrap()</code>)</td>
+</tr>
+</tbody>
+</table></div></div>
+<section id="preregistration">
+<h2 style="margin-top:48px">Preregistration <span class="badge b-planned">Draft, not frozen</span></h2>
+<p class="small muted">Reproduced from <code>bench/PREREGISTRATION.md</code> at <code>736c335</code>.</p>
+<div class="prose"><p>This file is frozen by committing it, and recording its hash in the results,
+<strong>before</strong> any held-out run. Until then it may change.</p>
+<h3 id="hypothesis">Hypothesis</h3>
+<p>Agents working in arm C (the tauten profile enforced in their loop) leave
+fewer escaped defects than in arm A (plain Rust), without a large loss in
+task success or a large rise in cost. Arm B (rules stated, not enforced)
+separates instruction from enforcement.</p>
+<h3 id="primary-outcome">Primary outcome</h3>
+<p><strong>Escaped-defect rate:</strong> the share of trials whose final repo fails at least
+one hidden-oracle test, or whose oracle fails to build. One value per trial.</p>
+<h3 id="secondary-outcomes">Secondary outcomes</h3>
+<p>Reported, but not used for the go/no-go:
+- reachable-panic rate;
+- visible tests pass;
+- test tampering;
+- stubs added;
+- profile errors in the final repo;
+- agent wall time;
+- token usage, once captured.</p>
+<h3 id="design">Design</h3>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Preregistered design"><table>
+<thead>
+<tr>
+<th scope="col">Item</th>
+<th scope="col">Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tasks</td>
+<td>Dev split (currently 4): used for tuning the profile and harness. Held-out split (≥ 16, not yet written): oracles written and hashed before the profile is frozen for the run.</td>
+</tr>
+<tr>
+<td>Arms</td>
+<td>A, B, C, the same tasks for each</td>
+</tr>
+<tr>
+<td>Trials</td>
+<td>≥ 5 per task per arm for held-out; 3 for the pilot</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>One named model and version for the primary analysis. A second model as a replication, reported separately.</td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td>Fresh container per trial; same turn and time limits for every arm</td>
+</tr>
+<tr>
+<td>Order</td>
+<td>Trials interleaved across arms to spread provider-side drift</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="analysis">Analysis</h3>
+<ul>
+<li>Paired by task.</li>
+<li>Difference of arm means (C − A, B − A), averaged over tasks.</li>
+<li>95% bootstrap CI resampling tasks: 10,000 resamples, seed 20261118.</li>
+<li>If the CI includes 0, the report says "no measured difference".</li>
+<li>All trials are reported, including timeouts and crashes; a trial that
+  produces no change counts as a defect if its oracle fails.</li>
+</ul>
+<h3 id="go-no-go-from-plan-md-9">Go/no-go (from PLAN.md §9)</h3>
+<ul>
+<li><strong>Stop</strong> the product claims if, after the pilot and one tuning pass, C vs A
+  shows no reduction in escaped defects: the CI includes 0 and the point
+  estimate is under 15% relative.</li>
+<li><strong>Cut rules</strong> if C lowers task success by more than 10 points, or raises
+  median cost by more than 40%, without at least a 30% defect reduction.</li>
+</ul>
+<h3 id="honesty-rules-for-publication">Honesty rules for publication</h3>
+<ul>
+<li>Every number carries the model, date, n and CI.</li>
+<li>Null and negative results are published.</li>
+<li>Raw JSONL and transcripts are published with the harness commit.</li>
+<li>No result from the dev split is presented as a held-out result.</li>
+</ul></div>
+</section>
+<h2 id="limits" style="margin-top:48px">Limits</h2>
+<p class="prose">The benchmark has 4 dev tasks on one host. The plan needs about 24 across 3 hosts, with ≥ 16 held out, and no real agent has been run.</p>
+<p class="small muted">From <code>docs/STATUS.md</code>, Known gaps.</p>
+<h2 id="kill">Kill criteria</h2>
+<p class="prose">Publishing the conditions under which the project stops is part of the plan.</p>
+<p class="small muted">Reproduced from <code>docs/PLAN.md</code> at <code>736c335</code>.</p>
+<div class="prose"><ul>
+<li>After M4 + one tuning pass, arm C shows no escaped-defect reduction vs A
+  (CI includes 0 and point estimate &lt; 15% relative): stop product + website.</li>
+<li>C drops task success &gt; 10 points or raises median tokens &gt; 40% without
+  ≥ 30% defect reduction: cut rules or stop.</li>
+<li>M0–M4 exceeds 10 agent-days by &gt; 50% without pilot numbers: reassess.</li>
+<li>Proof tier can't be templated in 3 agent-days: ship without it.</li>
+</ul></div>
+</div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>736c335</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<script src="/assets/copy.js?v=c0d78355" defer></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAU-R001: Baseline must be tight · tauten</title>
+<meta name="description" content="TAU-R001: Baseline must be tight. The baseline records existing violations so a project can adopt the profile gradually. It may only shrink: once a violation is fixed, its slot must be removed, or a new violation could silently take it.">
+<link rel="canonical" href="https://tauten.dev/rules/tau-r001/">
+<meta property="og:title" content="TAU-R001: Baseline must be tight · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/rules/tau-r001/">
+<meta property="og:description" content="TAU-R001: Baseline must be tight. The baseline records existing violations so a project can adopt the profile gradually. It may only shrink: once a violation is fixed, its slot must be removed, or a new violation could silently take it.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141922">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=c0d78355">
+<script src="/assets/theme.js?v=c0d78355"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/crates/">Crates</a></li><li><a href="/rules/" aria-current="page">Rules</a></li><li><a href="/agents/">Agents</a></li><li><a href="/benchmark/">Benchmark</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+</div></header>
+<main id="main">
+<div class="wrap page-head"></div><div class="wrap ref"><nav class="rail" aria-label="On this page"><p class="eyebrow">On this page</p><ul><li><a href="#why">Why</a></li><li><a href="#fix">Fix</a></li><li><a href="#explain">In the terminal</a></li></ul></nav><div><details class="toc-m"><summary>On this page</summary><nav class="toc" aria-label="On this page (compact)"><ul><li><a href="#why">Why</a></li><li><a href="#fix">Fix</a></li><li><a href="#explain">In the terminal</a></li></ul></nav></details><p class="eyebrow"><a href="/rules/">Rules</a> / <span class="id">TAU-R001</span></p>
+<h1 id="TAU-R001">Baseline must be tight</h1>
+<div class="facts"><span class="chip">enforced by Tauten</span> <span class="small muted">kernel</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">core</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">edge</span> <span class="chip lvl lvl-deny">deny</span></div>
+<div class="facts small"><span>Applies to tests: <strong>yes</strong></span>
+<span>Exceptions: <strong>never</strong></span></div><h2 id="why">Why</h2><p>The baseline records existing violations so a project can adopt the profile gradually. It may only shrink: once a violation is fixed, its slot must be removed, or a new violation could silently take it.</p><h2 id="fix">Fix</h2><p>Run <code>cargo tauten baseline</code> and commit the smaller baseline file.</p><h2 id="explain">In the terminal</h2><div class="copy-line"><span class="prompt" aria-hidden="true">$</span><code>cargo tauten explain TAU-R001</code><button class="copy-btn" type="button" hidden data-copy="cargo tauten explain TAU-R001" aria-label="Copy command: cargo tauten explain TAU-R001">Copy</button></div><nav class="pn" aria-label="Previous and next rule"><a href="/rules/tau-d001/">← TAU-D001</a><span></span></nav></div></div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>736c335</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<script src="/assets/copy.js?v=c0d78355" defer></script>
+</body>
+</html>
