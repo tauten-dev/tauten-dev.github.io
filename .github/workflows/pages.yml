@@ -1,0 +1,46 @@
+name: pages
+run-name: publish-static-${{ inputs.site_commit }}
+
+# website/build.py renders locally; website/publish.py pushes public/ to the
+# published-site branch and dispatches this job with that commit's full SHA.
+# CI never builds Rust and never runs build.py: it uploads prebuilt bytes.
+on:
+  workflow_dispatch:
+    inputs:
+      site_commit:
+        description: "Prebuilt static website commit from published-site"
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Require a full commit SHA
+        env:
+          SITE_COMMIT: ${{ inputs.site_commit }}
+        run: '[[ "$SITE_COMMIT" =~ ^[0-9a-f]{40}$ ]]'
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.site_commit }}
+          path: public
+          persist-credentials: false
+      - name: Require rendered static entrypoints
+        run: test -f public/index.html && test -f public/CNAME && test "$(cat public/CNAME)" = tauten.dev
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: public
+      - id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
