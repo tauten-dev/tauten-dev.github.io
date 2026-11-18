@@ -4,18 +4,21 @@
 # file is read with `git show <core_ref>:<path>`, never from the working tree.
 # Both can be overridden on the command line (--core, --core-ref).
 core = "../tauten"
-core_ref = "b8640f6b7b27c851c4dd8330205007321abbdcdc"
+core_ref = "736c335e62b7392bdf156ce57eba146a032029df"
 
 site_url = "https://tauten.dev"
 domain = "tauten.dev"
 repository = "tauten-dev/tauten"
 site_repository = "tauten-dev/tauten-dev.github.io"
 
-# Release switch. While false:
-#   - the install step shows `cargo install --locked cargo-tauten` with a note
-#     that it works from the first release (0.0.1), and no git-URL install;
-#   - links into github.com/tauten-dev/tauten are rendered as plain paths,
-#     because the repository is private until that release.
-# Set it to true once 0.0.1 is on crates.io and the repository is public.
-published = false
+# Release switch: the crates are on crates.io. When true, the install step
+# shows `cargo install --locked cargo-tauten` plainly and crate cards link to
+# crates.io and docs.rs. When false, the command carries a note that it works
+# from the first release, and there are no crates.io or docs.rs links.
+published = true
 first_release = "0.0.1"
+
+# Source switch: tauten-dev/tauten is public. While false, paths into
+# the core repository are shown as plain text, with no github.com links, and
+# the GitHub nav and footer links are left out. Set true once it is public.
+repo_public = true

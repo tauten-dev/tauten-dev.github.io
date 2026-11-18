@@ -1,0 +1,151 @@
+# Code excerpts pulled from the core repository at the pinned commit.
+# `start` is an exact line that must occur once in the file; `end` is the
+# first exact line at or after it. Optional: `before`/`after` extend the
+# excerpt by whole lines, `strip` removes a prefix, `dedent` removes common
+# indentation. Line numbers are never used to locate code.
+
+# --- home: six mistakes the compiler accepts
+[card-unwrap]
+path = "fixtures/cases/rej-unwrap/src/lib.rs"
+start = "pub fn port(text: &str) -> u16 {"
+end = "}"
+lang = "rust"
+
+[card-overflow]
+path = "fixtures/cases/rej-contract-overflow/src/lib.rs"
+start = "pub fn next(x: u8) -> u8 {"
+end = "}"
+lang = "rust"
+
+[card-stub]
+path = "fixtures/cases/rej-stub/src/lib.rs"
+start = "pub fn fee(_amount: u64) -> u64 {"
+end = "}"
+lang = "rust"
+
+[card-ignored]
+path = "fixtures/cases/rej-ignored-result/src/lib.rs"
+start = "pub fn run() {"
+end = "}"
+lang = "rust"
+
+[card-wildcard]
+path = "fixtures/cases/rej-wildcard/src/lib.rs"
+start = "    match mode {"
+end = "    }"
+dedent = true
+lang = "rust"
+
+[card-clock]
+path = "fixtures/cases/rej-ambient-clock/src/lib.rs"
+start = "pub fn now() -> std::time::SystemTime {"
+end = "}"
+lang = "rust"
+
+# --- home: tiers
+[edge-main]
+path = "fixtures/cases/acc-edge/src/main.rs"
+start = "fn main() -> Result<(), Box<dyn std::error::Error>> {"
+end = "}"
+lang = "rust"
+
+[core-load]
+path = "fixtures/cases/acc-core/src/lib.rs"
+start = "pub fn load_amount(source: &mut impl Read) -> Result<u64, LoadError> {"
+end = "}"
+lang = "rust"
+
+[core-stamp]
+path = "fixtures/cases/acc-core/src/lib.rs"
+start = "pub fn stamp(clock: &impl Clock, balance: u64) -> (u64, u64) {"
+end = "}"
+lang = "rust"
+
+[kernel-head]
+path = "fixtures/cases/acc-kernel/src/lib.rs"
+start = "#![no_std]"
+end = "//! A pure decision kernel: exact, total, no IO."
+lang = "rust"
+
+[kernel-withdraw]
+path = "fixtures/cases/acc-kernel/src/lib.rs"
+start = "/// Decide a withdrawal; returns the new balance."
+end = "}"
+lang = "rust"
+
+[forged-sneaky]
+path = "fixtures/cases/rej-forged-capability/src/lib.rs"
+start = "/// Library code minting its own authority."
+end = "}"
+lang = "rust"
+
+# --- tauten-check
+[rule-p001]
+path = "crates/tauten-check/rules.toml"
+start = 'id = "TAU-P001"'
+before = 1
+end = 'fix = "Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose."'
+lang = "toml"
+
+[diag-struct]
+path = "crates/tauten-check/src/diag.rs"
+start = "/// One finding, in the stable schema printed by `--format json`."
+end = "}"
+lang = "rust"
+
+[diag-enforced]
+path = "crates/tauten-check/src/diag.rs"
+start = "/// What enforces a rule. Shown with every diagnostic so claims stay honest."
+end = "}"
+lang = "rust"
+
+[diag-severity]
+path = "crates/tauten-check/src/diag.rs"
+start = "/// Diagnostic severity."
+end = "}"
+lang = "rust"
+
+# --- tauten
+[cap-doc-example]
+path = "crates/tauten/src/cap.rs"
+start = "//! use tauten::cap::{Authority, Clock, ManualClock};"
+end = "//! assert!(is_expired(&ManualClock::at(10), 5));"
+strip = "//! "
+lang = "rust"
+
+# --- tauten-macros (crates/tauten/tests/behaviour.rs)
+[refined-percent]
+path = "crates/tauten/tests/behaviour.rs"
+start = "    #[refined(|v| *v <= 100)]"
+end = "    pub struct Percent(u8);"
+dedent = true
+lang = "rust"
+
+[newtype-userid]
+path = "crates/tauten/tests/behaviour.rs"
+start = "    #[newtype]"
+end = "    pub struct UserId(u64);"
+dedent = true
+lang = "rust"
+
+[refined-asserts]
+path = "crates/tauten/tests/behaviour.rs"
+start = "        assert_eq!(Percent::try_new(100).map(|p| *p.get()), Ok(100));"
+end = '        assert_eq!(err.type_name(), "Percent");'
+dedent = true
+lang = "rust"
+
+[contract-withdraw]
+path = "crates/tauten/tests/behaviour.rs"
+start = "    #[derive(Debug, PartialEq, Eq)]"
+end = "    fn withdraw(balance: u64, amount: u64) -> Result<u64, BankError> {"
+after = 2
+dedent = true
+lang = "rust"
+
+[contract-asserts]
+path = "crates/tauten/tests/behaviour.rs"
+start = "        assert_eq!(withdraw(10, 3), Ok(7));"
+end = "        assert_eq!(withdraw(1, 3), Err(BankError::Insufficient));"
+dedent = true
+lang = "rust"

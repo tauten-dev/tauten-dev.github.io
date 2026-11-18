@@ -1,0 +1,43 @@
+# Hand-written prose for the crate cards and pages. Everything else on those
+# pages (descriptions, tiers, versions, features, dependencies, status) is
+# read from the core repository at the pinned commit.
+
+[cargo-tauten]
+use_for = "Running the profile over a workspace, locally or in CI."
+does = """The CLI runs one `cargo check` with itself as the workspace rustc wrapper, so each crate gets exactly the lints and clippy configuration of its own tier, and then adds tauten's structural checks. \
+It prints one diagnostic per finding, as text or as one JSON object per line, each with a rule ID, a repair hint and what enforces the rule. \
+It exits with 1 when an error-level finding remains, 0 otherwise, and 2 when the tool itself fails."""
+does_not = [
+  "No automatic fixes. It reports; the code is changed by you or your agent.",
+  "No LSP or SARIF output.",
+  "It does not replace clippy. It runs clippy, with the profile's lints and a generated configuration.",
+]
+
+[tauten-check]
+use_for = "The rule table and diagnostic schema behind `cargo tauten`."
+does = """The analysis crate holds the rule table (`rules.toml`), the agent profile, lint flags and `clippy.toml` generation per tier, the mapping from compiler messages to rule IDs, and the structural checks. \
+It performs no IO; the CLI builds the workspace model from disk and hands it in."""
+does_not = [
+  "No IO. It is a core crate and is checked with its own profile.",
+  "Structural checks parse source with `syn`. They are syntactic, not type-aware.",
+]
+
+[tauten]
+use_for = "Passing authority down from `main` as parameters, and substituting fakes in tests."
+does = """Authority is created once, in an edge crate, with `Authority::acquire`, and handed down as narrow capabilities: a clock, an environment snapshot and, with the `fs` feature, a directory handle. \
+Core code takes those as parameters, so a signature shows what it can touch. \
+The crate also re-exports the macros from `tauten-macros`."""
+
+[tauten-macros]
+use_for = "Nominal IDs, validated values, and pre- and postconditions checked on every call."
+does = """`#[newtype]` and `#[refined]` define wrappers whose field cannot be reached or built except through `new` or `try_new`. \
+`#[requires]` and `#[ensures]`, with `old(..)`, check contracts on every call in every build profile. \
+A violation is a returned error, never a panic, and there is no release-mode switch that turns the checks off."""
+does_not = [
+  "Predicates are checked at run time. Nothing is propagated or proved statically.",
+  "Contracts apply only to functions that return `Result<T, E>` with `E: From<tauten::ContractViolation>`.",
+  "No `async fn` yet (\"contracts on async functions are not supported yet\").",
+  "No generic newtypes yet (\"generic newtypes are not supported yet\").",
+  "`old(..)` snapshots only `Copy` values; it never clones a resource.",
+  "No Kani lowering yet.",
+]
