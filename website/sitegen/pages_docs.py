@@ -126,15 +126,15 @@ def benchmark(site: Site) -> None:
     prereg = d.core.blob("bench/PREREGISTRATION.md")
     plan = d.core.blob("docs/PLAN.md")
     status = d.core.blob("docs/STATUS.md")
-    banner = "No real agent has been run yet; there are no results."
+    banner = "Pilot on the dev split only (2026-11-18, Claude Sonnet 5.5, 36 trials): no held-out result yet."
     if f"**{banner}**" not in bench:
-        raise BuildError("bench/README.md no longer states that no real agent has been run")
+        raise BuildError("bench/README.md no longer carries the benchmark status line the site quotes")
     question = re.search(r"^\*\*Question\.\*\*.*?(?=\n\n)", bench, re.M | re.S).group(0)
     harness = site.status_map["bench-harness"]
     limits = _bullet(md.section(status, "Known gaps"), "The benchmark has")
     body = f"""<div class="wrap page-head"><p class="eyebrow">Benchmark</p><h1>Does the profile reduce escaped defects?</h1></div>
 <div class="wrap">
-<div class="banner-pending" role="note"><p><span class="badge b-pending">Pending</span> <strong>{banner}</strong></p></div>
+<div class="banner-pending" role="note"><p><span class="badge b-pending">Pilot</span> <strong>{banner}</strong> The dev tasks hit a ceiling: no defect escaped in any arm, so the primary outcome cannot separate the arms. In the secondary outcome, half the plain-Rust trials left unchecked arithmetic in core code, and none of the enforced ones did. Harder held-out tasks are being written.</p></div>
 <div class="prose">{_md(site, question, "bench/README.md")}</div>
 {_repro(site, "bench/README.md")}
 <h2 id="arms">Arms</h2>
@@ -160,7 +160,7 @@ def benchmark(site: Site) -> None:
 {_repro(site, "docs/PLAN.md")}
 <div class="prose">{_md(site, md.section(plan, "9. Kill criteria"), "docs/PLAN.md")}</div>
 </div>"""
-    site.add("/benchmark/", "Benchmark", "The tauten benchmark: arms, measurements, harness validation and preregistration. No real agent has been run yet.", body)
+    site.add("/benchmark/", "Benchmark", "The tauten benchmark: arms, measurements, the dev-split pilot, harness validation and preregistration. No held-out result yet.", body)
 
 
 # -------------------------------------------------------------------- proofs ---

@@ -64,7 +64,7 @@ def crate_cards(site: Site, compact: bool = False) -> str:
         f'<div class="card planned"><h3><a href="/proofs/">Proof tier</a></h3><div class="top">{status_badge(sm["proof-tier"])}</div>'
         f'<p>Charon/Aeneas → Lean for kernel crates. Planned (M3); nothing of it exists yet.</p></div>',
         f'<div class="card planned"><h3><a href="/benchmark/">Benchmark</a></h3><div class="top">{status_badge(sm["bench-harness"])} '
-        f'{badge("pending", "Results pending")}</div><p>Does working under the profile reduce the defects that escape an agent\'s "done"? No real agent has been run yet.</p></div>',
+        f'{badge("pending", "Pilot only")}</div><p>Does working under the profile reduce the defects that escape an agent\'s "done"? A dev-split pilot has run; held-out tasks are being written.</p></div>',
     ]
     return f'<div class="grid-2">{"".join(cards)}</div><div class="grid-2" style="margin-top:24px">{"".join(planned)}</div>'
 
@@ -152,7 +152,7 @@ def results_html(site: Site, compact: bool = False) -> str:
         tbl = table(headers, rows, label="Benchmark results (not measured)", cls="results",
                     caption="What will be reported for each run. Nothing has been measured.")
         return (f'<div class="pending"><p><span class="badge b-pending">Pending</span> {esc(res["note"])}</p>{tbl}'
-                f'<p class="small">Blocked on: model budget and model choice (owner).</p></div>')
+                f'</div>')
     out = []
     for run in res["runs"]:
         kind = run["kind"]

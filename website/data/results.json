@@ -1,6 +1,30 @@
 {
   "schema": 1,
-  "status": "pending",
-  "note": "No real agent has been run yet; there are no results.",
-  "runs": []
+  "status": "pilot",
+  "note": "One pilot on the dev split (used for tuning). No held-out result yet.",
+  "runs": [
+    {
+      "kind": "pilot",
+      "label": "Pilot, dev split",
+      "model": "claude-sonnet-5-5 (Claude Code)",
+      "date": "2026-11-18",
+      "tasks": 4,
+      "trials_per_task_arm": 3,
+      "core_commit": "c4de73b",
+      "raw_url": "https://github.com/tauten-dev/tauten/tree/711863485dc4e03c2481788048ec6b1508c68354/bench/reports/2026-11-18-pilot",
+      "arms": {
+        "A": {"n": 12, "escaped_defect": 0.0, "panic": 0.0, "visible_ok": 1.0, "tamper": 0.0, "stubs": 0.0, "tauten_errors": 0.5, "seconds": 40.79},
+        "B": {"n": 12, "escaped_defect": 0.0, "panic": 0.0, "visible_ok": 1.0, "tamper": 0.0, "stubs": 0.0, "tauten_errors": 0.42, "seconds": 46.16},
+        "C": {"n": 12, "escaped_defect": 0.0, "panic": 0.0, "visible_ok": 1.0, "tamper": 0.0, "stubs": 0.0, "tauten_errors": 0.0, "seconds": 46.24}
+      },
+      "diffs": [
+        {"metric": "escaped_defect", "arm": "C", "base": "A", "point": 0.0, "ci_low": 0.0, "ci_high": 0.0},
+        {"metric": "escaped_defect", "arm": "B", "base": "A", "point": 0.0, "ci_low": 0.0, "ci_high": 0.0},
+        {"metric": "tauten_errors", "arm": "C", "base": "A", "point": -0.5, "ci_low": -1.0, "ci_high": 0.0},
+        {"metric": "tauten_errors", "arm": "B", "base": "A", "point": -0.083, "ci_low": -0.25, "ci_high": 0.0},
+        {"metric": "seconds", "arm": "C", "base": "A", "point": 5.45, "ci_low": 1.78, "ci_high": 10.35},
+        {"metric": "seconds", "arm": "B", "base": "A", "point": 5.37, "ci_low": -0.13, "ci_high": 11.13}
+      ]
+    }
+  ]
 }

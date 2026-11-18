@@ -48,7 +48,7 @@ def build(site: Site) -> None:
 <h1>Strict Rust for code written by agents. <span class="second">Every rule names what enforces it.</span></h1>
 <p class="lede">Agents rarely get memory safety wrong in Rust: the compiler stops them. What gets through is everything else: <code>unwrap</code> on input, unchecked arithmetic, <code>todo!()</code> left behind, errors silently dropped, library code that quietly reads the clock. tauten turns those into checked rules, sorted by how much authority a crate holds, each with a stable ID and a repair hint an agent can act on.</p>
 <div class="actions"><a class="btn" href="/start/">Get started</a><a href="/rules/">Read the {n} rules</a><a href="/enforcement/">What is not enforced</a></div>
-<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>{registry} No benchmark results yet. <a href="/status/">Status</a></span></p>
+<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>{registry} A dev-split pilot has run; no held-out benchmark result yet. <a href="/benchmark/">Benchmark</a></span></p>
 <figure class="hero-fig">
 <div class="pair">
 {site.fixture_panel(unwrap, marks={block["line"]: block["column"]}, title="rej-unwrap/src/lib.rs")}
