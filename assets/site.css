@@ -229,6 +229,8 @@ td.num{text-align:right}
 .tiers .arrow{align-self:center;justify-self:center;font:650 .64rem var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center}
 .tiers .arrow::after{content:" \2193"}
 @media (min-width:960px){.tiers{grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr) 52px minmax(0,1fr)}.tiers .arrow::after{content:"\2192";display:block;font-size:1.2rem}}
+.tiers .tcol pre,.tiers .tcol pre code{white-space:pre-wrap;overflow-wrap:anywhere}
+@media (min-width:960px){.tiers .tcol pre{font-size:.76rem}}
 .tcol dt{font:650 .72rem var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:10px}
 .tcol dd{margin:2px 0 0}
 
