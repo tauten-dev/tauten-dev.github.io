@@ -31,11 +31,11 @@
 <main id="main">
 <div class="wrap page-head"><p class="eyebrow">Status</p><h1>Status</h1>
 <p class="lede">How far each item has got, as the core repository records it.</p><ul class="small"><li><span class="badge b-specified"><span class="g" aria-hidden="true">○</span>Specified</span> written down only.</li><li><span class="badge b-implemented"><span class="g" aria-hidden="true">◐</span>Implemented</span> code exists.</li><li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> ran against real input in the repository; the evidence is named.</li></ul></div>
-<div class="wrap"><p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>736c335</code>.</p><div class="prose wide"><h2 id="status">Status</h2>
+<div class="wrap"><p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>7118634</code>.</p><div class="prose wide"><h2 id="status">Status</h2>
 <p>Updated 2026-11-18 (evening). Name final: tauten; license MIT; code at github.com/tauten-dev/tauten (private until first release). Every line says how far an item got:
 <strong>specified → implemented → exercised</strong>. "Exercised" means it ran against
 real input in this repository, and the evidence is named. Nothing is
-published; nothing has been measured with a real agent.</p>
+published. One pilot on the dev split has been run with a real agent; nothing held-out has been measured.</p>
 <h3 id="milestones-see-plan-md-6">Milestones (see PLAN.md §6)</h3>
 <div class="table-scroll" tabindex="0" role="region" aria-label="Milestones"><table>
 <thead>
@@ -57,7 +57,7 @@ published; nothing has been measured with a real agent.</p>
 <td>M0</td>
 <td>Fixtures ported from Sovel examples</td>
 <td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>fixtures/cases</code>: 26 reject + 3 accept crates, exact expected IDs, one tier per crate (<code>tests/fixtures.rs</code>)</td>
+<td><code>fixtures/cases</code>: 27 reject + 3 accept crates, exact expected IDs, one tier per crate (<code>tests/fixtures.rs</code>)</td>
 </tr>
 <tr>
 <td>M0b</td>
@@ -96,8 +96,20 @@ published; nothing has been measured with a real agent.</p>
 <td><code>crates/tauten/tests/behaviour.rs</code> (runtime), 6 trybuild compile-fail tests</td>
 </tr>
 <tr>
+<td>P0</td>
+<td>Proof plan probe: Charon/Aeneas on tauten-shaped code</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local, 32 CPUs)</span></td>
+<td><code>docs/proofs/probe.md</code>; probe retired in P1 (kept at <code>2885ee1</code>)</td>
+</tr>
+<tr>
+<td>P1</td>
+<td><code>tauten-check-kernel</code> (tier order, severity, lint exceptions); <code>tauten-check</code> calls it; 13 Lean theorems over the extraction; axiom + coverage audit; drift check; 9 mutants; <code>proofs.yml</code> workflow</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
+<td><code>docs/proofs/README.md</code>; <code>proofs.yml</code> green on main 2026-11-18 (gate 2 min, job 7 min incl. image pull). Every claim is broken by at least one mutant</td>
+</tr>
+<tr>
 <td>M3</td>
-<td>Proof tier (Aeneas/Lean template from writfold)</td>
+<td>Proof tier for users (Aeneas/Lean template from writfold)</td>
 <td><span class="badge b-planned">Not started</span></td>
 <td></td>
 </tr>
@@ -109,21 +121,21 @@ published; nothing has been measured with a real agent.</p>
 </tr>
 <tr>
 <td>M4</td>
-<td>Pilot with a real agent</td>
-<td><span class="badge b-blocked">Blocked on owner</span> <span class="qual">(model budget, model choice)</span></td>
-<td></td>
+<td>Pilot with a real agent (dev split)</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
+<td><code>bench/reports/2026-11-18-pilot</code>: 36 trials, Sonnet 5.5. Ceiling: 0 escaped defects in every arm; enforcement removed unchecked arithmetic (A 6/12, B 5/12, C 0/12 trials). Held-out suite being designed</td>
 </tr>
 <tr>
 <td>M5</td>
-<td>Repo, CI gate, tag-driven release workflow, crates.io token secret</td>
-<td><span class="badge b-implemented"><span class="g" aria-hidden="true">◐</span>Implemented</span></td>
-<td><code>.github/workflows/</code>; first <code>0.0.1</code> publish awaits owner go-ahead</td>
+<td>Repo (public), CI gate, tag-driven release workflow with crates.io trusted publishing (no stored token)</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
+<td>0.0.1 (stored token) and 0.0.2 (trusted publishing) of all four crates published 2026-11-18 by <code>release.yml</code> after the gate passed. A new crate's first publish still needs a token</td>
 </tr>
 <tr>
 <td>M7</td>
 <td>Website (tauten.dev)</td>
-<td><span class="badge b-progress">In progress</span></td>
-<td>placeholder live repo <code>tauten-dev/tauten-dev.github.io</code>; spec in progress</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(live)</span></td>
+<td><code>tauten-dev/tauten-dev.github.io</code>, generated from a pinned commit with drift checks; benchmark section shows the dev-split pilot</td>
 </tr>
 <tr>
 <td>M8</td>
@@ -181,14 +193,14 @@ published; nothing has been measured with a real agent.</p>
   report.</li>
 <li>S002 (placeholder comments) is a heuristic.</li>
 <li>The benchmark has 4 dev tasks on one host. The plan needs about 24 across
-  3 hosts, with ≥ 16 held out, and no real agent has been run.</li>
+  3 hosts, with ≥ 16 held out. The dev-split pilot hit a ceiling, so harder held-out tasks are needed.</li>
 <li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no
   Kani (<code>cfg(kani)</code>) lowering yet.</li>
 <li><strong>No measurement of agent behaviour yet. Nothing here supports a claim that
   agents make fewer mistakes.</strong></li>
 </ul></div></div>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>736c335</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>7118634</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
 <script src="/assets/copy.js?v=f9a13847" defer></script>
 </body>
 </html>
