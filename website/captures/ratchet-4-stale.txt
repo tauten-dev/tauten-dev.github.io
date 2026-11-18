@@ -1,4 +1,4 @@
-# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# core: 736c335e62b7392bdf156ce57eba146a032029df
 # cmd: cargo tauten check
 # cwd: website/scratch/ratchet
 # exit: 1
