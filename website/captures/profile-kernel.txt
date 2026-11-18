@@ -1,0 +1,679 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten profile kernel
+# cwd: .
+# exit: 0
+# ---
+# lint flags for kernel
+-D clippy::unwrap_used -D clippy::expect_used -D clippy::get_unwrap -D clippy::panic -D clippy::unreachable -D clippy::indexing_slicing -D clippy::string_slice -D clippy::unwrap_in_result -D clippy::panic_in_result_fn -D clippy::exit -D clippy::mem_forget -D clippy::arithmetic_side_effects -D clippy::integer_division -D clippy::as_conversions -D clippy::cast_possible_truncation -D clippy::cast_sign_loss -D clippy::cast_possible_wrap -D clippy::float_arithmetic -D clippy::float_cmp -D clippy::float_cmp_const -D unused_must_use -D clippy::map_err_ignore -D clippy::let_underscore_must_use -D clippy::result_unit_err -D clippy::wildcard_enum_match_arm -D clippy::match_wildcard_for_single_variants -D clippy::todo -D clippy::unimplemented -D clippy::dbg_macro -D clippy::allow_attributes -D clippy::allow_attributes_without_reason -D unfulfilled_lint_expectations -D unsafe_code -D clippy::disallowed_methods -D clippy::disallowed_types -D clippy::disallowed_macros -D clippy::await_holding_lock -D clippy::await_holding_refcell_ref -D clippy::let_underscore_future -D clippy::large_futures -D clippy::print_stdout -D clippy::print_stderr -D clippy::infinite_loop -D clippy::std_instead_of_core -D clippy::std_instead_of_alloc -W missing_docs -W clippy::missing_errors_doc -W clippy::missing_panics_doc
+
+# clippy.toml for kernel
+allow-expect-in-tests = true
+allow-indexing-slicing-in-tests = true
+allow-panic-in-tests = true
+allow-unwrap-in-tests = true
+
+[[disallowed-macros]]
+allow-invalid = true
+path = "std::thread_local"
+reason = "TAU-G001: global or thread-local state"
+
+[[disallowed-macros]]
+allow-invalid = true
+path = "lazy_static::lazy_static"
+reason = "TAU-G001: global or thread-local state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tauten::cap::Authority::acquire"
+reason = "TAU-A002: mints authority; only an edge crate may"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "cap_std::ambient_authority"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "ambient_authority::ambient_authority"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "cap_std::fs::Dir::open_ambient_dir"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "cap_std::fs::Dir::create_ambient_dir_all"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "cap_std::fs::File::open_ambient"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "cap_std::fs::File::create_ambient"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "cap_std::fs::File::open_ambient_with"
+reason = "TAU-A001: ambient authority through cap-std"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::read"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::read_to_string"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::write"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::read_dir"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::create_dir"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::create_dir_all"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::remove_file"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::remove_dir"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::remove_dir_all"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::rename"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::copy"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::metadata"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::symlink_metadata"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::canonicalize"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::hard_link"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::set_permissions"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::read_link"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::exists"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::File::open"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::File::create"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::File::create_new"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::File::options"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::fs::OpenOptions::new"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::exists"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::try_exists"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::is_file"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::is_dir"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::is_symlink"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::metadata"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::symlink_metadata"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::read_dir"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::canonicalize"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::path::Path::read_link"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::read"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::read_to_string"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::write"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::read_dir"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::create_dir_all"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::remove_file"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::remove_dir_all"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::rename"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::copy"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::metadata"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::File::open"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::fs::File::create"
+reason = "TAU-A001: ambient filesystem access"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::var"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::var_os"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::vars"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::vars_os"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::args"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::args_os"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::current_dir"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::set_current_dir"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::set_var"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::remove_var"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::temp_dir"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::home_dir"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::env::current_exe"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::process::Command::new"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::process::id"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::process::Command::new"
+reason = "TAU-A001: ambient environment or process state"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::time::SystemTime::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::time::Instant::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::thread::sleep"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::time::Instant::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::time::sleep"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "chrono::Utc::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "chrono::Local::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "time::OffsetDateTime::now_utc"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "time::OffsetDateTime::now_local"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "jiff::Timestamp::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "jiff::Zoned::now"
+reason = "TAU-A001: ambient clock"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "rand::thread_rng"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "rand::rng"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "rand::random"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "getrandom::getrandom"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "getrandom::fill"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "uuid::Uuid::new_v4"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "uuid::Uuid::now_v7"
+reason = "TAU-A001: ambient randomness"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::net::TcpStream::connect"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::net::TcpStream::connect_timeout"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::net::TcpListener::bind"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::net::UdpSocket::bind"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::net::ToSocketAddrs::to_socket_addrs"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::io::stdin"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::io::stdout"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::io::stderr"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::net::TcpStream::connect"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::net::TcpListener::bind"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::net::UdpSocket::bind"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::io::stdin"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::io::stdout"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::io::stderr"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "reqwest::get"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "reqwest::Client::new"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "reqwest::blocking::get"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "reqwest::blocking::Client::new"
+reason = "TAU-A001: ambient network or standard streams"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::process::exit"
+reason = "TAU-P005: process termination"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::process::abort"
+reason = "TAU-P005: process termination"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::thread::spawn"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "std::thread::Builder::spawn"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::spawn"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::task::spawn"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::task::spawn_blocking"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "tokio::task::spawn_local"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-methods]]
+allow-invalid = true
+path = "async_std::task::spawn"
+reason = "TAU-C001: detached thread or task"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::sync::OnceLock"
+reason = "TAU-G001: global or lazily initialised shared state"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::sync::LazyLock"
+reason = "TAU-G001: global or lazily initialised shared state"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "once_cell::sync::Lazy"
+reason = "TAU-G001: global or lazily initialised shared state"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "once_cell::sync::OnceCell"
+reason = "TAU-G001: global or lazily initialised shared state"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "once_cell::unsync::Lazy"
+reason = "TAU-G001: global or lazily initialised shared state"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "anyhow::Error"
+reason = "TAU-E002: type-erased error"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "eyre::Report"
+reason = "TAU-E002: type-erased error"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "color_eyre::Report"
+reason = "TAU-E002: type-erased error"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::rc::Rc"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::rc::Weak"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::cell::RefCell"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::cell::Cell"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::sync::Arc"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::sync::Mutex"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::sync::RwLock"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::collections::HashMap"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+
+[[disallowed-types]]
+allow-invalid = true
+path = "std::collections::HashSet"
+reason = "TAU-K001: shared mutability or nondeterministic iteration in the kernel"
+

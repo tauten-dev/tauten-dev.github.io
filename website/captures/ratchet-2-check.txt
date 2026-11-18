@@ -1,0 +1,14 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten check
+# cwd: website/scratch/ratchet
+# exit: 1
+# note: src/lib.rs is step2.rs: a second unwrap added
+# ---
+error[TAU-P001]: used `unwrap()` on a `Result` value
+  --> crates/parse/src/lib.rs:12:5 (core crate `parse`)
+  = rule: No unwrap/expect on fallible values (enforced by Clippy)
+  = fix: Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose.
+
+warnings (run with --warnings to list them):
+       2  TAU-D001  Documented public API
+tauten: 1 error(s), 2 warning(s), 1 accepted by the baseline

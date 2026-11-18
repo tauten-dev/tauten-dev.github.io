@@ -1,0 +1,11 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten init
+# cwd: website/scratch/init
+# exit: 0
+# ---
+rules                        tier = "kernel"   (no_std library; crates/rules/Cargo.toml)
+ledger                       tier = "core"   (library; crates/ledger/Cargo.toml)
+cli                          tier = "edge"   (binary only; crates/cli/Cargo.toml)
+AGENTS.tauten.md             agent instructions
+
+Nothing written. Re-run with --write to apply; change any tier afterwards by hand.

@@ -1,0 +1,8 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten baseline --output tauten-baseline.json
+# cwd: website/scratch/ratchet
+# exit: 2
+# note: src/lib.rs is still step2.rs
+# ---
+  TAU-P001 in crates/parse/src/lib.rs: used `unwrap()` on a `Result` value
+cargo-tauten: 1 baseline entr(ies) would grow; fix the new findings, or pass --allow-increase

@@ -1,0 +1,18 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten explain TAU-P001
+# cwd: .
+# exit: 0
+# ---
+TAU-P001: No unwrap/expect on fallible values
+
+Why: unwrap/expect turn every unexpected input into a crash, and agents use them to silence the type checker instead of handling the case.
+
+Fix: Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: clippy::unwrap_used, clippy::expect_used, clippy::get_unwrap

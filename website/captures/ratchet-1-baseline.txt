@@ -1,0 +1,7 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten baseline --output tauten-baseline.json
+# cwd: website/scratch/ratchet
+# exit: 0
+# note: src/lib.rs is step1.rs: one unwrap
+# ---
+tauten: baseline tauten-baseline.json accepts 1 finding(s)

@@ -1,0 +1,12 @@
+# core: b8640f6b7b27c851c4dd8330205007321abbdcdc
+# cmd: cargo tauten check
+# cwd: website/scratch/ratchet
+# exit: 1
+# note: src/lib.rs is step3.rs: both unwraps gone
+# ---
+error[TAU-R001]: baseline accepts 1 more `TAU-P001` finding(s) in `crates/parse/src/lib.rs` than exist now; tighten it with `cargo tauten baseline`
+  --> crates/parse/src/lib.rs (untiered crate `parse`)
+  = rule: Baseline must be tight (enforced by Tauten)
+  = fix: Run `cargo tauten baseline` and commit the smaller baseline file.
+
+tauten: 1 error(s), 0 warning(s)
