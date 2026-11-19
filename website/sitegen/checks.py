@@ -16,7 +16,13 @@ BANNED = [
     r"fewer mistakes", r"reduces bugs", r"safer code",
     r"production[- ]ready", r"battle[- ]tested", r"trusted by",
     r"\bsignificant(ly)?\b", r"\bproves\b",
+    # No defect-reduction claim (docs/DISCIPLINE-PROPOSAL.md, section 6).
+    r"\breduc(e|es|ed|ing) (escaped )?(defects|bugs)\b", r"\bfewer (escaped )?(defects|bugs)\b",
 ]
+
+# Commands and APIs that are not released yet. A page that names one must
+# also carry an "In progress" or "Planned" label.
+UNRELEASED = ["cargo tauten ship", "verify --level", "#[effects", "#[evidence", "#[derive(Cap)]", "effects.lock"]
 
 # Exact sentences reproduced from core files that use those words in a
 # negative sense. They are removed before the grep; nothing else is excused.
@@ -26,6 +32,8 @@ ALLOWED = [
     # docs/STATUS.md, Known gaps
     "The capability rule is discipline, not confinement (see MAPPING.md).",
     "Nothing here supports a claim that agents make fewer mistakes.",
+    # docs/STATUS.md, milestone table (benchmark row)
+    "nothing here supports a claim that the profile reduces escaped defects.",
     # crates/tauten/src/lib.rs
     "it does not sandbox anything.",
     # crates/tauten-check/rules.toml, TAU-U001
@@ -107,6 +115,23 @@ def wording(site: Site) -> list[str]:
     return out
 
 
+def positioning(site: Site) -> list[str]:
+    """The benchmark sentence is on /status/, and unreleased features carry a label."""
+    from .common import MEASURED
+    out = []
+    status = page_text(site.pages.get("/status/", ""))
+    if MEASURED not in status or "makes no defect-reduction claim" not in status:
+        out.append("/status/ lacks the benchmark sentence and 'tauten makes no defect-reduction claim'")
+    if "No defect-reduction claim" not in page_text(site.pages.get("/", "")):
+        out.append("/ lacks 'No defect-reduction claim' in its status line")
+    for path, page in site.pages.items():
+        text = page_text(page)
+        named = [u for u in UNRELEASED if u in text]
+        if named and "Planned" not in text and "In progress" not in text and "planned" not in text:
+            out.append(f"{path} names unreleased {named} without an In progress or Planned label")
+    return out
+
+
 def links(site: Site, files: set[str]) -> list[str]:
     """Internal links and anchors resolve; ids unique; nothing third-party is loaded."""
     out = []
@@ -127,6 +152,8 @@ def links(site: Site, files: set[str]) -> list[str]:
                 out.append(f"{path}: insecure URL {url}")
                 continue
             parts = urlsplit(url)
+            if url.startswith("https://docs.rs/") and f"/{site.config['latest_release']}/" not in url:
+                out.append(f"{path}: docs.rs link {url} is not pinned to latest_release")
             if parts.scheme or url.startswith("//"):
                 if tag == "a" or (tag == "link" and 'rel="canonical"' in attrs and url.startswith(site_url + "/")):
                     continue

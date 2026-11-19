@@ -50,3 +50,7 @@ item_contains = "Pilot with a real agent"
 [publication]
 milestone = "M5"
 item_contains = "release workflow"
+
+[writfold]
+milestone = "M8"
+item_contains = "Writfold adoption"

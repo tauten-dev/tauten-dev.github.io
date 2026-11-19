@@ -1,13 +1,14 @@
-"""Start, enforcement, agents, benchmark, proofs, status and 404."""
+"""Start, discipline, proofs, status, redirects for retired pages, and 404."""
 
 from __future__ import annotations
 
+import json
 import re
 
 from . import md
-from .common import install_block, results_html, tiers_figure
+from .common import CADENCE, DISCIPLINE, install_block, measured_sentence, ratchet_html, tiers_figure
 from .errors import BuildError
-from .render import badge, code_html, esc, inline_md, panel, status_badge
+from .render import badge, code_html, esc, inline_md, panel, status_badge, table
 from .site import Site
 from .source import parse_state
 
@@ -28,6 +29,27 @@ def _repro(site: Site, path: str) -> str:
     return f'<p class="small muted">Reproduced from <code>{path}</code> at <code>{site.short}</code>.</p>'
 
 
+def _subcommands(site: Site) -> str:
+    """Subcommands, doc comments and flags, parsed from the clap definitions in main.rs."""
+    main = site.data.core.blob("crates/cargo-tauten/src/main.rs")
+    target = re.search(r"struct Target \{(.*?)\n\}", main, re.S).group(1)
+    target_flags = [f"--{n.replace('_', '-')}" for n in re.findall(r"^    (\w+): ", target, re.M)]
+    enum = re.search(r"enum Command \{(.*?)\n\}", main, re.S).group(1)
+    rows = []
+    for doc, variant, body in re.findall(r"    /// (.*?)\n    (\w+) \{(.*?)\n    \},", enum, re.S):
+        flags = []
+        for attrs, field in re.findall(r"((?:\s+(?:///.*|#\[.*\]))*)\n\s+(\w+): ", body):
+            if "flatten" in attrs:
+                flags += target_flags
+            elif "long" in attrs:
+                flags.append(f"--{field.replace('_', '-')}")
+            else:
+                flags.append(f"&lt;{field}&gt;")
+        rows.append([f"<code>{variant.lower()}</code>", inline_md(doc), ", ".join(f"<code>{f}</code>" for f in flags) or "–"])
+    return table(["Command", "Doc comment", "Arguments"], rows, label="cargo tauten subcommands",
+                 caption=f'Parsed from the clap definitions in {site.src("crates/cargo-tauten/src/main.rs")} at <code>{site.short}</code>.')
+
+
 # -------------------------------------------------------------------- start ---
 
 def start(site: Site) -> None:
@@ -36,44 +58,53 @@ def start(site: Site) -> None:
     manifest = md.section(readme, "How it works").split("```toml", 1)[1].split("```", 1)[0].strip()
     check = site.captures["check-fixtures"]
     excerpt = check.block("TAU-P001", "rej-unwrap")["text"] + "\n\n" + check.body.rstrip("\n").split("\n\n")[-1]
-    import json
     json_p001 = json.dumps(next(json.loads(line) for line in site.captures["check-fixtures-json"].body.splitlines()
                                 if '"TAU-P001"' in line and '"rej-unwrap"' in line), indent=2, ensure_ascii=False)
     readme_flat = " ".join(readme.split())
     if "does not weaken the check" not in readme_flat:
         raise BuildError("README no longer says that loosening the project's lints does not weaken the check")
+    raw = d.core.blob("crates/tauten-check/agents.md")
+    site.extra_files["agents/AGENTS.tauten.md"] = raw.encode()
+    docs = (f'<p>The library API (<code>tauten::cap</code>, <code>#[refined]</code>, contracts) is documented on '
+            f'<a href="{site.docs_url}">docs.rs</a>.</p>') if site.published else ""
     steps = [
         ("install", "Install",
-         "<p><code>cargo-tauten</code> is a Cargo subcommand. Install it once; it brings its own profile, so there is nothing to configure in your project.</p>",
+         "<p><code>cargo-tauten</code> is a Cargo subcommand. Install it once; it brings its own profile, so there is nothing to configure in your project.</p>" + docs,
          install_block(site)),
         ("tiers", "Declare tiers",
          "<p>Every crate declares a tier in its manifest. <code>cargo tauten init</code> proposes one for each crate that has none and prints the plan; <code>--write</code> applies it.</p>"
-         "<ul><li>a <code>no_std</code> library is proposed as <code>kernel</code>;</li><li>a library as <code>core</code>;</li><li>a binary-only crate as <code>edge</code>.</li></ul>"
-         "<p>With <code>--write</code> it also writes <code>AGENTS.tauten.md</code>, the agent profile. Review the proposals: a library that does IO directly belongs at the edge, or should be split.</p>",
+         "<ul><li>a <code>no_std</code> library is proposed as <code>kernel</code>: pure decisions, eligible for proofs;</li><li>a library as <code>core</code>: effects arrive as parameters;</li><li>a binary-only crate as <code>edge</code>: the only tier that may create authority.</li></ul>"
+         "<p>With <code>--write</code> it also writes <code>AGENTS.tauten.md</code>, the agent profile.</p>",
          panel(code_html(manifest, "toml"), title="Cargo.toml", label="Tier declaration", provenance="From the repo")
          + '<div style="height:16px"></div>' + site.capture_panel("init")),
-        ("check", "Check",
-         "<p><code>cargo tauten check</code> runs clippy and the structural checks with each crate's own tier. Error-level findings fail the run with exit code 1.</p>"
-         "<p>Add <code>--format json</code> for one diagnostic per line, the form an agent should read. <code>--warnings</code> lists each warning instead of a per-rule summary.</p>",
+        ("check", "Check, on every edit",
+         "<p><code>cargo tauten check</code> runs clippy and the structural checks with each crate's own tier. Error-level findings fail the run with exit code 1. "
+         "The CLI owns the profile: deleting or loosening a project's own <code>clippy.toml</code> or <code>[lints]</code> table does not weaken the check.</p>"
+         "<p><code>--format json</code> prints one diagnostic per line, the form an agent should read. <code>cargo tauten explain &lt;ID&gt;</code> prints a rule.</p>",
          site.capture_panel("check-fixtures", excerpt, title="$ cargo tauten check",
                             label="One block and the summary of cargo tauten check over the fixtures")
-         + '<p class="small muted">One block and the summary line, from a run over the tauten fixture crates.</p>'
+         + '<div style="height:16px"></div>'
          + panel(code_html(json_p001, "json"), title="$ cargo tauten check --format json", label="One JSON diagnostic",
                  provenance="Captured", wrapped=True)
-         + '<p class="small muted">The same finding as JSON, pretty-printed for reading; the CLI prints it on one line.</p>'),
-        ("profile", "The profile is the CLI's",
-         "<p>The CLI owns the profile: it runs one <code>cargo check</code> with itself as the workspace rustc wrapper, adding each crate's tier lints and a generated clippy configuration. Deleting or loosening a project's own <code>clippy.toml</code> or <code>[lints]</code> table does not weaken the check.</p>"
-         "<p><code>cargo tauten explain &lt;ID&gt;</code> prints a rule: why, the fix, the level per tier, and the lints behind it.</p>",
-         site.capture_panel("explain-p001")),
+         + '<p class="small muted">The same finding as JSON, pretty-printed; the CLI prints it on one line.</p>'),
         ("adopt", "Adopt gradually",
          "<p><code>cargo tauten baseline</code> records today's error-level findings in <code>tauten-baseline.json</code>. Later checks accept up to that many per rule and file, and report anything new.</p>"
-         "<p>The baseline may only shrink. A slot that is no longer needed is itself an error (TAU-R001), and recording more findings is refused without <code>--allow-increase</code>. "
-         'The whole sequence is on the <a href="/crates/cargo-tauten/#ratchet">cargo-tauten page</a>.</p>',
-         site.capture_panel("ratchet-1-baseline") + '<div style="height:16px"></div>' + site.capture_panel("ratchet-2-check")),
+         "<p>The baseline may only shrink. A slot that is no longer needed is itself an error (TAU-R001), and recording more findings is refused without <code>--allow-increase</code>.</p>",
+         f'<details><summary>The ratchet, in four captured steps</summary>{ratchet_html(site)}</details>'),
+        ("proofs", "Prove kernel functions",
+         "<p><code>cargo tauten init --proofs &lt;kernel crate&gt; --write</code> sets up the proof gate for a kernel crate: <code>proofs/claims.toml</code>, the Lean project and the gate scripts. "
+         "<code>cargo tauten proofs</code> runs it in the pinned image and records one outcome per claim. A fresh, proved, total claim discharges the arithmetic and indexing findings inside that function.</p>"
+         f'<p>{badge("planned", "Planned (0.1)")} <code>cargo tauten ship</code> at the end of a feature re-runs only the proofs of stale claims; <code>verify --level full</code> runs everything nightly. <a href="/discipline/#proofs">The cadence</a>.</p>',
+         panel(code_html("cargo tauten init --proofs my-kernel --write\nsh proofs/refresh.sh\ncargo tauten proofs", "console"),
+               title="Proof tier", label="Proof tier commands", provenance="From the repo")),
         ("agent", "Tell the agent",
-         '<p>Point your <code>AGENTS.md</code> or <code>CLAUDE.md</code> at <code>AGENTS.tauten.md</code>. It tells the agent that <code>cargo tauten check</code> must pass before it reports a task as done, and how to fix a finding instead of hiding it. <a href="/agents/">Read the agent profile</a>.</p>',
-         panel(code_html(d.core.blob("crates/tauten-check/agents.md").split("\n\n", 1)[1].split("\n\n", 1)[0], "text"),
-               title="AGENTS.tauten.md (first paragraph)", label="Start of the agent profile", provenance="From the repo", wrapped=True)),
+         '<p>Point your <code>AGENTS.md</code> or <code>CLAUDE.md</code> at <code>AGENTS.tauten.md</code>. It tells the agent that <code>cargo tauten check</code> must pass before it reports a task as done, and how to fix a finding instead of hiding it.</p>'
+         f'<p>{badge("progress", "In progress")} A "Discipline" section (authority as a parameter, declared effects, evidence, refined values, kernel shape) joins the profile once the D0 trial passes.</p>'
+         '<p><a href="/agents/AGENTS.tauten.md">Raw file</a></p>',
+         panel(code_html(raw.split("\n\n", 1)[1].split("\n\n", 1)[0], "text"),
+               title="AGENTS.tauten.md (first paragraph)", label="Start of the agent profile", provenance="From the repo", wrapped=True)
+         + f'<details><summary>The whole profile</summary><div class="actions"><button class="copy-btn" type="button" hidden data-src="/agents/AGENTS.tauten.md">Copy as Markdown</button></div>'
+         f'{_repro(site, "crates/tauten-check/agents.md")}<div class="card prose">{_md(site, raw, "crates/tauten-check/agents.md", shift=1)}</div></details>'),
         ("exceptions", "Exceptions",
          '<p>When a finding is wrong for one item, excuse it there: <code>#[expect(lint, reason = "...")]</code> on the smallest item. <code>#[allow]</code> is itself a finding (TAU-X001), and so is a crate-wide exception (TAU-X002).</p>'
          "<p>Some rules admit none: stubs, <code>unsafe</code> outside the edge, and anything in a kernel crate (TAU-X004).</p>",
@@ -81,111 +112,65 @@ def start(site: Site) -> None:
     ]
     items = "".join(f'<li id="{i}"><div><h2>{t}</h2>{left}</div><div>{right}</div></li>' for i, t, left, right in steps)
     body = f"""<div class="wrap page-head"><p class="eyebrow">Getting started</p><h1>Getting started</h1>
-<p class="lede">Install the CLI, declare a tier per crate, check, and adopt gradually with a baseline. Every output below was captured at <code>{site.short}</code>.</p></div>
+<p class="lede">Install the CLI, declare a tier per crate, check on every edit, adopt gradually with a baseline, and prove kernel functions. Every output below was captured at <code>{site.short}</code>.</p></div>
 <div class="wrap"><ol class="workflow">{items}</ol>
+<section id="commands"><h2>Commands</h2>
+<p class="prose">docs.rs documents libraries, not binaries, so the CLI reference is here. <code>cargo tauten explain &lt;ID&gt;</code> prints any rule.</p>
+{_subcommands(site)}</section>
 <section id="tier-examples"><h2>What each tier looks like</h2>
 {tiers_figure(site)}</section></div>"""
-    site.add("/start/", "Getting started", "Install cargo-tauten, declare tiers, check a workspace and adopt the profile gradually.", body)
+    site.add("/start/", "Getting started", "Install cargo-tauten, declare tiers, check a workspace, adopt gradually, prove kernel functions and tell the agent.", body)
 
 
-# --------------------------------------------------------------- enforcement ---
+# ---------------------------------------------------------------- discipline ---
 
-def enforcement(site: Site) -> None:
-    d = site.data
-    mapping = d.core.blob("docs/MAPPING.md")
-    head, sep, dropped = mapping.partition("\nOut of scope for now")
-    if not sep:
-        raise BuildError("MAPPING.md: 'Out of scope for now' paragraph not found")
-    status = d.core.blob("docs/STATUS.md")
-    body = f"""<div class="wrap page-head"><p class="eyebrow">Enforcement</p><h1>What is enforced, and what is not</h1>
-<p class="lede">Every mechanism, what enforces it, how far it has got, and the honest gap. The table is the core repository's, reproduced unedited.</p></div>
-<div class="wrap">
-<p class="small muted">Reproduced from <code>docs/MAPPING.md</code> at <code>{site.short}</code>. Strength codes are explained in its first paragraphs.</p>
-<div class="prose wide">{_md(site, head, "docs/MAPPING.md", table_label="Enforcement table", table_cls="mapping", sticky=True)}</div>
-<h2 id="known-gaps">Known gaps</h2>
-{_repro(site, "docs/STATUS.md")}
-<div class="prose">{_md(site, md.section(status, "Known gaps"), "docs/STATUS.md")}</div>
-<h2 id="dropped">Out of scope for now</h2>
-<div class="prose">{_md(site, "Out of scope for now" + dropped, "docs/MAPPING.md")}</div>
+STRENGTH_HELP = ("<strong>compiler</strong>: rustc rejects it. <strong>lint</strong>: a lint or tauten check, escapable only by a visible, reasoned "
+                 "<code>#[expect]</code>. <strong>proved</strong>: a Lean theorem over the translation of the shipped code. "
+                 "<strong>bounded</strong>: model-checked up to a bound; never counted as proved. <strong>convention</strong>: review only.")
+
+
+def discipline(site: Site) -> None:
+    sections = []
+    for idea in DISCIPLINE:
+        strength = "".join(f'<li><span class="chip">{k}</span> {what}</li>' for k, what in idea["strength"])
+        states = "".join(f"<li>{badge(kind, label)} {what}</li>" for kind, label, what in idea["states"])
+        if "snippet" in idea:
+            right = site.snippet_panel(idea["snippet"], title="Before / after",
+                                       provenance="Proposed API", label=f"Before and after: {idea['title']}")
+        elif "code" in idea:
+            right = panel(code_html(idea["code"], "rust"), title="Before / after", label=f"Before and after: {idea['title']}",
+                          provenance="Proposed API",
+                          foot="The <code>after</code> is the D0 spec's API (being built on the <code>discipline-d0</code> branch); the <code>before</code> is an illustration.")
+        else:
+            rows = [[f"<code>{lvl}</code>", f"<code>{cmd}</code>", when, runs, badge(*state)] for lvl, cmd, when, runs, state in CADENCE]
+            right = table(["Level", "Command", "When", "Runs", "State"], rows, label="Run cadence",
+                          caption="Levels from <code>docs/DISCIPLINE-PROPOSAL.md</code>, section 3.2.")
+        src = f' <span class="small muted">({idea["gap_src"]})</span>' if idea.get("gap_src") else ""
+        left = (f'<p>{idea["line"]}</p><ul class="small">{states}</ul>'
+                f'<p class="small"><strong>Enforced by</strong></p><ul class="small">{strength}</ul>'
+                f'<p class="boundary"><strong>Gap.</strong> {idea["gap"]}{src}</p>')
+        sections.append(f'<li id="{idea["key"]}"><div><h2>{idea["title"]}</h2>{left}</div><div>{right}</div></li>')
+    mapping = site.src("docs/MAPPING.md")
+    status = site.src("docs/STATUS.md")
+    proposal = site.src("docs/DISCIPLINE-PROPOSAL.md")
+    site.extra_files["assets/writfold-wiring.svg"] = (site.root / "website" / "assets" / "writfold-wiring.svg").read_bytes()
+    body = f"""<div class="wrap page-head"><p class="eyebrow">Discipline</p><h1>The discipline</h1>
+<p class="lede">Four ideas carried into Rust, plus proofs over the code that ships. Each says what enforces it, how far it has got, and where it stops.</p>
+<p class="small">{STRENGTH_HELP}</p></div>
+<div class="wrap"><ol class="workflow">{"".join(sections)}</ol>
+<section id="writfold"><h2>In practice: writfold</h2>
+<p class="prose">How the cadence would wire into one real project. The left half is writfold today; the right half is the planned shape with tauten. The adoption is on a branch, not merged, and the commands on the right are planned.</p>
+<figure><a href="/assets/writfold-wiring.svg"><img src="/assets/writfold-wiring.svg" width="1134" height="717" style="max-width:100%;height:auto;border:1px solid var(--border);border-radius:6px" alt="Two columns. Today: writfold's gate script drives two Docker images (tools, and an Aeneas/Lean proofs image whose gate takes 105 minutes), a TLA+ spec with no runner, archived Verus code, and an unmerged tauten adoption with its own adapters. With tauten: cargo tauten check on every edit, cargo tauten ship at the end of a feature, verify --level full nightly, all in one public proofs image; writfold keeps its theorems, mutants, claims and TLA+ specs and deletes its forked gate scripts."></a>
+<figcaption>From <code>docs/diagrams/writfold-wiring.svg</code> in the tauten repository (2026-11-19). Line counts and timings are from the writfold checkout and the adoption worktree.</figcaption></figure></section>
+<section id="sources"><h2>Sources</h2>
+<p class="prose">The full mechanism table, with every rule and gap, is {mapping}; current gaps are listed under Known gaps in {status}; the plan is {proposal}.</p></section>
 </div>"""
-    site.add("/enforcement/", "Enforcement", "What tauten enforces, with what, and what it does not enforce: the mapping table and known gaps.", body)
-
-
-# -------------------------------------------------------------------- agents ---
-
-def agents(site: Site) -> None:
-    d = site.data
-    raw = d.core.blob("crates/tauten-check/agents.md")
-    site.extra_files["agents/AGENTS.tauten.md"] = raw.encode()
-    bench = d.core.blob("bench/README.md")
-    body = f"""<div class="wrap page-head"><p class="eyebrow">Agent profile</p><h1>The agent profile</h1>
-<p class="lede">This is the text an adopting project gives its agent. <code>cargo tauten init --write</code> writes it to <code>AGENTS.tauten.md</code>; point your <code>AGENTS.md</code> or <code>CLAUDE.md</code> at it.</p>
-<p><span class="tag">Designed</span>Whether it changes agent behaviour: no defect-reduction benefit established (<a href="/benchmark/">benchmark</a>).</p></div>
-<div class="wrap">
-<div class="actions"><button class="copy-btn" type="button" hidden data-src="/agents/AGENTS.tauten.md">Copy as Markdown</button><a href="/agents/AGENTS.tauten.md">Raw file</a></div>
-{_repro(site, "crates/tauten-check/agents.md")}
-<div class="card prose" style="max-width:76ch">{_md(site, raw, "crates/tauten-check/agents.md", shift=1)}</div>
-<h2 id="arms" style="margin-top:48px">Three arms</h2>
-<p class="prose">Whether instructions alone help is an open question, and the benchmark tests it: arm B gets the same rules in prose, without the check.</p>
-{_repro(site, "bench/README.md")}
-<div class="prose">{_md(site, md.section(bench, "Arms"), "bench/README.md", table_label="Benchmark arms")}</div>
-</div>"""
-    site.add("/agents/", "Agent profile", "The instructions an adopting project gives its coding agent, written by cargo tauten init --write.", body)
-
-
-# ----------------------------------------------------------------- benchmark ---
-
-def benchmark(site: Site) -> None:
-    d = site.data
-    bench = d.core.blob("bench/README.md")
-    prereg = d.core.blob("bench/PREREGISTRATION.md")
-    plan = d.core.blob("docs/PLAN.md")
-    status = d.core.blob("docs/STATUS.md")
-    banner = "Pilot on the dev split only (2026-11-18, Claude Sonnet 5.5, 36 trials): no held-out result yet."
-    if f"**{banner}**" not in bench:
-        raise BuildError("bench/README.md no longer carries the benchmark status line the site quotes")
-    question = re.search(r"^\*\*Question\.\*\*.*?(?=\n\n)", bench, re.M | re.S).group(0)
-    harness = site.status_map["bench-harness"]
-    gaps = md.section(status, "Known gaps")
-    limits = _bullet(gaps, "The benchmark hits a ceiling")
-    validity = _bullet(gaps, "Finding validity")
-    body = f"""<div class="wrap page-head"><p class="eyebrow">Benchmark</p><h1>Does the profile reduce escaped defects?</h1></div>
-<div class="wrap">
-<div class="banner-pending" role="note"><p><span class="badge b-pending">No benefit shown</span> <strong>No defect-reduction benefit established.</strong> Agents without the profile almost never shipped a defect the hidden tests catch (2 of 200 calibration trials), so the held-out run was stopped by its preregistered go/no-go rule. An audit of 120 findings the profile raised in that code confirmed none as a reachable defect. The profile does change the code (in the pilot, half the plain-Rust trials left unchecked arithmetic in core code and none of the enforced ones did); on these tasks, that code was not wrong.</p></div>
-<div class="prose">{_md(site, question, "bench/README.md")}</div>
-{_repro(site, "bench/README.md")}
-<h2 id="arms">Arms</h2>
-<div class="prose">{_md(site, md.section(bench, "Arms"), "bench/README.md", table_label="Benchmark arms")}</div>
-<h2 id="measured">What is measured</h2>
-<div class="prose">{_md(site, md.section(bench, "Measurements (every arm)"), "bench/README.md")}</div>
-<h2 id="results">Results</h2>
-{results_html(site)}
-<h2 id="validation" style="margin-top:48px">Harness validation with built-in agents (not a result about AI agents)</h2>
-<p>{status_badge(harness)} <span class="small muted">dated 2026-11-18 in <code>bench/README.md</code></span></p>
-<p class="prose">Three built-in agents check the harness itself before any model is paid for. <strong>reference</strong> applies the task's known-good solution, <strong>null</strong> changes nothing, and <strong>sloppy</strong> applies a hand-written plausible solution with the typical mistake. A task is admitted only when each produces what the table requires: the oracle must pass the reference and catch the other two, and the profile must name the sloppy mistake.</p>
-<div class="prose">{_md(site, md.section(bench, "Validation (no model budget)"), "bench/README.md", table_label="Harness validation", shift=1)}</div>
-<section id="preregistration">
-<h2 style="margin-top:48px">Preregistration <span class="badge b-planned">Draft, not frozen</span></h2>
-{_repro(site, "bench/PREREGISTRATION.md")}
-<div class="prose">{_md(site, prereg.split("\n", 1)[1], "bench/PREREGISTRATION.md", table_label="Preregistered design", shift=1)}</div>
-</section>
-<h2 id="limits" style="margin-top:48px">Calibration and finding validity</h2>
-<p class="prose">{inline_md(limits)}</p>
-<p class="prose">{inline_md(validity)}</p>
-<p class="small muted">From <code>docs/STATUS.md</code>, Known gaps.</p>
-<h2 id="kill">Kill criteria</h2>
-<p class="prose">Publishing the conditions under which the project stops is part of the plan.</p>
-{_repro(site, "docs/PLAN.md")}
-<div class="prose">{_md(site, md.section(plan, "9. Kill criteria"), "docs/PLAN.md")}</div>
-</div>"""
-    site.add("/benchmark/", "Benchmark", "The tauten benchmark: arms, measurements, the dev-split pilot, calibration, the finding-validity audit and preregistration. No defect-reduction benefit established.", body)
+    site.add("/discipline/", "Discipline", "The tauten discipline: authority passed explicitly, effects in signatures, checked evidence, refinement types and proofs, each with what enforces it and the honest gap.", body)
 
 
 # -------------------------------------------------------------------- proofs ---
 
 def proofs(site: Site) -> None:
-    import json
-    from .render import table
     d = site.data
     claims = json.loads(d.core.blob("proofs/claims.json"))["claims"]
     status = d.core.blob("docs/STATUS.md")
@@ -218,92 +203,27 @@ def proofs(site: Site) -> None:
         ("5 · mutants", "Each deliberately broken copy of the Rust must fail its named theorems."),
     ]
     steps = "".join(f"<li><b>{a}</b>{b}</li>" for a, b in flow)
-    body = f"""<div class="wrap page-head"><p class="eyebrow">Proof tier</p><h1>Proofs over the shipped Rust</h1>
+    body = f"""<div class="wrap page-head"><p class="eyebrow">Proofs</p><h1>Proofs over the shipped Rust</h1>
 <p>{status_badge(site.status_map["proof-tier"])}</p></div>
 <div class="wrap prose-wrap">
-<p class="prose">The code that decides whether your build passes (tier rules, severity, exceptions, the baseline ratchet and rule-table validation) lives in a small <code>no_std</code> crate, <code>tauten-check-kernel</code>. Charon and Aeneas translate that exact crate to Lean, and the theorems below are proved about the translation. A CI workflow re-runs the whole gate whenever the kernel, the macros or the proofs change.</p>
+<p class="prose">"Proved" means: a Lean theorem about the Charon/Aeneas translation of the exact crate that ships, passing the five steps below. tauten's own build decisions (tier rules, severity, exceptions, the baseline ratchet, rule-table validation) live in the <code>no_std</code> crate <code>tauten-check-kernel</code> and are proved this way; <code>cargo tauten init --proofs</code> sets up the same gate for your kernel crates.</p>
 <h2 id="pipeline">The gate</h2>
 <ol class="flow" aria-label="Proof gate">{steps}</ol>
 <h2 id="own">Proved: tauten's own decisions</h2>
 {own_tbl}
-<h2 id="macros">Proved for listed instances: macro output</h2>
-<p class="prose">These theorems are about the code that <code>#[refined]</code>, <code>#[requires]</code> and <code>#[ensures]</code> generate for the example types and functions in <code>crates/tauten-proof-instances</code>, plus lemmas about the general shape of that code. The macros themselves are not verified: a different predicate or body is a different instance.</p>
-{inst_tbl}
-<h2 id="not">Not proved</h2>
-<p class="prose">Source scanning, the mapping from compiler diagnostics to rule IDs, the rustc wrapper, workspace loading and the CLI are tested, not proved. So is the authority check (TAU-A002): a proof of a wrong model would have passed, as review showed. Charon, Aeneas, Lean and the steps around them are trusted; the list is in <a href="{gh}/proofs/TRUST.md"><code>proofs/TRUST.md</code></a>.</p>
-<h2 id="yours">Proofs for your kernel crates</h2>
-<p class="prose"><code>cargo tauten init --proofs</code> sets up the same gate for your own <code>kernel</code> crates, and <code>cargo tauten proofs</code> runs it and records one outcome per claim in <code>proofs/claims.json</code>. When a claim is proved and its source has not changed since, arithmetic and indexing findings (TAU-N001, TAU-P003) inside that function are reported as subsumed by the named theorem rather than as errors. Any edit makes the record stale and the findings return.</p>
+<details id="macros"><summary>Proved for listed instances: macro output ({len(inst)} claims)</summary>
+<p class="prose">Theorems about the code <code>#[refined]</code>, <code>#[requires]</code> and <code>#[ensures]</code> generate for the examples in <code>crates/tauten-proof-instances</code>. The macros themselves are not verified: a different predicate or body is a different instance.</p>
+{inst_tbl}</details>
+<h2 id="not">Not proved, and trusted</h2>
+<p class="prose">Source scanning, diagnostic mapping, the rustc wrapper, workspace loading and the CLI are tested, not proved; so is the authority check (TAU-A002). Charon, Aeneas, Lean and the steps around them are trusted: <a href="{gh}/proofs/TRUST.md"><code>proofs/TRUST.md</code></a>.</p>
 <p class="boundary">{inline_md(caveat)} <span class="small muted">(docs/STATUS.md, Known gaps)</span></p>
-<h2 id="writfold">Modelled on writfold</h2>
-<p class="prose">The gate generalises the one <a href="https://writfold.dev">writfold</a> uses for its own kernel, with the same pinned Lean, Aeneas and Charon versions.</p>
+<h2 id="next">Next</h2>
+<p class="prose">{badge("planned", "Planned (0.1)")} Per-claim fingerprints, so an edit stales only the claims it touches, and <code>cargo tauten ship</code> to re-prove them at the end of a feature. {badge("planned", "Planned")} TLC configurations as claims, labelled bounded. The gate generalises the one <a href="https://writfold.dev">writfold</a> uses; <a href="/discipline/#writfold">how it would wire in</a>.</p>
 </div>"""
-    site.add("/proofs/", "Proof tier", f"Lean proofs over tauten's decision code: {len(own)} proved claims, plus macro output proved for listed instances.", body)
+    site.add("/proofs/", "Proofs", f"Lean proofs over tauten's decision code: {len(own)} proved claims, plus macro output proved for listed instances.", body)
 
 
 # -------------------------------------------------------------------- status ---
-
-# Moved here from the home page.
-NOT_ENFORCED = [
-    "Capability discipline, not containment. Dependencies, <code>unsafe</code>, FFI and build scripts keep ambient access.",
-    "Panic rules are syntactic. Panics inside dependencies and allocation failure are not covered.",
-    "Contracts and refinements are runtime checks. Nothing is proved statically yet.",
-    "Rust cannot express per-function effect rows; tiers are a coarse stand-in.",
-    "An agent can still add <code>.clone()</code> to quiet the borrow checker, or a reasoned <code>#[expect]</code> (visible in review).",
-    "Async cancellation safety is not enforceable.",
-    'The placeholder-comment rule (<a href="/rules/tau-s002/">TAU-S002</a>) is a heuristic.',
-]
-
-
-def _rule_example(site: Site, rule: dict) -> str:
-    """The expanded view of one rule: a fixture and its captured output, or the explain text."""
-    rid = rule["id"]
-    warnings_cap = site.captures["check-fixtures-warnings"]
-    seen = []
-    for f in site.data.fixtures:
-        if rid not in f.expect:
-            continue
-        blocks = [b for b in warnings_cap.blocks() if b["id"] == rid and b["crate"] == f.name]
-        if blocks:
-            seen.append((f, blocks))
-    links = f'<a href="/rules/{rid.lower()}/">Rule page</a> · <code>cargo tauten explain {rid}</code>'
-    if not seen:
-        explain = site.captures[f"explain-rule-{rid.lower()}"]
-        return (f'<p class="small"><span class="chip">No fixture yet</span> No fixture in the tauten repository triggers '
-                f'this rule, so there is no captured diagnostic to show. This is what <code>cargo tauten explain</code> prints.</p>'
-                f'{site.capture_panel(explain.name, label=f"cargo tauten explain {rid}")}<p class="small">{links}</p>')
-    # The shortest fixture reads best; the others are named.
-    seen.sort(key=lambda x: (len(x[0].src.splitlines()), x[0].name))
-    f, blocks = seen[0]
-    marks = {b["line"]: b["column"] for b in blocks if b["line"]}
-    text = "\n\n".join(b["text"] for b in blocks)
-    others = ", ".join(f"<code>{o.name}</code>" for o, _ in seen[1:])
-    also = f" Also triggered by {others}." if others else ""
-    return (f'<div class="pair">{site.fixture_panel(f, marks=marks)}'
-            f'{site.capture_panel("check-fixtures-warnings", text, title="$ cargo tauten check", label=f"Output for {f.name}")}</div>'
-            f'<p class="small muted"><span class="chip prov">Captured</span> Fixture <code>{f.name}</code> ({f.tier or "no tier"}) '
-            f'and the output <code>cargo tauten check --warnings</code> printed for it at <code>{site.short}</code>.{also} {links}</p>')
-
-
-def rule_table(site: Site) -> str:
-    from .render import level_chip
-    from .source import ENFORCERS, FAMILIES, TIERS, level
-    rows, current = [], None
-    for r in site.data.rules:
-        fam = r["id"][4]
-        if fam != current:
-            current = fam
-            rows.append(f'<p class="rt-fam" id="family-{fam.lower()}">{fam} · {FAMILIES.get(fam, fam)}</p>')
-        has = any(r["id"] in f.expect for f in site.data.fixtures)
-        lv = "".join(f'<span class="rt-lv"><span class="rt-t">{t}</span>{level_chip(level(r, t))}</span>' for t in TIERS)
-        ex = '<span class="rt-ex">example</span>' if has else '<span class="rt-ex none">no fixture</span>'
-        rows.append(f'<details class="rt-row" id="{r["id"].lower()}"><summary><span class="id">{r["id"]}</span>'
-                    f'<span class="rt-title">{inline_md(r["title"])}</span><span class="rt-lvs">{lv}</span>'
-                    f'<span class="rt-by">{ENFORCERS[r["enforced_by"]]}</span>{ex}</summary>'
-                    f'<div class="rt-body">{_rule_example(site, r)}</div></details>')
-    head = ('<div class="rt-head" aria-hidden="true"><span>ID</span><span>Rule</span>'
-            '<span class="rt-lvs">kernel · core · edge</span><span>Enforced by</span><span></span></div>')
-    return f'<div class="rtable">{head}{"".join(rows)}</div>'
-
 
 def _status_milestones(site: Site) -> str:
     text = site.data.core.blob("docs/STATUS.md")
@@ -330,76 +250,72 @@ def _status_milestones(site: Site) -> str:
     return out
 
 
+# The approved path (docs/DISCIPLINE-PROPOSAL.md, section 5 replaced). D0 is being built.
+PATH = [
+    ("D0", "Worked example with all four ideas and one proved claim; the attribute macros", ("progress", "In progress")),
+    ("X1–X3", "One-day experiments: automatic Lean tactics, Charon facts, Kani on the audited findings", ("planned", "Planned")),
+    ("D1", "One shared proof gate and public image, replacing forked scripts", ("planned", "Planned")),
+    ("D2", "Cadence: <code>ship</code>, <code>verify --level</code>, per-claim fingerprints", ("planned", "Planned (0.1)")),
+    ("D3", "Findings reframed as obligations: fixed, proved, justified or open", ("planned", "Planned (0.1)")),
+    ("D4–D7", "Capabilities and effects ratchet, evidence, the refinement fragment, TLC claims", ("planned", "Planned")),
+    ("D8", "This site, rustdoc on docs.rs, release 0.1.0", ("progress", "In progress")),
+]
+
+
 def status(site: Site) -> None:
     from .common import status_line
-    d = site.data
     sm = site.status_map
     rej, acc = site.fixture_counts()
-    n = len(d.rules)
-    first = site.config["first_release"]
-    publication = (f"Publication: {site.config['latest_release']} is on crates.io."
-                   if site.published else
-                   f'Publication: the release workflow is {status_badge(sm["publication"])}; nothing is on crates.io yet.')
     legend = (f'<ul class="small legend"><li>{badge("specified", "Specified")} written down only.</li>'
               f'<li>{badge("implemented", "Implemented")} code exists.</li>'
-              f'<li>{badge("exercised", "Exercised")} ran against real input in the repository; the evidence is named.</li></ul>')
-    covered = sum(1 for r in d.rules if any(r["id"] in f.expect for f in d.fixtures))
-
-    groups = []
-    for key, label in (("rustc", "rustc"), ("clippy", "Clippy, at levels the profile sets"), ("tauten", "tauten structural checks")):
-        members = [r for r in d.rules if r["enforced_by"] == key]
-        groups.append(f'<li><span class="count">{label}:</span> {len(members)} rules.</li>')
-    never = len(site.no_exception_rules)
-    groups.append(f'<li><span class="count">{never} rules admit no exception;</span> in kernel crates, none do (<a href="/rules/tau-x004/">TAU-X004</a>).</li>')
-    gaps = "".join(f"<li>{g}</li>" for g in NOT_ENFORCED)
-    gaps += "<li><strong>No defect-reduction benefit established.</strong></li>"
-
+              f'<li>{badge("exercised", "Exercised")} ran against real input in the repository; the evidence is named.</li>'
+              f'<li>{badge("progress", "In progress")} / {badge("planned", "Planned")} not released.</li></ul>')
+    path = "".join(f"<li>{badge(*state)} <strong>{m}</strong> {what}</li>" for m, what, state in PATH)
     body = f"""<div class="wrap page-head"><p class="eyebrow">Status</p><h1>Status</h1>
-<p class="lede">What tauten checks, what each check prints, and how far each part has got.</p>
 <p class="maturity"><span class="badge b-planned">Pre-release</span> <span>{status_line(site)}</span></p>{legend}</div>
 <div class="wrap">
-<section id="rules">
-<h2>Rules and what they report</h2>
-<p class="prose">{n} rules. Open a row to see a fixture crate from the tauten repository that triggers the rule and the diagnostic <code>cargo tauten check</code> printed for it. {covered} rules have a fixture; for the other {n - covered} the row shows <code>cargo tauten explain</code> instead. Levels are per tier; <a href="/rules/">the rule reference</a> has the full table with filters.</p>
-{rule_table(site)}
-</section>
 <section id="exercised">
-<h2>What has been exercised</h2>
 <div class="status-grid">
-<div class="card"><div class="top">{status_badge(sm["tauten-check"])}</div><ul>
-<li>{rej} reject and {acc} accept fixture crates, each producing exactly its expected rule IDs. <span class="ev">{site.src("crates/cargo-tauten/tests/fixtures.rs")}</span></li>
+<div class="card"><h3>Exercised</h3><ul>
+<li>{status_badge(sm["tauten-check"])} {len(site.data.rules)} rules; {rej} reject and {acc} accept fixture crates, each producing exactly its expected rule IDs. <span class="ev">{site.src("crates/cargo-tauten/tests/fixtures.rs")}</span></li>
+<li>{status_badge(sm["proof-tier"])} Proof tier: tauten's own kernel and the user template. <a href="/proofs/">Proofs</a></li>
+<li>{status_badge(sm["tauten-macros"])} <code>#[refined]</code>, <code>#[newtype]</code>, contracts.</li>
+<li>{status_badge(sm["writfold"])} Writfold adoption, on a worktree: 151 claims proved, 142 findings subsumed, baseline 527. <span class="ev">docs/STATUS.md, M8</span></li>
 <li>tauten passes its own profile on every gate run. <span class="ev">scripts/gate</span></li>
-<li><span class="tag">Observed</span>Dry run on a throwaway clone of writfold: 2,883 findings, and four defects found in tauten itself, since fixed. <span class="ev">{site.src("docs/dry-runs/writfold-2026-11-18.md")}</span></li>
-<li>Mutation testing of <code>tauten-check</code>: 14 of 137 viable mutants missed on the first run, 0 after new tests. <span class="ev">docs/STATUS.md, Quality</span></li>
-<li>Benchmark harness: 4 dev tasks admitted with built-in agents. <span class="ev">{site.src("bench/README.md")}</span></li>
 </ul></div>
-<div class="card"><div class="top"><span class="badge b-pending">Pending</span></div><ul>
-<li>Pilot with a real agent (dev split): {status_badge(sm["bench-pilot"])} Held-out benefit not established.</li>
-<li>Proof tier: {status_badge(sm["proof-tier"])}</li>
-<li>Contracts for <code>async fn</code> and generic newtypes; Kani lowering.</li>
-<li>{publication}</li>
-</ul></div>
+<div class="card"><h3>The approved path</h3><ul>{path}</ul>
+<p class="small muted">From {site.src("docs/DISCIPLINE-PROPOSAL.md")}; no step depends on a defect benchmark.</p></div>
 </div>
-<h3 style="margin-top:32px">Benchmark, dev-split pilot</h3>
-{results_html(site, compact=True)}
-<p><a href="/benchmark/">The benchmark →</a></p>
 </section>
-<section id="enforced">
-<h2>Enforced, and not</h2>
-<div class="ledger">
-<div><h3>Enforced</h3><ul>{"".join(groups)}</ul></div>
-<div class="gap"><h3>Not enforced</h3><ul>{gaps}</ul></div>
-</div>
-<p><a href="/enforcement/">The full enforcement table →</a></p>
+<section id="benchmark">
+<h2>Benchmark</h2>
+<p class="boundary">{measured_sentence(site)} tauten makes no defect-reduction claim.</p>
+<p class="prose">Agents without the profile almost never shipped a defect the hidden tests catch, so the held-out run was stopped by its preregistered rule. The profile does change the code; on these tasks that code was not wrong. The harness, design and pilot are in {site.src("bench/README.md")}; the audit is summarised under Known gaps in {site.src("docs/STATUS.md")}.</p>
 </section>
 <section id="status-doc">
-{_repro(site, "docs/STATUS.md")}<div class="prose wide">{_status_milestones(site)}</div>
+<details><summary>Every milestone, from docs/STATUS.md</summary>
+{_repro(site, "docs/STATUS.md")}<div class="prose wide">{_status_milestones(site)}</div></details>
 </section>
+<p>Every rule, with a fixture that triggers it and the diagnostic it prints: <a href="/rules/">Rules</a>.</p>
 </div>"""
-    site.add("/status/", "Status", "Every tauten rule with an example and the diagnostic it prints, what has been exercised, and what is still planned.", body)
+    site.add("/status/", "Status", "What tauten has exercised, the approved path with what is in progress and planned, and the benchmark result: no defect-reduction claim.", body)
+
+
+# ----------------------------------------------------------------- redirects ---
+
+def redirects(site: Site) -> None:
+    site.redirect("/benchmark/", "/status/#benchmark", "The benchmark page")
+    site.redirect("/enforcement/", "/discipline/", "The enforcement page")
+    site.redirect("/agents/", "/start/#agent", "The agent profile")
+    docs = site.docs_url if site.published else "/start/"
+    site.redirect("/crates/", docs, "The crates page")
+    for name in site.data.crates:
+        target = (f"https://docs.rs/{name}/{site.config['latest_release']}/"
+                  if site.published and name != "cargo-tauten" else "/start/#commands")
+        site.redirect(f"/crates/{name}/", target, f"The {name} page")
 
 
 def not_found(site: Site) -> None:
     body = """<div class="wrap page-head"><p class="eyebrow">404</p><h1>Not found</h1>
-<p class="lede">There is no page at this address. Try the <a href="/">home page</a>, the <a href="/rules/">rules</a> or <a href="/start/">getting started</a>.</p></div>"""
+<p class="lede">There is no page at this address. Try the <a href="/">home page</a>, <a href="/discipline/">the discipline</a> or <a href="/start/">getting started</a>.</p></div>"""
     site.add("/404.html", "Not found", "No page at this address.", body)

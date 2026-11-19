@@ -59,15 +59,12 @@ def build(args: argparse.Namespace) -> int:
 
     pages_home.build(site)
     pages_docs.start(site)
-    pages_ref.crates_index(site)
-    pages_ref.crate_pages(site)
+    pages_docs.discipline(site)
+    pages_docs.proofs(site)
     pages_ref.rules_index(site)
     pages_ref.rule_pages(site)
-    pages_docs.enforcement(site)
-    pages_docs.agents(site)
-    pages_docs.benchmark(site)
-    pages_docs.proofs(site)
     pages_docs.status(site)
+    pages_docs.redirects(site)
     pages_docs.not_found(site)
 
     files = {f"assets/{n}" for n in ASSETS + BRAND} | set(site.extra_files)
@@ -83,6 +80,7 @@ def build(args: argparse.Namespace) -> int:
         ("4 snippets, captures, status rows", stale),
         ("5 results.json", []),  # validated while loading; a failure stops the build earlier
         ("6 wording and claim tags", checks.wording(site)),
+        ("6b positioning: benchmark sentence, unreleased labels", checks.positioning(site)),
         ("7 links, anchors, ids, third-party requests", checks.links(site, files)),
         ("+ colour contrast (WCAG AA)", contrast.check()),
     ]
@@ -135,7 +133,8 @@ def build(args: argparse.Namespace) -> int:
             "rules": len(data.rules), "fixtures": {"reject": rej, "accept": acc},
             "published": site.published, "allow_stale_captures": bool(args.allow_stale_captures)}
     (OUT / "build-info.json").write_text(json.dumps(info, indent=2) + "\n")
-    urls = "".join(f"<url><loc>{config['site_url']}{p}</loc></url>" for p in sorted(site.pages) if p != "/404.html")
+    urls = "".join(f"<url><loc>{config['site_url']}{p}</loc></url>" for p in sorted(site.pages)
+                   if p != "/404.html" and p not in site.redirects)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
                                      f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
     (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {config['site_url']}/sitemap.xml\n")

@@ -1,7 +1,8 @@
 # tauten.dev
 
-Source of the website for [tauten](https://github.com/tauten-dev/tauten), a strictness
-profile for Rust written by AI agents. Most pages are generated from the core
+Source of the website for [tauten](https://github.com/tauten-dev/tauten), a discipline
+for Rust: authority passed explicitly, effects visible in signatures, checked
+evidence, refinement types, and proofs over the shipped code. Most pages are generated from the core
 repository at one pinned commit; nothing is copied by hand.
 
 ## Build and preview
@@ -48,11 +49,17 @@ the release switches live in `website/config.toml`:
    STATUS.md row with a known state.
 5. `website/data/results.json` validates (a pending file must have no runs;
    every run needs model, date, n, CI, commit and raw data link).
-6. Banned wording (prevents, sandbox, formally verified, significant, …) and
-   claim tags (`Measured` needs a results run; `Proved` needs a proofs gate).
-   Only exact sentences reproduced from core files are allow-listed.
-7. Internal links and anchors resolve, ids are unique per page, and nothing
-   is loaded from a third party.
+6. Banned wording (prevents, sandbox, formally verified, significant, any
+   defect-reduction claim, …) and claim tags (`Measured` needs a results run;
+   `Proved` needs a proofs gate). Only exact sentences reproduced from core
+   files are allow-listed.
+   6b. `/status/` carries the benchmark sentence from
+   `docs/DISCIPLINE-PROPOSAL.md` and "tauten makes no defect-reduction claim";
+   any page naming an unreleased command or API (`ship`, `verify --level`,
+   `#[effects]`, `#[evidence]`, `#[derive(Cap)]`, `effects.lock`) carries an
+   "In progress" or "Planned" label.
+7. Internal links and anchors resolve, ids are unique per page, nothing
+   is loaded from a third party, and docs.rs links carry `latest_release`.
 
 Also checked: WCAG AA contrast of every colour pair in both themes
 (`website/contrast.py`), the CSS budget (20 KB) and the home page budget
@@ -65,14 +72,18 @@ Also checked: WCAG AA contrast of every colour pair in both themes
   the build, or captured CLI output. Nothing is asserted from memory.
 - Status badges come only from STATUS.md through `status-map.toml`.
 - Lint and convention rules "flag" or "reject"; nothing "prevents".
-- Benchmark numbers come only from `website/data/results.json`. A [0, 0]
-  interval over all-zero counts is labelled "insufficient defect events to
-  assess improvement", never plotted as a result.
-- The home page stays short: pitch, install, the three tiers, the status
-  line and links. The status page carries every rule as an expandable row:
-  a fixture that triggers it with its captured `check --warnings` output, or,
-  where no fixture exists, the captured `cargo tauten explain` text marked
-  "No fixture yet". `capture.py` records one `explain-rule-<id>` per rule.
+- No defect-reduction claim. The benchmark appears as one sentence on
+  `/status/#benchmark`, quoted from `docs/DISCIPLINE-PROPOSAL.md`; the bench
+  design and reports stay in the core repository.
+- Every page has the home page's shape: a pitch line, one code or CLI panel,
+  a short list, links. Pages: `/`, `/discipline/` (four ideas plus proofs and
+  cadence, each with a before/after, a strength label and one honest gap),
+  `/proofs/`, `/start/` (includes the agent profile and the CLI reference),
+  `/rules/` with one page per rule, `/status/`. `/benchmark/`, `/enforcement/`,
+  `/agents/` and `/crates/…` are redirects; API docs live on docs.rs.
+- Anything not released carries "In progress" (being built, milestone D0)
+  or "Planned" / "Planned (0.1)". Before/after snippets come from the
+  proposal at the pinned commit (`snippets.toml`), labelled "Proposed API".
 - Palettes: paper (light) and paper-dark, shared with the sibling sites; the
   theme select offers System, Paper and Paper dark.
 

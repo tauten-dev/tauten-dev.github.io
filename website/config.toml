@@ -4,7 +4,7 @@
 # file is read with `git show <core_ref>:<path>`, never from the working tree.
 # Both can be overridden on the command line (--core, --core-ref).
 core = "../tauten"
-core_ref = "d3bdea7ec5ddfb04db7f27c3af30e26c123a79d8"
+core_ref = "8fb6ade8a7174fb7924eb684132794ae383cb45d"
 
 site_url = "https://tauten.dev"
 domain = "tauten.dev"

@@ -10,8 +10,8 @@ from pathlib import Path
 from .render import code_html, diag_html, esc, panel
 from .source import Capture, Data, exceptions_label
 
-NAV = [("Start", "/start/"), ("Crates", "/crates/"), ("Rules", "/rules/"), ("Agents", "/agents/"),
-       ("Benchmark", "/benchmark/"), ("Proofs", "/proofs/"), ("Status", "/status/")]
+NAV = [("Start", "/start/"), ("Discipline", "/discipline/"), ("Proofs", "/proofs/"), ("Rules", "/rules/"),
+       ("Status", "/status/")]
 
 
 @dataclass
@@ -25,6 +25,7 @@ class Site:
     results: dict
     built_at: str
     pages: dict[str, str] = field(default_factory=dict)
+    redirects: dict[str, str] = field(default_factory=dict)
     extra_files: dict[str, bytes] = field(default_factory=dict)
 
     # ------------------------------------------------------------ facts ---
@@ -43,6 +44,11 @@ class Site:
     @property
     def repo_public(self) -> bool:
         return bool(self.config["repo_public"])
+
+    @property
+    def docs_url(self) -> str:
+        """The versioned docs.rs page of the `tauten` library crate."""
+        return f"https://docs.rs/tauten/{self.config['latest_release']}/tauten/"
 
     @property
     def rule_ids(self) -> set[str]:
@@ -122,6 +128,27 @@ class Site:
             full_title: bool = False) -> None:
         self.pages[path] = self.shell(path, title, description, body, scripts=scripts, full_title=full_title)
 
+    def redirect(self, path: str, target: str, what: str) -> None:
+        """A page that has moved: a meta refresh plus a visible link. Not in the sitemap."""
+        external = target.startswith("https:")
+        url = target if external else self.config["site_url"] + target
+        canonical = "" if external else f'<link rel="canonical" href="{esc(url)}">\n'
+        self.redirects[path] = target
+        self.pages[path] = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moved · tauten</title>
+<meta name="robots" content="noindex">
+{canonical}<meta http-equiv="refresh" content="0; url={esc(target)}">
+</head>
+<body>
+<main id="main"><p>{esc(what)} moved to <a href="{esc(target)}">{esc(url)}</a>.</p></main>
+</body>
+</html>
+"""
+
     def shell(self, path: str, title: str, description: str, body: str, *, scripts=(), full_title=False) -> str:
         v = self.asset_version()
         site = self.config["site_url"]
@@ -133,6 +160,8 @@ class Site:
             nav.append(f'<li><a href="{href}"{current}>{label}</a></li>')
         if self.repo_public:
             nav.append(f'<li><a href="https://github.com/{self.config["repository"]}">GitHub</a></li>')
+        if self.published:
+            nav.append(f'<li><a href="{self.docs_url}">API</a></li>')
         footer = ["<li>MIT</li>"]
         if self.repo_public:
             footer.append(f'<li><a href="https://github.com/{self.config["repository"]}">GitHub</a></li>')
@@ -140,7 +169,8 @@ class Site:
             footer.append("<li>Source repository not public yet</li>")
         if self.published:
             footer.append('<li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li>')
-        footer += ['<li><a href="/enforcement/">Enforcement</a></li>', '<li><a href="/status/">Status</a></li>',
+            footer.append(f'<li><a href="{self.docs_url}">docs.rs</a></li>')
+        footer += ['<li><a href="/discipline/">Discipline</a></li>', '<li><a href="/status/">Status</a></li>',
                    f"<li>built from tauten@<code>{self.short}</code>, {self.data.core.date}</li>",
                    '<li><span class="badge b-planned">pre-release</span></li>']
         script_tags = "".join(f'<script src="/assets/{s}?v={v}" defer></script>' for s in ("copy.js", *scripts))
@@ -161,7 +191,7 @@ class Site:
 <meta property="og:image" content="{site}/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta property="og:image:alt" content="The tauten mark and the headline: A discipline for Rust, with proofs over the shipped code.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">

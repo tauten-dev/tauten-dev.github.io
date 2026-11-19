@@ -105,3 +105,23 @@ start = "        assert_eq!(withdraw(10, 3), Ok(7));"
 end = "        assert_eq!(withdraw(1, 3), Err(BankError::Insufficient));"
 dedent = true
 lang = "rust"
+
+# --- discipline: before/after, from the approved proposal (APIs there are proposals)
+[disc-cap]
+path = "docs/DISCIPLINE-PROPOSAL.md"
+start = "// before: core crate"
+end = "pub fn is_stale(dir: &Dir, clock: &impl Clock, name: &str) -> Result<bool, StaleError> { ... }"
+lang = "rust"
+
+[disc-origin]
+path = "docs/DISCIPLINE-PROPOSAL.md"
+start = "// before: check-then-use compiles even if `plan` changed in between"
+end = "plan.advance(ok)                                             // consumes the evidence"
+lang = "rust"
+
+[disc-refine]
+path = "docs/DISCIPLINE-PROPOSAL.md"
+start = "pub fn set_volume(v: u8) { assert!(v <= 100); ... }"
+end = "pub fn set_volume(v: Percent) { ... }   // kernel crate: try_new proved (ok iff v <= 100)"
+before = 1
+lang = "rust"

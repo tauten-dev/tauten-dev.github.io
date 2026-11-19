@@ -20,7 +20,7 @@ config = tomllib.loads((HERE / "config.toml").read_text())
 core = (HERE.parent / config["core"]).resolve()
 mark = subprocess.check_output(["git", "-C", str(core), "show", f"{config['core_ref']}:assets/brand/tauten-icon.svg"], text=True)
 body = (HERE / "captures" / "check-fixtures.txt").read_text().split("# ---\n", 1)[1]
-block = next(b for b in body.split("\n\n") if b.startswith("error[TAU-P001]") and "rej-unwrap" in b)
+block = next(b for b in body.split("\n\n") if b.startswith("error[TAU-A001]") and "rej-ambient-clock" in b)
 lines = []
 for line in block.split("\n"):
     e = html.escape(line)
@@ -31,8 +31,8 @@ page = f"""<!doctype html><html><body style="margin:0;width:1200px;height:630px;
 font-family:system-ui,sans-serif;display:flex;flex-direction:column;justify-content:center;padding:0 72px;box-sizing:border-box">
 <div style="display:flex;align-items:center;gap:16px;font-size:44px;font-weight:650;letter-spacing:-.05em">
 <div style="width:64px;height:64px">{mark}</div>tauten</div>
-<h1 style="font-size:62px;line-height:1.08;letter-spacing:-.04em;margin:28px 0 30px;font-weight:650">Strict Rust for code written by agents.<br>
-<span style="color:#18765B">Every rule names what enforces it.</span></h1>
+<h1 style="font-size:62px;line-height:1.08;letter-spacing:-.04em;margin:28px 0 30px;font-weight:650">A discipline for Rust.<br>
+<span style="color:#18765B">Proofs over the shipped code.</span></h1>
 <pre style="margin:0;background:#FDFDF9;border:1px solid #7D8F80;border-left:4px solid #18765B;border-radius:6px;padding:18px 22px;
 font:19px/1.6 'DejaVu Sans Mono',monospace;white-space:pre-wrap">{"<br>".join(lines)}</pre></body></html>"""
 exe = os.environ.get("PLAYWRIGHT_CHROMIUM")

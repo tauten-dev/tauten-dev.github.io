@@ -1,11 +1,10 @@
-"""Reference pages: the rules index, one page per rule, and the crates."""
+"""Reference pages: the rules index and one page per rule."""
 
 from __future__ import annotations
 
 import re
 
-from .common import registry_links, crate_cards, crate_prose, evidence_table, ratchet_html, version_label
-from .render import code_html, copy_line, diag_html, esc, inline_md, level_chip, panel, status_badge, table
+from .render import copy_line, esc, inline_md, level_chip
 from .site import Site, ref_layout
 from .source import ENFORCERS, FAMILIES, TIERS, exceptions_label, level
 
@@ -60,7 +59,7 @@ def rules_index(site: Site) -> None:
 <span id="rule-count" class="muted" aria-live="polite"></span></form>"""
     body = f"""<div class="wrap page-head"><p class="eyebrow">Rule reference</p><h1>Rules</h1>
 <p class="lede">{counts} Each rule has a stable ID; <code>cargo tauten explain &lt;ID&gt;</code> prints it in the terminal.</p>
-<p>What a rule cannot catch is listed on <a href="/enforcement/">Enforcement</a>.</p></div>
+<p>What a rule cannot catch is listed with each idea on <a href="/discipline/">Discipline</a>.</p></div>
 {ref_layout([(f"family-{f.lower()}", f"{f} · {FAMILIES.get(f, f)}") for f in families],
             filters + tbl + f'<p class="small">{inline_md(notes_line)}</p>', "Families")}"""
     site.add("/rules/", "Rules", f"The {n} rules of the tauten profile, with level per tier, test scope, exceptions and what enforces each.",
@@ -104,7 +103,9 @@ def rule_pages(site: Site) -> None:
                             f'({f.tier or "no tier"}); it expects {", ".join(f.expect)}.</figcaption></figure>')
             parts.append('<h2 id="fixtures">Seen in fixtures</h2>' + "".join(figs))
         toc.append(("explain", "In the terminal"))
-        parts.append(f'<h2 id="explain">In the terminal</h2>{copy_line(f"cargo tauten explain {rid}")}')
+        explain = site.captures.get(f"explain-rule-{rid.lower()}")
+        shown = site.capture_panel(explain.name, label=f"cargo tauten explain {rid}") if explain else ""
+        parts.append(f'<h2 id="explain">In the terminal</h2>{copy_line(f"cargo tauten explain {rid}")}{shown}')
         prev = rules[i - 1] if i else None
         nxt = rules[i + 1] if i + 1 < len(rules) else None
         pn = '<nav class="pn" aria-label="Previous and next rule">'
@@ -120,210 +121,3 @@ def rule_pages(site: Site) -> None:
         body = f'<div class="wrap page-head"></div>{ref_layout(toc, head + "".join(parts) + pn)}'
         site.add(f"/rules/{rid.lower()}/", f"{rid}: {re.sub(r'`', '', r['title'])}",
                  f"{rid}: {r['title']}. {r['why']}", body)
-
-
-# ------------------------------------------------------------------ crates ---
-
-def crates_index(site: Site) -> None:
-    legend = _legend()
-    body = f"""<div class="wrap page-head"><p class="eyebrow">The family</p><h1>Crates</h1>
-<p class="lede">Four crates, one profile. Each card says what the crate is, its own tier, and how far it has got.</p></div>
-<div class="wrap">{crate_cards(site)}<h2 style="margin-top:48px" id="legend">How far an item has got</h2>{legend}</div>"""
-    site.add("/crates/", "Crates", "The tauten crates: cargo-tauten, tauten-check, tauten and tauten-macros, with tier and status.", body)
-
-
-def _legend() -> str:
-    from .render import badge
-    return (f'<ul class="small"><li>{badge("specified", "Specified")} written down only.</li>'
-            f'<li>{badge("implemented", "Implemented")} code exists.</li>'
-            f'<li>{badge("exercised", "Exercised")} ran against real input in the repository; the evidence is named.</li></ul>')
-
-
-def _facts(site: Site, c: dict) -> str:
-    feats = ", ".join(f"<code>{esc(k)}</code> = [{', '.join(esc(x) for x in v)}]" for k, v in c["features"].items()) or "none"
-    rows = [["Version", esc(version_label(site, c))], ["rust-version", c["rust_version"]], ["Edition", c["edition"]],
-            ["License", c["license"]], ["Tier", f'<code>{c["tier"]}</code>'],
-            ["Features", feats], ["Dependencies", ", ".join(f"<code>{esc(x)}</code>" for x in c["dependencies"]) or "none"]]
-    if c["dev_dependencies"]:
-        rows.append(["Dev-dependencies", ", ".join(f"<code>{esc(x)}</code>" for x in c["dev_dependencies"])])
-    if c["proc_macro"]:
-        rows.append(["Kind", "procedural macro crate"])
-    return table(["Fact", "Value"], rows, label=f"{c['name']} facts",
-                 caption=f'From {site.src(c["path"])} at <code>{site.short}</code>.')
-
-
-def _does_not(items: list[str], verbatim_from: str | None = None) -> str:
-    lis = "".join(f"<li>{x}</li>" for x in items)
-    src = f'<p class="small muted">{verbatim_from}</p>' if verbatim_from else ""
-    return f'<div class="doesnot"><h2 id="does-not">What it does not do</h2><ul>{lis}</ul>{src}</div>'
-
-
-def _pair_files(site: Site, rs: str, stderr: str, caption: str) -> str:
-    src = site.data.core.blob(rs).rstrip("\n")
-    err = site.data.core.blob(stderr).rstrip("\n")
-    return (f'<figure><div class="pair">{panel(code_html(src, "rust"), title=esc(rs.split("crates/tauten/")[1]), label=f"Source of {rs}", provenance="From the repo")}'
-            f'{panel(diag_html(err, site.rule_ids), title=esc(stderr.split("crates/tauten/")[1]), label=f"Expected compiler output {stderr}", provenance="From the repo", diag=True)}'
-            f'</div><figcaption><span class="chip prov">Compile-fail test (trybuild)</span> {caption} The expected output is '
-            f'committed beside the test and checked on every gate run.</figcaption></figure>')
-
-
-def _crate_page(site: Site, name: str, examples: list[tuple[str, str, str]], does_not: str, evidence_keys: list[str],
-                extra_evidence: str = "") -> None:
-    c = site.data.crates[name]
-    prose = crate_prose(site)[name]
-    item = site.status_map[name]
-    toc = [("what", "What it does")] + [(i, t) for i, t, _ in examples] + [("does-not", "What it does not do"),
-                                                                       ("evidence", "Evidence"), ("facts", "Facts")]
-    head = f"""<p class="eyebrow"><a href="/crates/">Crates</a> / tier {c["tier"]}</p>
-<h1 class="id">{name}</h1>
-<div class="facts"><span class="chip chip-tier {c["tier"][0]}">{c["tier"]}</span>{status_badge(item)}{registry_links(site, name)}</div>
-<p class="lede">{esc(c["description"])}</p>"""
-    parts = [f'<h2 id="what">What it does</h2><p class="prose">{inline_md(prose["does"])}</p>']
-    parts += [f'<h2 id="{i}">{t}</h2>{html}' for i, t, html in examples]
-    parts.append(does_not)
-    parts.append(f'<h2 id="evidence">Evidence</h2>{evidence_table(site, evidence_keys)}{extra_evidence}')
-    parts.append(f'<h2 id="facts">Facts</h2>{_facts(site, c)}')
-    body = f'<div class="wrap page-head"></div>{ref_layout(toc, head + "".join(parts))}'
-    site.add(f"/crates/{name}/", name, f"{name}: {c['description']}", body)
-
-
-def _subcommands(site: Site) -> str:
-    """Subcommands, doc comments and flags, parsed from the clap definitions in main.rs."""
-    main = site.data.core.blob("crates/cargo-tauten/src/main.rs")
-    target = re.search(r"struct Target \{(.*?)\n\}", main, re.S).group(1)
-    target_flags = [f"--{n.replace('_', '-')}" for n in re.findall(r"^    (\w+): ", target, re.M)]
-    enum = re.search(r"enum Command \{(.*?)\n\}", main, re.S).group(1)
-    rows = []
-    for doc, variant, body in re.findall(r"    /// (.*?)\n    (\w+) \{(.*?)\n    \},", enum, re.S):
-        flags = []
-        for attrs, field in re.findall(r"((?:\s+(?:///.*|#\[.*\]))*)\n\s+(\w+): ", body):
-            if "flatten" in attrs:
-                flags += target_flags
-            elif "long" in attrs:
-                flags.append(f"--{field.replace('_', '-')}")
-            else:
-                flags.append(f"&lt;{field}&gt;")
-        rows.append([f"<code>{variant.lower()}</code>", inline_md(doc), ", ".join(f"<code>{f}</code>" for f in flags) or "–"])
-    return table(["Command", "Doc comment", "Arguments"], rows, label="cargo tauten subcommands",
-                 caption=f'Parsed from the clap definitions in {site.src("crates/cargo-tauten/src/main.rs")} at <code>{site.short}</code>.')
-
-
-def crate_pages(site: Site) -> None:
-    d = site.data
-    caps = site.captures
-    prose = crate_prose(site)
-
-    # cargo-tauten -----------------------------------------------------------
-    check = caps["check-fixtures"]
-    pieces = [check.block("TAU-P001", "rej-unwrap")["text"], check.block("TAU-A001", "rej-ambient-clock")["text"],
-              check.block("TAU-S001", "rej-stub")["text"]]
-    tail = check.body.rstrip("\n").split("\n\n")[-1]
-    elide = '<span class="line elide">…</span>'
-    check_html = elide.join(diag_html(p, site.rule_ids) for p in pieces) + elide + diag_html(tail, site.rule_ids)
-    rej, acc = site.fixture_counts()
-    check_panel = panel(check_html, title="$ cargo tauten check", label="Excerpt of cargo tauten check over the fixtures",
-                        provenance="Captured", diag=True,
-                        foot=f"Three of the blocks and the summary, run over the {rej + acc} fixture crates; … marks omitted blocks.")
-    clock = next(f for f in d.fixtures if f.name == "rej-ambient-clock")
-    excused = next(f for f in d.fixtures if f.name == "rej-stub-excused")
-    cb = check.block("TAU-A001", "rej-ambient-clock")
-    xb = check.block("TAU-X004", "rej-stub-excused")
-    prof = caps["profile-kernel"].body.split("\n")
-    cut = prof.index("# clippy.toml for kernel") + 6
-    profile_panel = site.capture_panel("profile-kernel", "\n".join(prof[:cut]) + "\n…", label="Start of cargo tauten profile kernel")
-    examples = [
-        ("commands", "Commands", _subcommands(site)),
-        ("check", "Check", f'<figure>{check_panel}</figure>'
-            f'<h3>Ambient authority in a core crate</h3><figure><div class="pair">{site.fixture_panel(clock, marks={cb["line"]: cb["column"]})}'
-            f'{site.capture_panel("check-fixtures", cb["text"], title="$ cargo tauten check")}</div></figure>'
-            f'<h3>An exception that is refused</h3><figure><div class="pair">{site.fixture_panel(excused, marks={xb["line"]: xb["column"]})}'
-            f'{site.capture_panel("check-fixtures", xb["text"], title="$ cargo tauten check")}</div>'
-            f'<figcaption><span class="chip prov">Captured</span> A reason does not excuse a stub: TAU-S001 admits no exceptions, in any tier.</figcaption></figure>'),
-        ("explain", "Explain and profile", f'{site.capture_panel("explain-p001")}<div style="height:16px"></div>{profile_panel}'),
-        ("init", "Init", f'<p>Run on a workspace with no tiers declared. Nothing is written without <code>--write</code>.</p>{site.capture_panel("init")}'),
-        ("ratchet", "Ratchet", ratchet_html(site)),
-    ]
-    _crate_page(site, "cargo-tauten", examples,
-                _does_not([inline_md(x) for x in prose["cargo-tauten"]["does_not"]]),
-                ["cargo-tauten", "init", "ratchet"])
-
-    # tauten-check -------------------------------------------------------------
-    struct = site.snippets["diag-struct"]["code"]
-    fields = re.findall(r"    /// (.*?)\n(?:    #\[serde\(rename = \"(\w+)\"\)\]\n)?    pub (\w+): ([^\n]+),", struct)
-    field_rows = [[f"<code>{esc(ren or name)}</code>", f"<code>{esc(ty)}</code>", inline_md(doc)] for doc, ren, name, ty in fields]
-    status_md = d.core.blob("docs/STATUS.md")
-    decisions = [b for b in re.findall(r"^- (\*\*.*?)(?=^- |^\n|\Z)", status_md, re.M | re.S)
-                 if b.startswith("**Lints compile at warn level") or b.startswith("**No rustc `forbid`")]
-    if len(decisions) != 2:
-        raise RuntimeError("STATUS design decisions not found")
-    dec_html = "".join(f"<li>{inline_md(' '.join(x.split()))}</li>" for x in decisions)
-    quality = re.search(r"- Mutation testing.*?(?=\n\n|\n## )", status_md, re.S).group(0)
-    examples = [
-        ("rule-data", "A rule, as data", site.snippet_panel("rule-p001", title="crates/tauten-check/rules.toml")),
-        ("schema", "The diagnostic schema", site.snippet_panel("diag-enforced", title="crates/tauten-check/src/diag.rs") + "<div style=\"height:16px\"></div>"
-            + site.snippet_panel("diag-struct", title="crates/tauten-check/src/diag.rs")
-            + "<div style=\"height:16px\"></div>"
-            + table(["JSON field", "Type", "Doc comment"], field_rows, label="Diagnostic fields",
-                    caption="The fields of <code>Diagnostic</code>, read from the struct above.")
-            + site.snippet_panel("diag-severity", title="crates/tauten-check/src/diag.rs")),
-        ("decisions", "Two design decisions", f'<ul class="prose">{dec_html}</ul><p class="small muted">From <code>docs/STATUS.md</code>, Design decisions.</p>'),
-    ]
-    _crate_page(site, "tauten-check", examples,
-                _does_not([inline_md(x) for x in prose["tauten-check"]["does_not"]]),
-                ["tauten-check", "rule-table"],
-                f'<p>{inline_md(" ".join(quality.lstrip("- ").split()))}</p>')
-
-    # tauten -------------------------------------------------------------------------
-    lib = d.core.blob("crates/tauten/src/lib.rs")
-    m = re.search(r"//! What this crate does \*\*not\*\* do: (.*?)\n\n", lib.replace("\n//!\n", "\n\n"), re.S)
-    sentence = " ".join(line.removeprefix("//!").strip() for line in m.group(1).splitlines())
-    api = [
-        ["<code>Authority::acquire() -&gt; Authority</code>", "Only edge crates may call this (TAU-A002). It cannot be cloned."],
-        ["<code>Authority::clock(&amp;self) -&gt; SystemClock</code>", "The system clock."],
-        ["<code>Authority::env(&amp;self) -&gt; Env</code>", "A snapshot of the process environment, taken now."],
-        ["<code>Authority::dir(&amp;self, path) -&gt; io::Result&lt;cap_std::fs::Dir&gt;</code>", "Feature <code>fs</code>. Everything below it, nothing above it."],
-        ["<code>trait Clock { fn now_ms(&amp;self) -&gt; u64; }</code>", "Milliseconds since the Unix epoch."],
-        ["<code>ManualClock::at(now_ms)</code>, <code>advance(ms)</code>", "A clock for tests."],
-        ["<code>Env::from_pairs(..)</code>, <code>Env::get(name)</code>", "Read-only environment variables; <code>from_pairs</code> builds one for tests."],
-    ]
-    examples = [
-        ("capabilities", "Capabilities", site.snippet_panel("cap-doc-example", title="crates/tauten/src/cap.rs (module docs, doc-tested)")
-            + "<div style=\"height:16px\"></div>"
-            + table(["API", "Doc comment, shortened"], api, label="tauten::cap API",
-                    caption=f'From {site.src("crates/tauten/src/cap.rs")} at <code>{site.short}</code>.')),
-        ("forged", "A forged Authority does not compile",
-            _pair_files(site, "crates/tauten/tests/ui/forged_authority.rs", "crates/tauten/tests/ui/forged_authority.stderr",
-                        "<code>Authority</code> has a private field, so outside the crate it can only come from <code>acquire()</code>.")),
-    ]
-    _crate_page(site, "tauten", examples,
-                _does_not([inline_md(sentence)], verbatim_from="Verbatim from the crate documentation, <code>crates/tauten/src/lib.rs</code>."),
-                ["tauten"])
-
-    # tauten-macros --------------------------------------------------------------------
-    ui = [
-        ("newtype_mixup", "Two IDs with the same representation are different types."),
-        ("refined_field_unreachable", "Even the defining module cannot build <code>Percent(200)</code>."),
-        ("refined_public_field", "A public field is rejected: it would let callers skip the check."),
-        ("refined_derive_default", "Derives that could construct a value without the check are rejected."),
-        ("refined_interior_mutability", "A <code>Cell</code> inside a refined type could change after the check, so it is rejected."),
-        ("refined_custom_clone", "A user-written <code>Clone</code> could break the predicate, so the inner type must be <code>Frozen</code>."),
-        ("contract_needs_result", "Contracts need a <code>Result</code> return type to return a violation."),
-        ("old_needs_copy", "<code>old(..)</code> snapshots only <code>Copy</code> values."),
-    ]
-    present = {p.rsplit("/", 1)[1].removesuffix(".rs") for p in d.core.ls("crates/tauten/tests/ui") if p.endswith(".rs")}
-    missing = present - {n for n, _ in ui} - {"forged_authority"}
-    if missing:
-        raise RuntimeError(f"compile-fail tests not shown on the site: {sorted(missing)}")
-    grid = "".join(_pair_files(site, f"crates/tauten/tests/ui/{n}.rs", f"crates/tauten/tests/ui/{n}.stderr", cap) for n, cap in ui)
-    examples = [
-        ("refined", "Refinements and newtypes",
-            site.snippet_panel("refined-percent", "newtype-userid", title="crates/tauten/tests/behaviour.rs")
-            + "<div style=\"height:16px\"></div>" + site.snippet_panel("refined-asserts", title="crates/tauten/tests/behaviour.rs (refinement_checks_at_construction)")),
-        ("contracts", "Contracts",
-            '<p>The error type must accept a <code>ContractViolation</code>, because a violation is returned, not raised.</p>'
-            + site.snippet_panel("contract-withdraw", title="crates/tauten/tests/behaviour.rs")
-            + "<div style=\"height:16px\"></div>" + site.snippet_panel("contract-asserts", title="crates/tauten/tests/behaviour.rs (preconditions_reject_before_the_body)")),
-        ("compile-fail", "What does not compile", grid),
-    ]
-    _crate_page(site, "tauten-macros", examples,
-                _does_not([inline_md(x) for x in prose["tauten-macros"]["does_not"]]), ["tauten-macros"])
