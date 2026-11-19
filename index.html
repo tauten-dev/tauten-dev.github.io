@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tauten: strict Rust for code written by agents</title>
-<meta name="description" content="A strictness profile for Rust written by AI agents: tiered rules, each with a stable ID, a repair hint and what enforces it. Pre-release.">
+<title>tauten: a discipline for Rust, with proofs over the shipped code</title>
+<meta name="description" content="A discipline for Rust: authority passed explicitly, effects visible in signatures, checked evidence, refinement types, and Lean proofs over the shipped code. Pre-release.">
 <link rel="canonical" href="https://tauten.dev/">
-<meta property="og:title" content="tauten: strict Rust for code written by agents">
+<meta property="og:title" content="tauten: a discipline for Rust, with proofs over the shipped code">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tauten.dev/">
-<meta property="og:description" content="A strictness profile for Rust written by AI agents: tiered rules, each with a stable ID, a repair hint and what enforces it. Pre-release.">
+<meta property="og:description" content="A discipline for Rust: authority passed explicitly, effects visible in signatures, checked evidence, refinement types, and Lean proofs over the shipped code. Pre-release.">
 <meta property="og:image" content="https://tauten.dev/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
+<meta property="og:image:alt" content="The tauten mark and the headline: A discipline for Rust, with proofs over the shipped code.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
@@ -25,35 +25,35 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap bar">
 <a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
-<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/crates/">Crates</a></li><li><a href="/rules/">Rules</a></li><li><a href="/agents/">Agents</a></li><li><a href="/benchmark/">Benchmark</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/discipline/">Discipline</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/">Rules</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://docs.rs/tauten/0.0.3/tauten/">API</a></li></ul></nav>
 <label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label>
 </div></header>
 <main id="main">
 
 <section class="hero"><div class="wrap home">
 <h1><img class="logo-light" src="/assets/tauten-icon.svg" width="52" height="52" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="52" height="52" alt="">tauten</h1>
-<p class="pitch">Strict Rust for code written by agents. The mistakes the compiler accepts (<code>unwrap</code> on input, unchecked arithmetic, stubs left behind, dropped errors, library code reading the clock) become checked rules, each with a stable ID and a repair hint.</p>
-<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>Version 0.0.3 is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>. No defect-reduction benefit established (<a href="/benchmark/">benchmark</a>).</span></p>
+<p class="pitch">A discipline for Rust: authority passed explicitly, effects visible in signatures, checked evidence, refinement types, and proofs over the shipped code (Aeneas → Lean), with bounded model checking (TLC) for protocols.</p>
+<p class="small muted">Written for code that agents write and maintain. Agents are the audience, not the claim.</p>
+<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>Version 0.0.3 is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>; the discipline APIs are in progress. No defect-reduction claim (<a href="/status/#benchmark">why</a>).</span></p>
 
 <h2>Use it</h2>
 <div class="copy-line"><span class="prompt" aria-hidden="true">$</span><code>cargo install --locked cargo-tauten</code><button class="copy-btn" type="button" hidden data-copy="cargo install --locked cargo-tauten" aria-label="Copy command: cargo install --locked cargo-tauten">Copy</button></div><p class="small muted">Needs Rust 1.98 or newer, with clippy.</p>
-<pre class="cmds"><code><span class="muted"># propose a tier for each crate</span>
-<span class="prompt">$</span> cargo tauten init --write
-<span class="prompt">$</span> cargo tauten check
-<span class="muted"># one diagnostic per line, for agents</span>
-<span class="prompt">$</span> cargo tauten check --format json</code></pre>
-<div class="panel diag"><div class="panel-head"><span class="path">$ cargo tauten check</span><span class="meta"><span class="chip prov">Captured</span></span></div><pre class="diag-body" tabindex="0" aria-label="cargo tauten check output for the rej-unwrap fixture"><code><span class="line" style="padding-left:17ch;text-indent:-17ch"><span class="d-err">error</span>[<a href="/rules/tau-p001/">TAU-P001</a>]: used `unwrap()` on a `Result` value</span><span class="line" style="padding-left:6ch;text-indent:-6ch">  <span class="d-mut">--&gt;</span> rej-unwrap/src/lib.rs:6:5 (core crate `rej-unwrap`)</span><span class="line" style="padding-left:10ch;text-indent:-10ch">  <span class="d-mut">=</span> <span class="d-lab">rule:</span> No unwrap/expect on fallible values (enforced by Clippy)</span><span class="line" style="padding-left:9ch;text-indent:-9ch">  <span class="d-mut">=</span> <span class="d-lab">fix:</span> Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose.</span></code></pre></div>
-<p class="small muted">Captured from the <code>rej-unwrap</code> fixture in the tauten repository at <code>d3bdea7</code>.</p>
+<pre class="cmds"><code><span class="prompt">$</span> cargo tauten check                  <span class="muted"># every edit</span>
+<span class="prompt">$</span> cargo tauten ship                   <span class="muted"># end of feature (planned 0.1)</span>
+<span class="prompt">$</span> cargo tauten verify --level full    <span class="muted"># nightly (planned 0.1)</span>
+<span class="prompt">$</span> cargo tauten verify --level release <span class="muted"># on a tag (planned 0.1)</span></code></pre>
+<div class="panel diag"><div class="panel-head"><span class="path">$ cargo tauten check</span><span class="meta"><span class="chip prov">Captured</span></span></div><pre class="diag-body" tabindex="0" aria-label="cargo tauten check output for the rej-ambient-clock fixture"><code><span class="line" style="padding-left:17ch;text-indent:-17ch"><span class="d-err">error</span>[<a href="/rules/tau-a001/">TAU-A001</a>]: use of a disallowed method `std::time::SystemTime::now`</span><span class="line" style="padding-left:6ch;text-indent:-6ch">  <span class="d-mut">--&gt;</span> rej-ambient-clock/src/lib.rs:6:5 (core crate `rej-ambient-clock`)</span><span class="line" style="padding-left:10ch;text-indent:-10ch">  <span class="d-mut">=</span> <span class="d-lab">rule:</span> No ambient authority (enforced by Clippy)</span><span class="line" style="padding-left:9ch;text-indent:-9ch">  <span class="d-mut">=</span> <span class="d-lab">fix:</span> Take a capability parameter (for example a `&amp;cap_std::fs::Dir` from `Authority::dir`, `&amp;dyn tauten::cap::Clock`, or `&amp;tauten::cap::Env`) and let an edge crate construct it.</span></code></pre></div>
+<p class="small muted">Captured from the <code>rej-ambient-clock</code> fixture in the tauten repository at <code>8fb6ade</code>: a core crate read the clock instead of taking it as a parameter.</p>
 
-<h2>What it is</h2>
-<p>Each crate declares a tier; the less it may touch, the stricter its rules. Dependencies point inward only.</p>
-<ul class="tier-list"><li><span class="chip chip-tier k">kernel</span> <span>Pure, <code>no_std</code>, deterministic decisions; eligible for proofs</span></li><li><span class="chip chip-tier c">core</span> <span>Library code; effects arrive as parameters</span></li><li><span class="chip chip-tier e">edge</span> <span>Startup and IO; the only tier that may create authority</span></li></ul>
+<h2>Four ideas</h2>
+<ul class="home-links"><li><a href="/discipline/#capabilities">Authority passed explicitly</a> <span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="badge b-progress">In progress</span> <span class="muted">Core code takes the clock, the environment or a directory as a parameter; only the edge creates them.</span></li><li><a href="/discipline/#effects">Effects visible in signatures</a> <span class="badge b-progress">In progress</span> <span class="badge b-planned">Planned</span> <span class="muted">Capability parameters, <code>Result</code> and <code>async</code> are a function's effect row; <code>#[effects(..)]</code> states it and a check compares the two.</span></li><li><a href="/discipline/#evidence">Checked evidence</a> <span class="badge b-progress">In progress</span> <span class="muted">A check returns evidence that borrows what it checked, so changing the state before acting on it does not compile.</span></li><li><a href="/discipline/#refinements">Refinement types</a> <span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="badge b-planned">Planned</span> <span class="muted">A value with a rule is a type that can only be built through its check; in kernel crates that check is proved.</span></li></ul>
+<p><a href="/proofs/"><strong>Proofs over the shipped code, on a cadence.</strong></a> <span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="badge b-planned">Planned (0.1)</span> <span class="badge b-planned">Planned</span> <span class="muted">Kernel crates are translated to Lean with Charon and Aeneas; theorems about that translation are axiom-audited and calibrated with mutants.</span></p>
 
 <h2>More</h2>
-<ul class="home-links"><li><a href="/status/">Status</a> <span class="muted">all 37 rules; open one for an example and the diagnostic it prints</span></li><li><a href="/rules/">Rules</a> <span class="muted">the reference table, with filters</span></li><li><a href="/proofs/">Proofs</a> <span class="muted">Lean proofs over tauten's own decision code</span></li><li><a href="/benchmark/">Benchmark</a> <span class="muted">the dev-split pilot and the preregistered design</span></li><li><a href="/start/">Docs</a> <span class="muted">getting started, tiers, the baseline ratchet</span></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a> <span class="muted">tauten-dev/tauten</span></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a> <span class="muted">cargo-tauten and the support crates</span></li></ul>
+<ul class="home-links"><li><a href="/discipline/">Discipline</a> <span class="muted">each idea with a before/after, what enforces it, and the honest gap</span></li><li><a href="/proofs/">Proofs</a> <span class="muted">Lean theorems over the shipped Rust; what is proved and what is trusted</span></li><li><a href="/start/">Start</a> <span class="muted">install, tiers, check, adopt gradually, the agent profile</span></li><li><a href="/rules/">Rules</a> <span class="muted">all 37 rules, each with a stable ID</span></li><li><a href="/status/">Status</a> <span class="muted">what has been exercised, what is planned, and the benchmark</span></li><li><a href="https://docs.rs/tauten/0.0.3/tauten/">docs.rs</a> <span class="muted">the <code>tauten</code> library API, 0.0.3</span></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a> <span class="muted">cargo-tauten and the support crates</span></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a> <span class="muted">tauten-dev/tauten</span></li></ul>
 </div></section>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>d3bdea7</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.0.3/tauten/">docs.rs</a></li><li><a href="/discipline/">Discipline</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>8fb6ade</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
 <script src="/assets/copy.js?v=c5343030" defer></script>
 </body>
 </html>
