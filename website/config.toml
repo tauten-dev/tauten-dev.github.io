@@ -17,7 +17,7 @@ site_repository = "tauten-dev/tauten-dev.github.io"
 # from the first release, and there are no crates.io or docs.rs links.
 published = true
 first_release = "0.0.1"
-latest_release = "0.0.2"
+latest_release = "0.0.3"
 
 # Source switch: tauten-dev/tauten is public. While false, paths into
 # the core repository are shown as plain text, with no github.com links, and
