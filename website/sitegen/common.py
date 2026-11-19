@@ -25,7 +25,7 @@ def status_line(site: Site) -> str:
     """The one honest status sentence the home and status pages share."""
     registry = (f'Version {site.config["latest_release"]} is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>.'
                 if site.published else "Not on crates.io yet.")
-    return (f'{registry} Development pilot completed; held-out benefit not established '
+    return (f'{registry} No defect-reduction benefit established '
             f'(<a href="/benchmark/">benchmark</a>).')
 
 

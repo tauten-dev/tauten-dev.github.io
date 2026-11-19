@@ -1,4 +1,4 @@
-# core: bbb20ebc7f1fb587fccd6b580aa3a2c23d6d95fb
+# core: d3bdea7ec5ddfb04db7f27c3af30e26c123a79d8
 # cmd: cargo tauten explain TAU-E002
 # cwd: .
 # exit: 0

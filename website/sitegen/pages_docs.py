@@ -120,7 +120,7 @@ def agents(site: Site) -> None:
     bench = d.core.blob("bench/README.md")
     body = f"""<div class="wrap page-head"><p class="eyebrow">Agent profile</p><h1>The agent profile</h1>
 <p class="lede">This is the text an adopting project gives its agent. <code>cargo tauten init --write</code> writes it to <code>AGENTS.tauten.md</code>; point your <code>AGENTS.md</code> or <code>CLAUDE.md</code> at it.</p>
-<p><span class="tag">Designed</span>Whether it changes agent behaviour: development pilot completed; held-out benefit not established (<a href="/benchmark/">benchmark</a>).</p></div>
+<p><span class="tag">Designed</span>Whether it changes agent behaviour: no defect-reduction benefit established (<a href="/benchmark/">benchmark</a>).</p></div>
 <div class="wrap">
 <div class="actions"><button class="copy-btn" type="button" hidden data-src="/agents/AGENTS.tauten.md">Copy as Markdown</button><a href="/agents/AGENTS.tauten.md">Raw file</a></div>
 {_repro(site, "crates/tauten-check/agents.md")}
@@ -146,10 +146,12 @@ def benchmark(site: Site) -> None:
         raise BuildError("bench/README.md no longer carries the benchmark status line the site quotes")
     question = re.search(r"^\*\*Question\.\*\*.*?(?=\n\n)", bench, re.M | re.S).group(0)
     harness = site.status_map["bench-harness"]
-    limits = _bullet(md.section(status, "Known gaps"), "The benchmark's dev split")
+    gaps = md.section(status, "Known gaps")
+    limits = _bullet(gaps, "The benchmark hits a ceiling")
+    validity = _bullet(gaps, "Finding validity")
     body = f"""<div class="wrap page-head"><p class="eyebrow">Benchmark</p><h1>Does the profile reduce escaped defects?</h1></div>
 <div class="wrap">
-<div class="banner-pending" role="note"><p><span class="badge b-pending">Pilot</span> <strong>{banner}</strong> The dev tasks hit a ceiling: no defect escaped in any arm, so the primary outcome cannot separate the arms. In the secondary outcome, half the plain-Rust trials left unchecked arithmetic in core code, and none of the enforced ones did. Harder held-out tasks are being written.</p></div>
+<div class="banner-pending" role="note"><p><span class="badge b-pending">No benefit shown</span> <strong>No defect-reduction benefit established.</strong> Agents without the profile almost never shipped a defect the hidden tests catch (2 of 200 calibration trials), so the held-out run was stopped by its preregistered go/no-go rule. An audit of 120 findings the profile raised in that code confirmed none as a reachable defect. The profile does change the code (in the pilot, half the plain-Rust trials left unchecked arithmetic in core code and none of the enforced ones did); on these tasks, that code was not wrong.</p></div>
 <div class="prose">{_md(site, question, "bench/README.md")}</div>
 {_repro(site, "bench/README.md")}
 <h2 id="arms">Arms</h2>
@@ -167,15 +169,16 @@ def benchmark(site: Site) -> None:
 {_repro(site, "bench/PREREGISTRATION.md")}
 <div class="prose">{_md(site, prereg.split("\n", 1)[1], "bench/PREREGISTRATION.md", table_label="Preregistered design", shift=1)}</div>
 </section>
-<h2 id="limits" style="margin-top:48px">Limits</h2>
+<h2 id="limits" style="margin-top:48px">Calibration and finding validity</h2>
 <p class="prose">{inline_md(limits)}</p>
+<p class="prose">{inline_md(validity)}</p>
 <p class="small muted">From <code>docs/STATUS.md</code>, Known gaps.</p>
 <h2 id="kill">Kill criteria</h2>
 <p class="prose">Publishing the conditions under which the project stops is part of the plan.</p>
 {_repro(site, "docs/PLAN.md")}
 <div class="prose">{_md(site, md.section(plan, "9. Kill criteria"), "docs/PLAN.md")}</div>
 </div>"""
-    site.add("/benchmark/", "Benchmark", "The tauten benchmark: arms, measurements, the dev-split pilot, harness validation and preregistration. No held-out result yet.", body)
+    site.add("/benchmark/", "Benchmark", "The tauten benchmark: arms, measurements, the dev-split pilot, calibration, the finding-validity audit and preregistration. No defect-reduction benefit established.", body)
 
 
 # -------------------------------------------------------------------- proofs ---
@@ -349,7 +352,7 @@ def status(site: Site) -> None:
     never = len(site.no_exception_rules)
     groups.append(f'<li><span class="count">{never} rules admit no exception;</span> in kernel crates, none do (<a href="/rules/tau-x004/">TAU-X004</a>).</li>')
     gaps = "".join(f"<li>{g}</li>" for g in NOT_ENFORCED)
-    gaps += "<li><strong>Development pilot completed; held-out benefit not established.</strong></li>"
+    gaps += "<li><strong>No defect-reduction benefit established.</strong></li>"
 
     body = f"""<div class="wrap page-head"><p class="eyebrow">Status</p><h1>Status</h1>
 <p class="lede">What tauten checks, what each check prints, and how far each part has got.</p>
