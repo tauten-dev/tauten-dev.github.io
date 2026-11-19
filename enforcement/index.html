@@ -32,7 +32,7 @@
 <div class="wrap page-head"><p class="eyebrow">Enforcement</p><h1>What is enforced, and what is not</h1>
 <p class="lede">Every mechanism, what enforces it, how far it has got, and the honest gap. The table is the core repository's, reproduced unedited.</p></div>
 <div class="wrap">
-<p class="small muted">Reproduced from <code>docs/MAPPING.md</code> at <code>7118634</code>. Strength codes are explained in its first paragraphs.</p>
+<p class="small muted">Reproduced from <code>docs/MAPPING.md</code> at <code>d840118</code>. Strength codes are explained in its first paragraphs.</p>
 <div class="prose wide"><h2 id="sovel-idea-rust-mechanism">Sovel idea → Rust mechanism</h2>
 <p>This is the enforcement table the website will reproduce unedited. "Status"
 says what exists in this repository today; "Strength" says what does the
@@ -106,7 +106,7 @@ only by a visible, reasoned <code>#[expect]</code>, and not at all where marked
 <td><code>Result</code> + error enums; <code>Result&lt;_, ()&gt;</code> and type-erased errors banned outside edge (TAU-E002); silent drops (TAU-E001) and unexplained discards (TAU-E003) rejected</td>
 <td>C + L</td>
 <td>Exercised</td>
-<td>Banned-type list is finite.</td>
+<td>Banned-type list is finite. E002 (clippy <code>result_unit_err</code>) sees only public functions. E001's <code>map_err_ignore</code> also fires where the discarded <code>Err</code> is not an error (<code>binary_search</code>, <code>fetch_update</code>, <code>PoisonError</code>, <code>join</code>); excuse those with a reasoned <code>#[expect]</code> (writfold pilot).</td>
 </tr>
 <tr>
 <td>No panic</td>
@@ -187,7 +187,7 @@ only by a visible, reasoned <code>#[expect]</code>, and not at all where marked
 </tr>
 <tr>
 <td>Visible exceptions</td>
-<td><code>#[allow]</code> banned in favour of <code>#[expect(.., reason)]</code> (X001); no crate-wide opt-outs (X002); loosening <code>[lints]</code> reported (X003); no exceptions in kernel or for no-exception rules (X004)</td>
+<td><code>#[allow]</code> banned in favour of <code>#[expect(.., reason)]</code> (X001; file-level <code>#![allow]</code> included by a tauten check, since clippy skips inner attributes); no crate-wide opt-outs (X002); loosening <code>[lints]</code> reported (X003); no exceptions in kernel or for no-exception rules (X004)</td>
 <td>L</td>
 <td>Exercised</td>
 <td>An agent with write access can still add a reasoned <code>#[expect]</code> (visible in review; ratchet planned).</td>
@@ -237,19 +237,23 @@ only by a visible, reasoned <code>#[expect]</code>, and not at all where marked
 </tbody>
 </table></div></div>
 <h2 id="known-gaps">Known gaps</h2>
-<p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>7118634</code>.</p>
+<p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>d840118</code>.</p>
 <div class="prose"><ul>
 <li>The capability rule is discipline, not confinement (see MAPPING.md).</li>
 <li>The kernel's arithmetic and indexing rules duplicate what an Aeneas proof
-  already establishes. The proof tier should subsume them; see the dry-run
-  report.</li>
+  already establishes (dry-run report). P5 subsumes them only for functions
+  with a recorded, current, total proof; writfold has not adopted the
+  claims format yet, so its 231 findings are unchanged until it does.</li>
 <li>S002 (placeholder comments) is a heuristic.</li>
-<li>The benchmark has 4 dev tasks on one host. The plan needs about 24 across
-  3 hosts, with ≥ 16 held out. The dev-split pilot hit a ceiling, so harder held-out tasks are needed.</li>
+<li>The benchmark's dev split (4 tasks, one host) hit a ceiling in the pilot.
+  A held-out suite (20 tasks, 3 hosts, per-trial containers) is built on the
+  local branch <code>bench-heldout</code> and kept unpublished until it has run; running
+  it needs the owner's budget approval.</li>
 <li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no
   Kani (<code>cfg(kani)</code>) lowering yet.</li>
-<li><strong>No measurement of agent behaviour yet. Nothing here supports a claim that
-  agents make fewer mistakes.</strong></li>
+<li><strong>Only a dev-split pilot has measured agent behaviour, and it could not
+  separate the arms. Nothing here supports a claim that agents make fewer
+  mistakes.</strong></li>
 </ul></div>
 <h2 id="dropped">Dropped as not portable to Rust</h2>
 <div class="prose"><p>Dropped as not portable to Rust: regions and arena brands, effect
@@ -257,7 +261,7 @@ polymorphism, hidden-authority capture tracking in closures, staged macros,
 cleanup effects.</p></div>
 </div>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>7118634</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>d840118</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
 <script src="/assets/copy.js?v=f9a13847" defer></script>
 </body>
 </html>

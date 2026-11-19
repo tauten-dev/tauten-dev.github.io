@@ -31,7 +31,7 @@
 <main id="main">
 <div class="wrap page-head"><p class="eyebrow">Status</p><h1>Status</h1>
 <p class="lede">How far each item has got, as the core repository records it.</p><ul class="small"><li><span class="badge b-specified"><span class="g" aria-hidden="true">○</span>Specified</span> written down only.</li><li><span class="badge b-implemented"><span class="g" aria-hidden="true">◐</span>Implemented</span> code exists.</li><li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> ran against real input in the repository; the evidence is named.</li></ul></div>
-<div class="wrap"><p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>7118634</code>.</p><div class="prose wide"><h2 id="status">Status</h2>
+<div class="wrap"><p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>d840118</code>.</p><div class="prose wide"><h2 id="status">Status</h2>
 <p>Updated 2026-11-18 (evening). Name final: tauten; license MIT; code at github.com/tauten-dev/tauten (private until first release). Every line says how far an item got:
 <strong>specified → implemented → exercised</strong>. "Exercised" means it ran against
 real input in this repository, and the evidence is named. Nothing is
@@ -57,7 +57,7 @@ published. One pilot on the dev split has been run with a real agent; nothing he
 <td>M0</td>
 <td>Fixtures ported from Sovel examples</td>
 <td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>fixtures/cases</code>: 27 reject + 3 accept crates, exact expected IDs, one tier per crate (<code>tests/fixtures.rs</code>)</td>
+<td><code>fixtures/cases</code>: 28 reject + 3 accept crates, exact expected IDs, one tier per crate (<code>tests/fixtures.rs</code>)</td>
 </tr>
 <tr>
 <td>M0b</td>
@@ -93,7 +93,7 @@ published. One pilot on the dev split has been run with a real agent; nothing he
 <td>M2</td>
 <td><code>tauten-macros</code>: <code>#[newtype]</code>, <code>#[refined]</code>, <code>#[requires]</code>, <code>#[ensures]</code> with <code>old()</code></td>
 <td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>crates/tauten/tests/behaviour.rs</code> (runtime), 6 trybuild compile-fail tests</td>
+<td><code>crates/tauten/tests/behaviour.rs</code> (runtime), 6 trybuild compile-fail tests; generated code proved in Lean for listed instances (P3)</td>
 </tr>
 <tr>
 <td>P0</td>
@@ -108,10 +108,34 @@ published. One pilot on the dev split has been run with a real agent; nothing he
 <td><code>docs/proofs/README.md</code>; <code>proofs.yml</code> green on main 2026-11-18 (gate 2 min, job 7 min incl. image pull). Every claim is broken by at least one mutant</td>
 </tr>
 <tr>
+<td>P2</td>
+<td>Baseline ratchet in <code>tauten-check-kernel</code> (<code>apply</code>, <code>stale</code>, <code>count_errors</code>, <code>increases</code>); <code>tauten-check</code> interns keys and calls it; 14 more Lean claims (R-conserve, R-cover, R-stale, R-exact, R-headroom, R-shrink, 2 non-vacuity examples); 8 more mutants; differential test against the old <code>BTreeMap</code> ratchet</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
+<td><code>docs/proofs/README.md</code>; local proof gate passed (27 claims, 17 mutants); interning is trusted and covered by the differential test; <code>proofs.yml</code> green on main 2026-11-18 (gate 206 s)</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>Proofs over what the macros generate, for listed instances: <code>crates/tauten-proof-instances</code> (unpublished; 4 <code>#[refined]</code> types, a <code>#[newtype]</code> control, 4 contract functions incl. <code>&amp;mut</code> and <code>old</code>); a schematic shape per macro; per instance a shape theorem plus Plyward F01 targets 1, 2, 3, 5 and the contract claims; constructor audit; 60 more Lean claims (87 in all); 10 macro-source mutants</td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
+<td><code>docs/proofs/README.md</code> (P3 section); local proof gate passed (87 claims, 27 mutants). Wording: "proved for listed instances"; the macros themselves are not verified. <code>proofs.yml</code> green on main 2026-11-19 (gate 408 s)</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>Rule-table well-formedness in <code>tauten-check-kernel</code> (<code>table::validate</code>: unique IDs, unique lint owner, API bans name existing rules, every emitted ID present); <code>Profile::parse</code> interns names and calls it; <code>validate_ok_iff</code> + non-vacuity examples (2 claims, 89 in all); 5 mutants (32 in all); differential test against the old checks; reject fixture <code>fixtures/profiles/rej-missing-r001.toml</code></td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local only; branch `proofs-p45`)</span></td>
+<td><code>docs/proofs/README.md</code> (P4 section); local proof gate passed (89 claims, 32 mutants, 339 s warm). Error order is not a theorem; the differential test compares error texts on 3,000 random tables</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>Proof tier for users (M3): <code>proofs/claims.toml</code>; <code>cargo tauten proofs</code> (JSON outcome per claim: proved, drift, build-failed, audit-failed, mutant-survived, tool-missing; records <code>proofs/claims.json</code> with a source fingerprint); template <code>crates/cargo-tauten/templates/proofs</code> + <code>cargo tauten init --proofs</code>; N001/P003 findings in kernel functions with a fresh, total, proved claim reported as subsumed (kernel <code>subsume::subsumes</code>, 4 claims, 4 mutants); <code>proofs/TRUST.md</code>; badge data <code>proofs/claims.json</code></td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local only; branch `proofs-p45`)</span></td>
+<td>Worked example <code>bench/hosts/ledger</code> (<code>apply_spec</code>, 2 mutants, <code>proved</code>, gate 53 s cold); fixture <code>fixtures/proofs-subsume</code> with a recorded gate run and <code>tests/proofs.rs</code> (fresh/stale/non-total/unclaimed, tool-missing without the toolchain); tauten's own gate via <code>cargo tauten proofs</code>: 20 of 20 claims <code>proved</code> (93 audited claims, 36 mutants, 409 s cold). CI does not run <code>cargo tauten proofs</code> yet; the site does not read <code>claims.json</code> yet</td>
+</tr>
+<tr>
 <td>M3</td>
 <td>Proof tier for users (Aeneas/Lean template from writfold)</td>
-<td><span class="badge b-planned">Not started</span></td>
-<td></td>
+<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local)</span></td>
+<td>see P5</td>
 </tr>
 <tr>
 <td>M4</td>
@@ -189,18 +213,22 @@ published. One pilot on the dev split has been run with a real agent; nothing he
 <ul>
 <li>The capability rule is discipline, not confinement (see MAPPING.md).</li>
 <li>The kernel's arithmetic and indexing rules duplicate what an Aeneas proof
-  already establishes. The proof tier should subsume them; see the dry-run
-  report.</li>
+  already establishes (dry-run report). P5 subsumes them only for functions
+  with a recorded, current, total proof; writfold has not adopted the
+  claims format yet, so its 231 findings are unchanged until it does.</li>
 <li>S002 (placeholder comments) is a heuristic.</li>
-<li>The benchmark has 4 dev tasks on one host. The plan needs about 24 across
-  3 hosts, with ≥ 16 held out. The dev-split pilot hit a ceiling, so harder held-out tasks are needed.</li>
+<li>The benchmark's dev split (4 tasks, one host) hit a ceiling in the pilot.
+  A held-out suite (20 tasks, 3 hosts, per-trial containers) is built on the
+  local branch <code>bench-heldout</code> and kept unpublished until it has run; running
+  it needs the owner's budget approval.</li>
 <li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no
   Kani (<code>cfg(kani)</code>) lowering yet.</li>
-<li><strong>No measurement of agent behaviour yet. Nothing here supports a claim that
-  agents make fewer mistakes.</strong></li>
+<li><strong>Only a dev-split pilot has measured agent behaviour, and it could not
+  separate the arms. Nothing here supports a claim that agents make fewer
+  mistakes.</strong></li>
 </ul></div></div>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>7118634</code>, 2026-11-18</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>d840118</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
 <script src="/assets/copy.js?v=f9a13847" defer></script>
 </body>
 </html>
