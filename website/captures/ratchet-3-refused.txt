@@ -1,4 +1,4 @@
-# core: 711863485dc4e03c2481788048ec6b1508c68354
+# core: d8401185bd1c2adc4b0f50922e767ea5f3dc96a7
 # cmd: cargo tauten baseline --output tauten-baseline.json
 # cwd: website/scratch/ratchet
 # exit: 2

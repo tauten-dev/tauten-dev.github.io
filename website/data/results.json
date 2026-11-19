@@ -11,7 +11,7 @@
       "tasks": 4,
       "trials_per_task_arm": 3,
       "core_commit": "c4de73b",
-      "raw_url": "https://github.com/tauten-dev/tauten/tree/711863485dc4e03c2481788048ec6b1508c68354/bench/reports/2026-11-18-pilot",
+      "raw_url": "https://github.com/tauten-dev/tauten/tree/d8401185bd1c2adc4b0f50922e767ea5f3dc96a7/bench/reports/2026-11-18-pilot",
       "arms": {
         "A": {"n": 12, "escaped_defect": 0.0, "panic": 0.0, "visible_ok": 1.0, "tamper": 0.0, "stubs": 0.0, "tauten_errors": 0.5, "seconds": 40.79},
         "B": {"n": 12, "escaped_defect": 0.0, "panic": 0.0, "visible_ok": 1.0, "tamper": 0.0, "stubs": 0.0, "tauten_errors": 0.42, "seconds": 46.16},

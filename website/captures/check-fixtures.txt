@@ -1,4 +1,4 @@
-# core: 711863485dc4e03c2481788048ec6b1508c68354
+# core: d8401185bd1c2adc4b0f50922e767ea5f3dc96a7
 # cmd: cargo tauten check
 # cwd: fixtures/cases
 # exit: 1
@@ -52,6 +52,11 @@ error[TAU-C001]: use of a disallowed method `std::thread::spawn`
   --> rej-detached-thread/src/lib.rs:5:10 (core crate `rej-detached-thread`)
   = rule: Structured concurrency only (enforced by Clippy)
   = fix: Use `std::thread::scope`, or `tokio::task::JoinSet` owned by the caller and awaited before returning.
+
+error[TAU-X001]: file-level `#![allow(clippy::needless_return)]`: use `#![expect(clippy::needless_return, reason = "...")]`, or narrow it to the item that needs it
+  --> rej-file-allow/src/lib.rs:3:1 (kernel crate `rej-file-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (enforced by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
 
 error[TAU-A002]: `Authority::acquire` in core crate `rej-forged-capability`
   --> rej-forged-capability/src/lib.rs:17:16 (core crate `rej-forged-capability`)
@@ -182,4 +187,4 @@ warnings (run with --warnings to list them):
        3  TAU-D001  Documented public API
        1  TAU-S002  Suspicious placeholder comments
        1  clippy::match_like_matches_macro  
-tauten: 35 error(s), 5 warning(s)
+tauten: 36 error(s), 5 warning(s)

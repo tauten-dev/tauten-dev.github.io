@@ -139,7 +139,7 @@ def build(site: Site) -> None:
     never = len(site.no_exception_rules)
     groups.append(f'<li><span class="count">{never} rules admit no exception;</span> in kernel crates, none do (<a href="/rules/tau-x004/">TAU-X004</a>).</li>')
     gaps = "".join(f"<li>{g}</li>" for g in NOT_ENFORCED)
-    gaps += "<li><strong>No measurement of agent behaviour yet. Nothing here supports a claim that agents make fewer mistakes.</strong></li>"
+    gaps += "<li><strong>Only a dev-split pilot has measured agent behaviour, and it could not separate the arms. Nothing here supports a claim that agents make fewer mistakes.</strong></li>"
     ledger = f"""
 <section class="section"><div class="wrap">
 <p class="eyebrow">04 / Enforced, and not</p>

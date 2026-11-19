@@ -131,7 +131,7 @@ def benchmark(site: Site) -> None:
         raise BuildError("bench/README.md no longer carries the benchmark status line the site quotes")
     question = re.search(r"^\*\*Question\.\*\*.*?(?=\n\n)", bench, re.M | re.S).group(0)
     harness = site.status_map["bench-harness"]
-    limits = _bullet(md.section(status, "Known gaps"), "The benchmark has")
+    limits = _bullet(md.section(status, "Known gaps"), "The benchmark's dev split")
     body = f"""<div class="wrap page-head"><p class="eyebrow">Benchmark</p><h1>Does the profile reduce escaped defects?</h1></div>
 <div class="wrap">
 <div class="banner-pending" role="note"><p><span class="badge b-pending">Pilot</span> <strong>{banner}</strong> The dev tasks hit a ceiling: no defect escaped in any arm, so the primary outcome cannot separate the arms. In the secondary outcome, half the plain-Rust trials left unchecked arithmetic in core code, and none of the enforced ones did. Harder held-out tasks are being written.</p></div>
@@ -166,50 +166,60 @@ def benchmark(site: Site) -> None:
 # -------------------------------------------------------------------- proofs ---
 
 def proofs(site: Site) -> None:
+    import json
+    from .render import table
     d = site.data
-    plan = d.core.blob("docs/PLAN.md")
-    sec = md.section(plan, "4. Proof tier")
-    first = sec.split("\n\n")[0]
-    if "Charon/Aeneas" not in first or "P2" not in first:
-        raise BuildError("PLAN.md §4 changed shape")
+    claims = json.loads(d.core.blob("proofs/claims.json"))["claims"]
     status = d.core.blob("docs/STATUS.md")
     caveat = _bullet(md.section(status, "Known gaps"), "The kernel's arithmetic")
-    kill = _bullet(md.section(plan, "9. Kill criteria"), "Proof tier can't be templated")
-    kernel = next(f for f in d.fixtures if f.name == "acc-kernel")
+    gh = f"https://github.com/{site.config['repository']}/blob/{d.core.ref}"
+    proved = [c for c in claims if c["outcome"] == "proved"]
+    if not proved:
+        raise BuildError("proofs/claims.json lists no proved claim")
+
+    def rows(group):
+        out = []
+        for c in group:
+            theorems = "<br>".join(f"<code>{esc(t.split('.')[-1])}</code>" for t in c["theorems"])
+            src = f'<a href="{gh}/{esc(c["file"])}"><code>{esc(c["crate"])}::{esc(c["function"])}</code></a>'
+            out.append([src, theorems, str(len(c["mutants"])), badge("exercised", "Proved")])
+        return out
+
+    own = [c for c in proved if c["crate"] != "tauten-proof-instances"]
+    inst = [c for c in proved if c["crate"] == "tauten-proof-instances"]
+    headers = ["Function", "Theorems", "Mutants killed", "Outcome"]
+    own_tbl = table(headers, rows(own), label="Proved claims about tauten's own decisions",
+                    caption=f"From <code>proofs/claims.json</code> at <code>{d.core.short}</code>.")
+    inst_tbl = table(headers, rows(inst), label="Proved claims about macro output",
+                     caption="Proved for these listed instances only.") if inst else ""
     flow = [
-        ("1 · extract", "Extract the kernel crate with Charon/Aeneas."),
-        ("2 · drift", "Check the extraction against the committed <code>proofs/Extracted/</code>."),
-        ("3 · build", "<code>lake build</code> the Lean proofs."),
-        ("4 · audit", "<code>Audit.lean</code>: an axiom allowlist and the required claims."),
-        ("5 · mutants", "Each mutant must break exactly its named theorem."),
+        ("1 · extract", "Charon and Aeneas translate the kernel crate to Lean."),
+        ("2 · drift", "The extraction must match the committed <code>proofs/Extracted/</code>."),
+        ("3 · build", "<code>lake build</code> checks every proof."),
+        ("4 · audit", "<code>Audit.lean</code>: axioms only <code>propext</code>, <code>Classical.choice</code>, <code>Quot.sound</code>; every extracted function covered by a claim."),
+        ("5 · mutants", "Each deliberately broken copy of the Rust must fail its named theorems."),
     ]
     steps = "".join(f"<li><b>{a}</b>{b}</li>" for a, b in flow)
-    rungs = [["P0", "Property tests and cargo-mutants", "tested"], ["P1", "Kani harnesses from contracts", "bounded model-checked"],
-             ["P2", "Aeneas extraction to Lean", "proved over the shipped Rust"]]
-    from .render import table
-    body = f"""<div class="wrap page-head"><p class="eyebrow">Proof tier</p><h1>The proof tier</h1>
-<p>{status_badge(site.status_map["proof-tier"])} <span class="qual">planned for M3</span></p></div>
+    body = f"""<div class="wrap page-head"><p class="eyebrow">Proof tier</p><h1>Proofs over the shipped Rust</h1>
+<p>{status_badge(site.status_map["proof-tier"])}</p></div>
 <div class="wrap prose-wrap">
-<div class="banner-pending" role="note"><p>Nothing on this page exists yet. Every sentence describes a plan.</p></div>
-<h2 id="pipeline">The planned pipeline</h2>
-<p class="prose">For crates declared <code>kernel</code>, a gate would run five steps. None of them is built.</p>
-<ol class="flow" aria-label="Planned proof pipeline">{steps}</ol>
-{_repro(site, "docs/PLAN.md")}
-<div class="prose">{_md(site, first, "docs/PLAN.md")}</div>
-<h2 id="rungs">Three rungs</h2>
-{table(["Rung", "Method", "What it would let the site say"], rungs, label="Proof rungs", caption="From <code>docs/PLAN.md</code> §4. None is in place.")}
-<h2 id="writfold">Modelled on writfold</h2>
-<p class="prose">The gate would generalise the one <a href="https://writfold.dev">writfold</a> uses for its own kernel. Those are writfold's proofs, not tauten's.</p>
-<h2 id="why-kernel">Why the kernel tier exists</h2>
-<p class="prose">A kernel crate is <code>no_std</code>, has no floats, no <code>HashMap</code>, no shared mutability and no lint exceptions. That is the shape of code the proof tier is meant for:</p>
-{site.fixture_panel(kernel, title="acc-kernel/src/lib.rs")}
+<p class="prose">The code that decides whether your build passes (tier rules, severity, exceptions, the baseline ratchet and rule-table validation) lives in a small <code>no_std</code> crate, <code>tauten-check-kernel</code>. Charon and Aeneas translate that exact crate to Lean, and the theorems below are proved about the translation. A CI workflow re-runs the whole gate whenever the kernel, the macros or the proofs change.</p>
+<h2 id="pipeline">The gate</h2>
+<ol class="flow" aria-label="Proof gate">{steps}</ol>
+<h2 id="own">Proved: tauten's own decisions</h2>
+{own_tbl}
+<h2 id="macros">Proved for listed instances: macro output</h2>
+<p class="prose">These theorems are about the code that <code>#[refined]</code>, <code>#[requires]</code> and <code>#[ensures]</code> generate for the example types and functions in <code>crates/tauten-proof-instances</code>, plus lemmas about the general shape of that code. The macros themselves are not verified: a different predicate or body is a different instance.</p>
+{inst_tbl}
+<h2 id="not">Not proved</h2>
+<p class="prose">Source scanning, the mapping from compiler diagnostics to rule IDs, the rustc wrapper, workspace loading and the CLI are tested, not proved. So is the authority check (TAU-A002): a proof of a wrong model would have passed, as review showed. Charon, Aeneas, Lean and the steps around them are trusted; the list is in <a href="{gh}/proofs/TRUST.md"><code>proofs/TRUST.md</code></a>.</p>
+<h2 id="yours">Proofs for your kernel crates</h2>
+<p class="prose"><code>cargo tauten init --proofs</code> sets up the same gate for your own <code>kernel</code> crates, and <code>cargo tauten proofs</code> runs it and records one outcome per claim in <code>proofs/claims.json</code>. When a claim is proved and its source has not changed since, arithmetic and indexing findings (TAU-N001, TAU-P003) inside that function are reported as subsumed by the named theorem rather than as errors. Any edit makes the record stale and the findings return.</p>
 <p class="boundary">{inline_md(caveat)} <span class="small muted">(docs/STATUS.md, Known gaps)</span></p>
-<h2 id="claims">What it will claim</h2>
-<p class="prose">Only listed kernel theorems will be called proved, each named in a gate that runs on every commit. Nothing else on this site will be described that way.</p>
-<h2 id="kill">Kill criterion</h2>
-<p class="prose">{inline_md(kill)} <span class="small muted">(docs/PLAN.md §9)</span></p>
+<h2 id="writfold">Modelled on writfold</h2>
+<p class="prose">The gate generalises the one <a href="https://writfold.dev">writfold</a> uses for its own kernel, with the same pinned Lean, Aeneas and Charon versions.</p>
 </div>"""
-    site.add("/proofs/", "Proof tier", "The planned proof tier for kernel crates: Charon/Aeneas to Lean. Not started.", body)
+    site.add("/proofs/", "Proof tier", f"Lean proofs over tauten's decision code: {len(own)} proved claims, plus macro output proved for listed instances.", body)
 
 
 # -------------------------------------------------------------------- status ---
