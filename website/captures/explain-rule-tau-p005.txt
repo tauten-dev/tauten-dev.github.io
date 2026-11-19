@@ -1,0 +1,19 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-P005
+# cwd: .
+# exit: 0
+# ---
+TAU-P005: No process exit or leaked values outside the edge
+
+Why: Exiting skips cleanup and hides control flow from callers; mem::forget silently leaks resources.
+
+Fix: Return an error to the edge and let `main` decide the exit code; drop values normally.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Lints: clippy::exit, clippy::mem_forget
+Banned (process termination): std::process::exit, std::process::abort

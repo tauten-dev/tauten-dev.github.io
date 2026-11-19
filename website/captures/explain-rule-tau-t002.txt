@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-T002
+# cwd: .
+# exit: 0
+# ---
+TAU-T002: Tier dependency direction
+
+Why: Dependencies must point inward (edge -> core -> kernel); otherwise a pure crate can reach IO through its dependency.
+
+Fix: Invert the dependency: move the shared code down a tier, or pass the capability in.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

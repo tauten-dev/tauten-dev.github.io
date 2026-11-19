@@ -1,4 +1,4 @@
-# core: d8401185bd1c2adc4b0f50922e767ea5f3dc96a7
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
 # cmd: cargo tauten check --format json
 # cwd: fixtures/cases
 # exit: 1

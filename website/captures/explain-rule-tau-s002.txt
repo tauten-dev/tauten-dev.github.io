@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-S002
+# cwd: .
+# exit: 0
+# ---
+TAU-S002: Suspicious placeholder comments
+
+Why: Comments such as 'for now', 'placeholder', 'TODO' or 'FIXME' usually mark unfinished work that tests do not cover.
+
+Fix: Finish the work, or track it in your issue tracker and remove the comment.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel warn
+  core warn
+  edge warn

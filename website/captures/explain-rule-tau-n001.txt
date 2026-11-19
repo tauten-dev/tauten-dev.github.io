@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-N001
+# cwd: .
+# exit: 0
+# ---
+TAU-N001: Checked arithmetic
+
+Why: Integer overflow and division by zero either panic or wrap silently depending on build profile; both are logic errors agents rarely test.
+
+Fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge warn
+Lints: clippy::arithmetic_side_effects, clippy::integer_division

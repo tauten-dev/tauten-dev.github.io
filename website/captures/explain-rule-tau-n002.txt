@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-N002
+# cwd: .
+# exit: 0
+# ---
+TAU-N002: No lossy `as` casts
+
+Why: `as` silently truncates, wraps and changes sign.
+
+Fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge warn
+Lints: clippy::as_conversions, clippy::cast_possible_truncation, clippy::cast_sign_loss, clippy::cast_possible_wrap

@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-K002
+# cwd: .
+# exit: 0
+# ---
+TAU-K002: Kernel uses core/alloc paths
+
+Why: Kernel crates are `no_std`; `std` paths hide the dependency.
+
+Fix: Import from `core::` or `alloc::`.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core -
+  edge -
+Lints: clippy::std_instead_of_core, clippy::std_instead_of_alloc

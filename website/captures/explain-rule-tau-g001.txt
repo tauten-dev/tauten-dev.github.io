@@ -1,0 +1,19 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-G001
+# cwd: .
+# exit: 0
+# ---
+TAU-G001: No hidden global state
+
+Why: Global and thread-local state creates invisible coupling between calls and breaks test isolation.
+
+Fix: Pass the state explicitly, or own it in a struct created by the edge.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Banned (global or lazily initialised shared state): std::sync::OnceLock, std::sync::LazyLock, once_cell::sync::Lazy, once_cell::sync::OnceCell, once_cell::unsync::Lazy
+Banned (global or thread-local state): std::thread_local, lazy_static::lazy_static

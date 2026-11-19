@@ -21,6 +21,14 @@ METRICS = [
 MINUS = "−"
 
 
+def status_line(site: Site) -> str:
+    """The one honest status sentence the home and status pages share."""
+    registry = (f'Version {site.config["latest_release"]} is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>.'
+                if site.published else "Not on crates.io yet.")
+    return (f'{registry} Development pilot completed; held-out benefit not established '
+            f'(<a href="/benchmark/">benchmark</a>).')
+
+
 def crate_prose(site: Site) -> dict:
     return tomllib.loads((site.root / "website" / "pages" / "crates.toml").read_text())
 
@@ -31,6 +39,28 @@ def tier_meanings(site: Site) -> dict[str, tuple[str, str]]:
     if len(rows) != 3:
         raise BuildError("README tier table not found")
     return {t: (m, r) for t, m, r in rows}
+
+
+def tiers_figure(site: Site) -> str:
+    """Three accept fixtures side by side, one per tier (moved from the home page)."""
+    meanings = tier_meanings(site)
+    excerpts = {
+        "edge": site.snippet_panel("edge-main", tier="edge", compact=True, title="acc-edge/src/main.rs"),
+        "core": site.snippet_panel("core-load", "core-stamp", tier="core", compact=True, title="acc-core/src/lib.rs"),
+        "kernel": site.snippet_panel("kernel-head", "kernel-withdraw", tier="kernel", compact=True, title="acc-kernel/src/lib.rs"),
+    }
+    cols = []
+    for i, tier in enumerate(("edge", "core", "kernel")):
+        meaning, rejected = meanings[tier]
+        if i:
+            cols.append('<div class="arrow" aria-hidden="true">depends on</div>')
+        cols.append(f'<div class="tcol tier-{tier}"><h3><span class="chip chip-tier {tier[0]}">{tier}</span></h3>'
+                    f'<dl><dt>Meaning</dt><dd>{inline_md(meaning)}</dd><dt>Examples of what is rejected</dt>'
+                    f'<dd>{inline_md(rejected)}</dd></dl>{excerpts[tier]}</div>')
+    return (f'<figure><div class="tiers">{"".join(cols)}</div>'
+            f'<figcaption>Three accept fixtures. <code>cargo tauten check</code> reports no profile errors for them. '
+            f'The Meaning and Rejected cells are from the tauten README.</figcaption></figure>'
+            f'<p class="boundary">Dependencies point inward only: edge → core → kernel (<a href="/rules/tau-t002/">TAU-T002</a>).</p>')
 
 
 def version_label(site: Site, crate: dict) -> str:
@@ -136,6 +166,16 @@ def _interval(diff: dict) -> str:
             f'<text x="{x0}" y="43">{esc(label)}</text><text x="{sx(0) + 4:.1f}" y="10">0 = no difference</text></svg>')
 
 
+INSUFFICIENT = "Insufficient defect events to assess improvement"
+
+
+def no_events(run: dict, diff: dict) -> bool:
+    """A [0, 0] interval over all-zero counts says nothing; it is labelled, not plotted."""
+    values = [run["arms"].get(a, {}).get(diff["metric"]) for a in (diff["arm"], diff["base"])]
+    return (diff["point"] == diff["ci_low"] == diff["ci_high"] == 0
+            and all(v == 0 for v in values))
+
+
 def verdict(diff: dict) -> str:
     if diff["ci_low"] <= 0 <= diff["ci_high"]:
         return "No measured difference (95% CI includes 0)"
@@ -170,12 +210,27 @@ def results_html(site: Site, compact: bool = False) -> str:
                 cells.append(_fmt(v) if v is not None else dash)
             for arm in ("C", "B"):
                 d = diffs.get((key, arm))
-                cells.append(f'{_fmt(d["point"])} [{_fmt(d["ci_low"])}, {_fmt(d["ci_high"])}]' if d else dash)
+                if d and no_events(run, d):
+                    cells.append(f'<span class="small">{INSUFFICIENT}</span>')
+                else:
+                    cells.append(f'{_fmt(d["point"])} [{_fmt(d["ci_low"])}, {_fmt(d["ci_high"])}]' if d else dash)
             rows.append(cells)
         tbl = table(headers, rows, label=f'Results for {run["label"]}', cls="results",
                     caption="n per arm: " + ", ".join(f'{a} {v["n"]}' for a, v in run["arms"].items()))
         plots = "".join(f'<figure>{_interval(d)}<figcaption>{esc(d["arm"])} {MINUS} {esc(d["base"])}, {esc(d["metric"])}: '
-                        f'{esc(verdict(d))}.</figcaption></figure>' for d in run.get("diffs", []))
-        pilot = "<p><strong>Pilot on the dev split: used for tuning, not evidence.</strong></p>" if kind == "pilot" else ""
+                        f'{esc(verdict(d))}.</figcaption></figure>' for d in run.get("diffs", []) if not no_events(run, d))
+        skipped = sorted({d["metric"] for d in run.get("diffs", []) if no_events(run, d)})
+        if skipped:
+            plots += (f'<p class="small">{", ".join(esc(m) for m in skipped)}: no arm had a single event, so no interval is '
+                      f'shown. {INSUFFICIENT}.</p>')
+        pilot = ""
+        if kind == "pilot":
+            ev = site.status_map["bench-pilot"]["evidence"]
+            m = re.search(r"unchecked arithmetic \((A \d+/\d+, B \d+/\d+, C \d+/\d+) trials\)", ev)
+            if not m:
+                raise BuildError("STATUS.md pilot row no longer states the unchecked-arithmetic counts")
+            pilot = ("<p><strong>Pilot on the dev split: used for tuning, not evidence.</strong> No defect escaped in any arm, "
+                     f"so the primary outcome has insufficient defect events to assess improvement. Trials that left unchecked "
+                     f'arithmetic (<a href="/status/#tau-n001">TAU-N001</a>) in core code: {m.group(1)}.</p>')
         out.append(f'<div class="card">{head}{pilot}{tbl}{"" if compact else plots}</div>')
     return "".join(out)

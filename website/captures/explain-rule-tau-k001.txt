@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-K001
+# cwd: .
+# exit: 0
+# ---
+TAU-K001: Kernel determinism and purity
+
+Why: Kernel decisions must be deterministic and free of shared mutable state so they can be extracted and proved (Aeneas) and replayed exactly.
+
+Fix: Use `BTreeMap`/`BTreeSet` and plain owned values; pass state explicitly.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core -
+  edge -
+Banned (shared mutability or nondeterministic iteration in the kernel): std::rc::Rc, std::rc::Weak, std::cell::RefCell, std::cell::Cell, std::sync::Arc, std::sync::Mutex, std::sync::RwLock, std::collections::HashMap, std::collections::HashSet

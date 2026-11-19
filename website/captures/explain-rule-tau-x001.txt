@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-X001
+# cwd: .
+# exit: 0
+# ---
+TAU-X001: Lint exceptions must be `#[expect]` with a reason
+
+Why: `#[allow]` silently outlives the code it excused. `#[expect(lint, reason = "...")]` documents why and fails once the exception is no longer needed.
+
+Fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
+
+Enforced by: Clippy
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: clippy::allow_attributes, clippy::allow_attributes_without_reason, unfulfilled_lint_expectations

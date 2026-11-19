@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-E003
+# cwd: .
+# exit: 0
+# ---
+TAU-E003: Explicit discards of results need a reason
+
+Why: `let _ = fallible()` is visible but still loses the failure. In library code that is rarely right; in tests it is the normal idiom for best-effort cleanup, so tests are exempt.
+
+Fix: Handle or propagate the result. If discarding is correct, say why: `#[expect(clippy::let_underscore_must_use, reason = "best-effort cleanup")]`.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: clippy::let_underscore_must_use

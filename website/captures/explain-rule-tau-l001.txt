@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-L001
+# cwd: .
+# exit: 0
+# ---
+TAU-L001: No unbounded loops outside the edge
+
+Why: A loop with no exit cannot be reasoned about or terminated by the caller.
+
+Fix: Bound the loop, return a value from it, or move the event loop to the edge.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Lints: clippy::infinite_loop

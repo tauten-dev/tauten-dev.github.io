@@ -1,0 +1,23 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-A001
+# cwd: .
+# exit: 0
+# ---
+TAU-A001: No ambient authority
+
+Why: Filesystem, network, environment, clock, randomness and process access must arrive as parameters (capabilities), so a signature shows everything a function can touch and tests can substitute them.
+
+Fix: Take a capability parameter (for example a `&cap_std::fs::Dir` from `Authority::dir`, `&dyn tauten::cap::Clock`, or `&tauten::cap::Env`) and let an edge crate construct it.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Banned (ambient authority through cap-std): cap_std::ambient_authority, ambient_authority::ambient_authority, cap_std::fs::Dir::open_ambient_dir, cap_std::fs::Dir::create_ambient_dir_all, cap_std::fs::File::open_ambient, cap_std::fs::File::create_ambient, cap_std::fs::File::open_ambient_with
+Banned (ambient filesystem access): std::fs::read, std::fs::read_to_string, std::fs::write, std::fs::read_dir, std::fs::create_dir, std::fs::create_dir_all, std::fs::remove_file, std::fs::remove_dir, std::fs::remove_dir_all, std::fs::rename, std::fs::copy, std::fs::metadata, std::fs::symlink_metadata, std::fs::canonicalize, std::fs::hard_link, std::fs::set_permissions, std::fs::read_link, std::fs::exists, std::fs::File::open, std::fs::File::create, std::fs::File::create_new, std::fs::File::options, std::fs::OpenOptions::new, std::path::Path::exists, std::path::Path::try_exists, std::path::Path::is_file, std::path::Path::is_dir, std::path::Path::is_symlink, std::path::Path::metadata, std::path::Path::symlink_metadata, std::path::Path::read_dir, std::path::Path::canonicalize, std::path::Path::read_link, tokio::fs::read, tokio::fs::read_to_string, tokio::fs::write, tokio::fs::read_dir, tokio::fs::create_dir_all, tokio::fs::remove_file, tokio::fs::remove_dir_all, tokio::fs::rename, tokio::fs::copy, tokio::fs::metadata, tokio::fs::File::open, tokio::fs::File::create
+Banned (ambient environment or process state): std::env::var, std::env::var_os, std::env::vars, std::env::vars_os, std::env::args, std::env::args_os, std::env::current_dir, std::env::set_current_dir, std::env::set_var, std::env::remove_var, std::env::temp_dir, std::env::home_dir, std::env::current_exe, std::process::Command::new, std::process::id, tokio::process::Command::new
+Banned (ambient clock): std::time::SystemTime::now, std::time::Instant::now, std::thread::sleep, tokio::time::Instant::now, tokio::time::sleep, chrono::Utc::now, chrono::Local::now, time::OffsetDateTime::now_utc, time::OffsetDateTime::now_local, jiff::Timestamp::now, jiff::Zoned::now
+Banned (ambient randomness): rand::thread_rng, rand::rng, rand::random, getrandom::getrandom, getrandom::fill, uuid::Uuid::new_v4, uuid::Uuid::now_v7
+Banned (ambient network or standard streams): std::net::TcpStream::connect, std::net::TcpStream::connect_timeout, std::net::TcpListener::bind, std::net::UdpSocket::bind, std::net::ToSocketAddrs::to_socket_addrs, std::io::stdin, std::io::stdout, std::io::stderr, tokio::net::TcpStream::connect, tokio::net::TcpListener::bind, tokio::net::UdpSocket::bind, tokio::io::stdin, tokio::io::stdout, tokio::io::stderr, reqwest::get, reqwest::Client::new, reqwest::blocking::get, reqwest::blocking::Client::new

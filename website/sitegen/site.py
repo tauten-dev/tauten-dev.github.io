@@ -163,8 +163,8 @@ class Site:
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The tauten mark and the headline: Strict Rust for code written by agents.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141922">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/site.css?v={v}">
 <script src="/assets/theme.js?v={v}"></script>
@@ -174,7 +174,7 @@ class Site:
 <header class="site-header"><div class="wrap bar">
 <a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
 <nav class="site-nav" aria-label="Primary"><ul>{"".join(nav)}</ul></nav>
-<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label>
 </div></header>
 <main id="main">
 {body}

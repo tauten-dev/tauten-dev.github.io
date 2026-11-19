@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-C001
+# cwd: .
+# exit: 0
+# ---
+TAU-C001: Structured concurrency only
+
+Why: Detached threads and tasks can outlive their caller, leak errors and race with shutdown.
+
+Fix: Use `std::thread::scope`, or `tokio::task::JoinSet` owned by the caller and awaited before returning.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Banned (detached thread or task): std::thread::spawn, std::thread::Builder::spawn, tokio::spawn, tokio::task::spawn, tokio::task::spawn_blocking, tokio::task::spawn_local, async_std::task::spawn

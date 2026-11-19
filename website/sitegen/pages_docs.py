@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 
 from . import md
-from .common import install_block, results_html
+from .common import install_block, results_html, tiers_figure
 from .errors import BuildError
 from .render import badge, code_html, esc, inline_md, panel, status_badge
 from .site import Site
@@ -36,6 +36,12 @@ def start(site: Site) -> None:
     manifest = md.section(readme, "How it works").split("```toml", 1)[1].split("```", 1)[0].strip()
     check = site.captures["check-fixtures"]
     excerpt = check.block("TAU-P001", "rej-unwrap")["text"] + "\n\n" + check.body.rstrip("\n").split("\n\n")[-1]
+    import json
+    json_p001 = json.dumps(next(json.loads(line) for line in site.captures["check-fixtures-json"].body.splitlines()
+                                if '"TAU-P001"' in line and '"rej-unwrap"' in line), indent=2, ensure_ascii=False)
+    readme_flat = " ".join(readme.split())
+    if "does not weaken the check" not in readme_flat:
+        raise BuildError("README no longer says that loosening the project's lints does not weaken the check")
     steps = [
         ("install", "Install",
          "<p><code>cargo-tauten</code> is a Cargo subcommand. Install it once; it brings its own profile, so there is nothing to configure in your project.</p>",
@@ -51,7 +57,14 @@ def start(site: Site) -> None:
          "<p>Add <code>--format json</code> for one diagnostic per line, the form an agent should read. <code>--warnings</code> lists each warning instead of a per-rule summary.</p>",
          site.capture_panel("check-fixtures", excerpt, title="$ cargo tauten check",
                             label="One block and the summary of cargo tauten check over the fixtures")
-         + '<p class="small muted">One block and the summary line, from a run over the tauten fixture crates.</p>'),
+         + '<p class="small muted">One block and the summary line, from a run over the tauten fixture crates.</p>'
+         + panel(code_html(json_p001, "json"), title="$ cargo tauten check --format json", label="One JSON diagnostic",
+                 provenance="Captured", wrapped=True)
+         + '<p class="small muted">The same finding as JSON, pretty-printed for reading; the CLI prints it on one line.</p>'),
+        ("profile", "The profile is the CLI's",
+         "<p>The CLI owns the profile: it runs one <code>cargo check</code> with itself as the workspace rustc wrapper, adding each crate's tier lints and a generated clippy configuration. Deleting or loosening a project's own <code>clippy.toml</code> or <code>[lints]</code> table does not weaken the check.</p>"
+         "<p><code>cargo tauten explain &lt;ID&gt;</code> prints a rule: why, the fix, the level per tier, and the lints behind it.</p>",
+         site.capture_panel("explain-p001")),
         ("adopt", "Adopt gradually",
          "<p><code>cargo tauten baseline</code> records today's error-level findings in <code>tauten-baseline.json</code>. Later checks accept up to that many per rule and file, and report anything new.</p>"
          "<p>The baseline may only shrink. A slot that is no longer needed is itself an error (TAU-R001), and recording more findings is refused without <code>--allow-increase</code>. "
@@ -69,7 +82,9 @@ def start(site: Site) -> None:
     items = "".join(f'<li id="{i}"><div><h2>{t}</h2>{left}</div><div>{right}</div></li>' for i, t, left, right in steps)
     body = f"""<div class="wrap page-head"><p class="eyebrow">Getting started</p><h1>Getting started</h1>
 <p class="lede">Install the CLI, declare a tier per crate, check, and adopt gradually with a baseline. Every output below was captured at <code>{site.short}</code>.</p></div>
-<div class="wrap"><ol class="workflow">{items}</ol></div>"""
+<div class="wrap"><ol class="workflow">{items}</ol>
+<section id="tier-examples"><h2>What each tier looks like</h2>
+{tiers_figure(site)}</section></div>"""
     site.add("/start/", "Getting started", "Install cargo-tauten, declare tiers, check a workspace and adopt the profile gradually.", body)
 
 
@@ -105,7 +120,7 @@ def agents(site: Site) -> None:
     bench = d.core.blob("bench/README.md")
     body = f"""<div class="wrap page-head"><p class="eyebrow">Agent profile</p><h1>The agent profile</h1>
 <p class="lede">This is the text an adopting project gives its agent. <code>cargo tauten init --write</code> writes it to <code>AGENTS.tauten.md</code>; point your <code>AGENTS.md</code> or <code>CLAUDE.md</code> at it.</p>
-<p><span class="tag">Designed</span>Whether it changes agent behaviour has not been measured.</p></div>
+<p><span class="tag">Designed</span>Whether it changes agent behaviour: development pilot completed; held-out benefit not established (<a href="/benchmark/">benchmark</a>).</p></div>
 <div class="wrap">
 <div class="actions"><button class="copy-btn" type="button" hidden data-src="/agents/AGENTS.tauten.md">Copy as Markdown</button><a href="/agents/AGENTS.tauten.md">Raw file</a></div>
 {_repro(site, "crates/tauten-check/agents.md")}
@@ -224,7 +239,70 @@ def proofs(site: Site) -> None:
 
 # -------------------------------------------------------------------- status ---
 
-def status(site: Site) -> None:
+# Moved here from the home page.
+NOT_ENFORCED = [
+    "Capability discipline, not containment. Dependencies, <code>unsafe</code>, FFI and build scripts keep ambient access.",
+    "Panic rules are syntactic. Panics inside dependencies and allocation failure are not covered.",
+    "Contracts and refinements are runtime checks. Nothing is proved statically yet.",
+    "Rust cannot express per-function effect rows; tiers are a coarse stand-in.",
+    "An agent can still add <code>.clone()</code> to quiet the borrow checker, or a reasoned <code>#[expect]</code> (visible in review).",
+    "Async cancellation safety is not enforceable.",
+    'The placeholder-comment rule (<a href="/rules/tau-s002/">TAU-S002</a>) is a heuristic.',
+]
+
+
+def _rule_example(site: Site, rule: dict) -> str:
+    """The expanded view of one rule: a fixture and its captured output, or the explain text."""
+    rid = rule["id"]
+    warnings_cap = site.captures["check-fixtures-warnings"]
+    seen = []
+    for f in site.data.fixtures:
+        if rid not in f.expect:
+            continue
+        blocks = [b for b in warnings_cap.blocks() if b["id"] == rid and b["crate"] == f.name]
+        if blocks:
+            seen.append((f, blocks))
+    links = f'<a href="/rules/{rid.lower()}/">Rule page</a> · <code>cargo tauten explain {rid}</code>'
+    if not seen:
+        explain = site.captures[f"explain-rule-{rid.lower()}"]
+        return (f'<p class="small"><span class="chip">No fixture yet</span> No fixture in the tauten repository triggers '
+                f'this rule, so there is no captured diagnostic to show. This is what <code>cargo tauten explain</code> prints.</p>'
+                f'{site.capture_panel(explain.name, label=f"cargo tauten explain {rid}")}<p class="small">{links}</p>')
+    # The shortest fixture reads best; the others are named.
+    seen.sort(key=lambda x: (len(x[0].src.splitlines()), x[0].name))
+    f, blocks = seen[0]
+    marks = {b["line"]: b["column"] for b in blocks if b["line"]}
+    text = "\n\n".join(b["text"] for b in blocks)
+    others = ", ".join(f"<code>{o.name}</code>" for o, _ in seen[1:])
+    also = f" Also triggered by {others}." if others else ""
+    return (f'<div class="pair">{site.fixture_panel(f, marks=marks)}'
+            f'{site.capture_panel("check-fixtures-warnings", text, title="$ cargo tauten check", label=f"Output for {f.name}")}</div>'
+            f'<p class="small muted"><span class="chip prov">Captured</span> Fixture <code>{f.name}</code> ({f.tier or "no tier"}) '
+            f'and the output <code>cargo tauten check --warnings</code> printed for it at <code>{site.short}</code>.{also} {links}</p>')
+
+
+def rule_table(site: Site) -> str:
+    from .render import level_chip
+    from .source import ENFORCERS, FAMILIES, TIERS, level
+    rows, current = [], None
+    for r in site.data.rules:
+        fam = r["id"][4]
+        if fam != current:
+            current = fam
+            rows.append(f'<p class="rt-fam" id="family-{fam.lower()}">{fam} · {FAMILIES.get(fam, fam)}</p>')
+        has = any(r["id"] in f.expect for f in site.data.fixtures)
+        lv = "".join(f'<span class="rt-lv"><span class="rt-t">{t}</span>{level_chip(level(r, t))}</span>' for t in TIERS)
+        ex = '<span class="rt-ex">example</span>' if has else '<span class="rt-ex none">no fixture</span>'
+        rows.append(f'<details class="rt-row" id="{r["id"].lower()}"><summary><span class="id">{r["id"]}</span>'
+                    f'<span class="rt-title">{inline_md(r["title"])}</span><span class="rt-lvs">{lv}</span>'
+                    f'<span class="rt-by">{ENFORCERS[r["enforced_by"]]}</span>{ex}</summary>'
+                    f'<div class="rt-body">{_rule_example(site, r)}</div></details>')
+    head = ('<div class="rt-head" aria-hidden="true"><span>ID</span><span>Rule</span>'
+            '<span class="rt-lvs">kernel · core · edge</span><span>Enforced by</span><span></span></div>')
+    return f'<div class="rtable">{head}{"".join(rows)}</div>'
+
+
+def _status_milestones(site: Site) -> str:
     text = site.data.core.blob("docs/STATUS.md")
     lines = text.split("\n")
     badges: dict[str, str] = {}
@@ -246,13 +324,76 @@ def status(site: Site) -> None:
     out = _md(site, "\n".join(lines), "docs/STATUS.md", table_label="Milestones")
     for key, html in badges.items():
         out = out.replace(key, html)
-    legend = (f'<ul class="small"><li>{badge("specified", "Specified")} written down only.</li>'
+    return out
+
+
+def status(site: Site) -> None:
+    from .common import status_line
+    d = site.data
+    sm = site.status_map
+    rej, acc = site.fixture_counts()
+    n = len(d.rules)
+    first = site.config["first_release"]
+    publication = (f"Publication: {site.config['latest_release']} is on crates.io."
+                   if site.published else
+                   f'Publication: the release workflow is {status_badge(sm["publication"])}; nothing is on crates.io yet.')
+    legend = (f'<ul class="small legend"><li>{badge("specified", "Specified")} written down only.</li>'
               f'<li>{badge("implemented", "Implemented")} code exists.</li>'
               f'<li>{badge("exercised", "Exercised")} ran against real input in the repository; the evidence is named.</li></ul>')
+    covered = sum(1 for r in d.rules if any(r["id"] in f.expect for f in d.fixtures))
+
+    groups = []
+    for key, label in (("rustc", "rustc"), ("clippy", "Clippy, at levels the profile sets"), ("tauten", "tauten structural checks")):
+        members = [r for r in d.rules if r["enforced_by"] == key]
+        groups.append(f'<li><span class="count">{label}:</span> {len(members)} rules.</li>')
+    never = len(site.no_exception_rules)
+    groups.append(f'<li><span class="count">{never} rules admit no exception;</span> in kernel crates, none do (<a href="/rules/tau-x004/">TAU-X004</a>).</li>')
+    gaps = "".join(f"<li>{g}</li>" for g in NOT_ENFORCED)
+    gaps += "<li><strong>Development pilot completed; held-out benefit not established.</strong></li>"
+
     body = f"""<div class="wrap page-head"><p class="eyebrow">Status</p><h1>Status</h1>
-<p class="lede">How far each item has got, as the core repository records it.</p>{legend}</div>
-<div class="wrap">{_repro(site, "docs/STATUS.md")}<div class="prose wide">{out}</div></div>"""
-    site.add("/status/", "Status", "What exists in tauten, what has been exercised, and what is still planned or blocked.", body)
+<p class="lede">What tauten checks, what each check prints, and how far each part has got.</p>
+<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>{status_line(site)}</span></p>{legend}</div>
+<div class="wrap">
+<section id="rules">
+<h2>Rules and what they report</h2>
+<p class="prose">{n} rules. Open a row to see a fixture crate from the tauten repository that triggers the rule and the diagnostic <code>cargo tauten check</code> printed for it. {covered} rules have a fixture; for the other {n - covered} the row shows <code>cargo tauten explain</code> instead. Levels are per tier; <a href="/rules/">the rule reference</a> has the full table with filters.</p>
+{rule_table(site)}
+</section>
+<section id="exercised">
+<h2>What has been exercised</h2>
+<div class="status-grid">
+<div class="card"><div class="top">{status_badge(sm["tauten-check"])}</div><ul>
+<li>{rej} reject and {acc} accept fixture crates, each producing exactly its expected rule IDs. <span class="ev">{site.src("crates/cargo-tauten/tests/fixtures.rs")}</span></li>
+<li>tauten passes its own profile on every gate run. <span class="ev">scripts/gate</span></li>
+<li><span class="tag">Observed</span>Dry run on a throwaway clone of writfold: 2,883 findings, and four defects found in tauten itself, since fixed. <span class="ev">{site.src("docs/dry-runs/writfold-2026-11-18.md")}</span></li>
+<li>Mutation testing of <code>tauten-check</code>: 14 of 137 viable mutants missed on the first run, 0 after new tests. <span class="ev">docs/STATUS.md, Quality</span></li>
+<li>Benchmark harness: 4 dev tasks admitted with built-in agents. <span class="ev">{site.src("bench/README.md")}</span></li>
+</ul></div>
+<div class="card"><div class="top"><span class="badge b-pending">Pending</span></div><ul>
+<li>Pilot with a real agent (dev split): {status_badge(sm["bench-pilot"])} Held-out benefit not established.</li>
+<li>Proof tier: {status_badge(sm["proof-tier"])}</li>
+<li>Contracts for <code>async fn</code> and generic newtypes; Kani lowering.</li>
+<li>{publication}</li>
+</ul></div>
+</div>
+<h3 style="margin-top:32px">Benchmark, dev-split pilot</h3>
+{results_html(site, compact=True)}
+<p><a href="/benchmark/">The benchmark →</a></p>
+</section>
+<section id="enforced">
+<h2>Enforced, and not</h2>
+<div class="ledger">
+<div><h3>Enforced</h3><ul>{"".join(groups)}</ul></div>
+<div class="gap"><h3>Not enforced</h3><ul>{gaps}</ul></div>
+</div>
+<p><a href="/enforcement/">The full enforcement table →</a></p>
+</section>
+<section id="status-doc">
+{_repro(site, "docs/STATUS.md")}<div class="prose wide">{_status_milestones(site)}</div>
+</section>
+</div>"""
+    site.add("/status/", "Status", "Every tauten rule with an example and the diagnostic it prints, what has been exercised, and what is still planned.", body)
 
 
 def not_found(site: Site) -> None:

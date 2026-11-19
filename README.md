@@ -65,8 +65,16 @@ Also checked: WCAG AA contrast of every colour pair in both themes
   the build, or captured CLI output. Nothing is asserted from memory.
 - Status badges come only from STATUS.md through `status-map.toml`.
 - Lint and convention rules "flag" or "reject"; nothing "prevents".
-- No benchmark number exists, so none is shown. The results table is drawn
-  with em dashes until `results.json` has a run.
+- Benchmark numbers come only from `website/data/results.json`. A [0, 0]
+  interval over all-zero counts is labelled "insufficient defect events to
+  assess improvement", never plotted as a result.
+- The home page stays short: pitch, install, the three tiers, the status
+  line and links. The status page carries every rule as an expandable row:
+  a fixture that triggers it with its captured `check --warnings` output, or,
+  where no fixture exists, the captured `cargo tauten explain` text marked
+  "No fixture yet". `capture.py` records one `explain-rule-<id>` per rule.
+- Palettes: paper (light) and paper-dark, shared with the sibling sites; the
+  theme select offers System, Paper and Paper dark.
 
 ## Publish
 

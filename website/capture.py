@@ -88,6 +88,10 @@ def main() -> None:
         cap("check-fixtures-warnings", ["check", "--warnings"], fixtures, "fixtures/cases")
         cap("check-fixtures-json", ["check", "--format", "json"], fixtures, "fixtures/cases")
         cap("explain-p001", ["explain", "TAU-P001"], src, ".")
+        # One explain capture per rule, for the status page's rule table.
+        rules = tomllib.loads((src / "crates" / "tauten-check" / "rules.toml").read_text())["rule"]
+        for rule in rules:
+            cap(f"explain-rule-{rule['id'].lower()}", ["explain", rule["id"]], src, ".")
         cap("profile-kernel", ["profile", "kernel"], src, ".")
 
         # init: a three-crate workspace with no tiers declared.

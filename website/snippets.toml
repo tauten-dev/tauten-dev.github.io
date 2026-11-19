@@ -4,45 +4,7 @@
 # excerpt by whole lines, `strip` removes a prefix, `dedent` removes common
 # indentation. Line numbers are never used to locate code.
 
-# --- home: six mistakes the compiler accepts
-[card-unwrap]
-path = "fixtures/cases/rej-unwrap/src/lib.rs"
-start = "pub fn port(text: &str) -> u16 {"
-end = "}"
-lang = "rust"
-
-[card-overflow]
-path = "fixtures/cases/rej-contract-overflow/src/lib.rs"
-start = "pub fn next(x: u8) -> u8 {"
-end = "}"
-lang = "rust"
-
-[card-stub]
-path = "fixtures/cases/rej-stub/src/lib.rs"
-start = "pub fn fee(_amount: u64) -> u64 {"
-end = "}"
-lang = "rust"
-
-[card-ignored]
-path = "fixtures/cases/rej-ignored-result/src/lib.rs"
-start = "pub fn run() {"
-end = "}"
-lang = "rust"
-
-[card-wildcard]
-path = "fixtures/cases/rej-wildcard/src/lib.rs"
-start = "    match mode {"
-end = "    }"
-dedent = true
-lang = "rust"
-
-[card-clock]
-path = "fixtures/cases/rej-ambient-clock/src/lib.rs"
-start = "pub fn now() -> std::time::SystemTime {"
-end = "}"
-lang = "rust"
-
-# --- home: tiers
+# --- start: what each tier looks like
 [edge-main]
 path = "fixtures/cases/acc-edge/src/main.rs"
 start = "fn main() -> Result<(), Box<dyn std::error::Error>> {"
@@ -70,12 +32,6 @@ lang = "rust"
 [kernel-withdraw]
 path = "fixtures/cases/acc-kernel/src/lib.rs"
 start = "/// Decide a withdrawal; returns the new balance."
-end = "}"
-lang = "rust"
-
-[forged-sneaky]
-path = "fixtures/cases/rej-forged-capability/src/lib.rs"
-start = "/// Library code minting its own authority."
 end = "}"
 lang = "rust"
 

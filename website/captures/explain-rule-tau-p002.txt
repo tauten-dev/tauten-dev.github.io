@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-P002
+# cwd: .
+# exit: 0
+# ---
+TAU-P002: No explicit panics
+
+Why: A panic is an untyped, unrecoverable failure that callers cannot see in the signature.
+
+Fix: Return a typed error variant. If the state is truly impossible, restructure the types so it cannot be represented.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge warn
+Lints: clippy::panic, clippy::unreachable

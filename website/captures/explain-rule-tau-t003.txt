@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-T003
+# cwd: .
+# exit: 0
+# ---
+TAU-T003: Kernel dependencies are allowlisted
+
+Why: Each external dependency of the kernel widens what must be trusted and may block proof extraction.
+
+Fix: Remove the dependency, or list it in `[package.metadata.tauten] kernel-deps = ["name"]` with a justification in review.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core -
+  edge -

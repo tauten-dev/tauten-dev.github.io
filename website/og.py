@@ -25,15 +25,15 @@ lines = []
 for line in block.split("\n"):
     e = html.escape(line)
     if line.startswith("error"):
-        e = '<b style="color:#B3203A">error</b>' + e[5:]
+        e = '<b style="color:#A43D3D">error</b>' + e[5:]
     lines.append(e)
-page = f"""<!doctype html><html><body style="margin:0;width:1200px;height:630px;background:#F7F5F1;color:#1B2230;
+page = f"""<!doctype html><html><body style="margin:0;width:1200px;height:630px;background:#F8F8F3;color:#20362D;
 font-family:system-ui,sans-serif;display:flex;flex-direction:column;justify-content:center;padding:0 72px;box-sizing:border-box">
 <div style="display:flex;align-items:center;gap:16px;font-size:44px;font-weight:650;letter-spacing:-.05em">
 <div style="width:64px;height:64px">{mark}</div>tauten</div>
 <h1 style="font-size:62px;line-height:1.08;letter-spacing:-.04em;margin:28px 0 30px;font-weight:650">Strict Rust for code written by agents.<br>
-<span style="color:#A3421E">Every rule names what enforces it.</span></h1>
-<pre style="margin:0;background:#FDFCFA;border:1px solid #8C8579;border-left:4px solid #C8552D;border-radius:6px;padding:18px 22px;
+<span style="color:#18765B">Every rule names what enforces it.</span></h1>
+<pre style="margin:0;background:#FDFDF9;border:1px solid #7D8F80;border-left:4px solid #18765B;border-radius:6px;padding:18px 22px;
 font:19px/1.6 'DejaVu Sans Mono',monospace;white-space:pre-wrap">{"<br>".join(lines)}</pre></body></html>"""
 exe = os.environ.get("PLAYWRIGHT_CHROMIUM")
 with sync_playwright() as p:

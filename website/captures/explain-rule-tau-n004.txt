@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-N004
+# cwd: .
+# exit: 0
+# ---
+TAU-N004: No exact float comparison
+
+Why: Exact equality of computed floats is almost always a bug.
+
+Fix: Compare with an explicit tolerance, or use integers in fixed units.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: clippy::float_cmp, clippy::float_cmp_const

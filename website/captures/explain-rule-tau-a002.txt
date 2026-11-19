@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-A002
+# cwd: .
+# exit: 0
+# ---
+TAU-A002: Authority minted outside the edge
+
+Why: Capabilities may only be created at startup in edge crates; minting them deeper defeats the point of passing them.
+
+Fix: Accept the capability as a parameter and create it in the edge crate's `main`.
+
+Enforced by: Clippy
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Banned (mints authority; only an edge crate may): tauten::cap::Authority::acquire

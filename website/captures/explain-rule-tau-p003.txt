@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-P003
+# cwd: .
+# exit: 0
+# ---
+TAU-P003: No panicking index or slice
+
+Why: `v[i]` and `&s[a..b]` panic on out-of-range or non-char-boundary input; off-by-one errors become crashes.
+
+Fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge warn
+Lints: clippy::indexing_slicing, clippy::string_slice

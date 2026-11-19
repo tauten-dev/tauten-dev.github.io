@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-C002
+# cwd: .
+# exit: 0
+# ---
+TAU-C002: Async hazards
+
+Why: Holding a lock across `.await` deadlocks, and dropping a future means the work never runs.
+
+Fix: Release guards before awaiting; await or explicitly spawn-and-join futures.
+
+Enforced by: Clippy
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: clippy::await_holding_lock, clippy::await_holding_refcell_ref, clippy::let_underscore_future, clippy::large_futures

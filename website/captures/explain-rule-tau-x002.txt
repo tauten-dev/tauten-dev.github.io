@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-X002
+# cwd: .
+# exit: 0
+# ---
+TAU-X002: No crate-wide exceptions to profile lints
+
+Why: A crate-level `#![expect(...)]` or `#![allow(...)]` of a profile lint switches the rule off for the whole crate.
+
+Fix: Move the exception to the single item that needs it, with a reason.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-A000
+# cwd: .
+# exit: 0
+# ---
+TAU-A000: Banned API in this tier
+
+Why: The API is banned in this tier; see the specific rule named in the diagnostic.
+
+Fix: See the specific rule named in the diagnostic.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Lints: clippy::disallowed_methods, clippy::disallowed_types, clippy::disallowed_macros

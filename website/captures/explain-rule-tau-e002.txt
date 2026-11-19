@@ -1,0 +1,19 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-E002
+# cwd: .
+# exit: 0
+# ---
+TAU-E002: Typed errors outside the edge
+
+Why: `Result<T, ()>`, `anyhow::Error` and similar erase which failures are possible, so callers cannot handle them exhaustively.
+
+Fix: Define an error enum (for example with `thiserror`) whose variants name each failure. Convert to anyhow/eyre only in edge crates.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Lints: clippy::result_unit_err
+Banned (type-erased error): anyhow::Error, eyre::Report, color_eyre::Report

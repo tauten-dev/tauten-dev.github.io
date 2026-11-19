@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-N003
+# cwd: .
+# exit: 0
+# ---
+TAU-N003: No floating point in the kernel
+
+Why: Floating point is not associative and has NaN; kernel decisions must be exact and proof-friendly.
+
+Fix: Use integers in fixed units (cents, milliseconds, basis points) or a rational type.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core -
+  edge -
+Lints: clippy::float_arithmetic

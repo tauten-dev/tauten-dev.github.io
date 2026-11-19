@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-K003
+# cwd: .
+# exit: 0
+# ---
+TAU-K003: Kernel crate attributes
+
+Why: A kernel crate root must declare `#![no_std]` so the compiler enforces the absence of IO.
+
+Fix: Add `#![no_std]` at the top of the kernel crate's `lib.rs`.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core -
+  edge -

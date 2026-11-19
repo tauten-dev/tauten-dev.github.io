@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-O001
+# cwd: .
+# exit: 0
+# ---
+TAU-O001: No direct console output outside the edge
+
+Why: Console output is an effect; library code that prints cannot be tested or redirected.
+
+Fix: Return the data, or write to an `impl std::io::Write` passed in by the caller.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge -
+Lints: clippy::print_stdout, clippy::print_stderr

@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-U002
+# cwd: .
+# exit: 0
+# ---
+TAU-U002: Documented, minimal unsafe blocks
+
+Why: Each unsafe operation needs its own stated justification for review.
+
+Fix: Split blocks to one unsafe operation each and add a `// SAFETY:` comment explaining why the contract holds.
+
+Enforced by: Clippy
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel -
+  core -
+  edge deny
+Lints: clippy::undocumented_unsafe_blocks, clippy::multiple_unsafe_ops_per_block

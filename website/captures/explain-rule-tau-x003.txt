@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-X003
+# cwd: .
+# exit: 0
+# ---
+TAU-X003: Manifest lint table loosens the profile
+
+Why: `[lints]` entries that allow or warn profile lints have no effect under `cargo tauten check` but mislead readers and plain `cargo clippy` runs.
+
+Fix: Remove the entry from `[lints]` / `[workspace.lints]`.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel warn
+  core warn
+  edge warn

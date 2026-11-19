@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-P004
+# cwd: .
+# exit: 0
+# ---
+TAU-P004: No panics inside fallible functions
+
+Why: A function that returns Result has promised to report failure as a value; panicking inside it breaks that promise.
+
+Fix: Map the failure into the function's error type and return it with `?`.
+
+Enforced by: Clippy
+Applies to tests: no
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: clippy::unwrap_in_result, clippy::panic_in_result_fn

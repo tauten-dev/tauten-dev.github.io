@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-R001
+# cwd: .
+# exit: 0
+# ---
+TAU-R001: Baseline must be tight
+
+Why: The baseline records existing violations so a project can adopt the profile gradually. It may only shrink: once a violation is fixed, its slot must be removed, or a new violation could silently take it.
+
+Fix: Run `cargo tauten baseline` and commit the smaller baseline file.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

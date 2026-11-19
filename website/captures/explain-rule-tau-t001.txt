@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-T001
+# cwd: .
+# exit: 0
+# ---
+TAU-T001: Every workspace crate declares a tier
+
+Why: Rules depend on the tier; an undeclared crate would escape the profile.
+
+Fix: Add `[package.metadata.tauten]` with `tier = "kernel"`, `"core"` or `"edge"` to the crate's Cargo.toml.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

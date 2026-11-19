@@ -1,0 +1,17 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-X004
+# cwd: .
+# exit: 0
+# ---
+TAU-X004: No exceptions to this rule here
+
+Why: Some rules admit no exceptions: stub macros anywhere, and any profile lint in a kernel crate, whose code must stay extractable and provable.
+
+Fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
+
+Enforced by: Tauten
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

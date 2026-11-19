@@ -1,0 +1,18 @@
+# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# cmd: cargo tauten explain TAU-E001
+# cwd: .
+# exit: 0
+# ---
+TAU-E001: Never ignore a result
+
+Why: Dropping a Result or discarding the original error is how failures go silent.
+
+Fix: Propagate with `?`, handle the error, or wrap it with context (`.map_err(|e| MyError::Io(e))`) instead of discarding it.
+
+Enforced by: Rustc
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny
+Lints: unused_must_use, clippy::map_err_ignore
