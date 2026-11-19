@@ -32,7 +32,7 @@
 <div class="wrap page-head"><p class="eyebrow">Enforcement</p><h1>What is enforced, and what is not</h1>
 <p class="lede">Every mechanism, what enforces it, how far it has got, and the honest gap. The table is the core repository's, reproduced unedited.</p></div>
 <div class="wrap">
-<p class="small muted">Reproduced from <code>docs/MAPPING.md</code> at <code>bbb20eb</code>. Strength codes are explained in its first paragraphs.</p>
+<p class="small muted">Reproduced from <code>docs/MAPPING.md</code> at <code>d3bdea7</code>. Strength codes are explained in its first paragraphs.</p>
 <div class="prose wide"><h2 id="sovel-idea-rust-mechanism">Sovel idea → Rust mechanism</h2>
 <p>This is the enforcement table the website will reproduce unedited. "Status"
 says what exists in this repository today; "Strength" says what does the
@@ -237,15 +237,16 @@ only by a visible, reasoned <code>#[expect]</code>, and not at all where marked
 </tbody>
 </table></div></div>
 <h2 id="known-gaps">Known gaps</h2>
-<p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>bbb20eb</code>.</p>
+<p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>d3bdea7</code>.</p>
 <div class="prose"><ul>
 <li>The capability rule is discipline, not confinement (see MAPPING.md).</li>
 <li>The kernel's arithmetic and indexing rules duplicate what an Aeneas proof
   already establishes (dry-run report). P5 subsumes them only for functions
   with a recorded, current, total proof. Writfold's adoption branch
-  subsumes 130 of its 159 extracted-kernel findings this way; the other 29
-  are in functions whose theorems need preconditions (<code>i &lt; len</code>, a cursor
-  invariant, a capacity bound).</li>
+  subsumes 142 of its 159 extracted-kernel findings this way, after
+  rewriting four helpers to be total (<code>get</code> instead of indexing; 10 more
+  findings disappeared with the indexing). The remaining 7 are in <code>splice</code>,
+  whose only panic is a length overflow past <code>usize::MAX</code>.</li>
 <li>No credit through callers: a helper with a precondition gets no
   subsumption even when every caller is proved total.</li>
 <li>tauten trusts the project's gate output, including its total-shape check;
@@ -256,19 +257,28 @@ only by a visible, reasoned <code>#[expect]</code>, and not at all where marked
 <li>Mutant counting differs: writfold's gate counts only direct proof
   failures, tauten's also counts theorems that depend on a broken one.</li>
 <li>S002 (placeholder comments) is a heuristic.</li>
-<li>The benchmark's dev split (4 tasks, one host) hit a ceiling in the pilot.
-  A held-out suite (20 tasks, 3 hosts, per-trial containers) is built on the
-  local branch <code>bench-heldout</code> and kept unpublished until it has run; running
-  it needs the owner's budget approval.</li>
+<li>The benchmark hits a ceiling. Three calibration rounds without the
+  profile (200 trials, Sonnet 5.5 and Haiku 5.5, 7 tasks on 3 hosts, hidden
+  oracles in dev and release builds) had 2 escaped defects. The
+  preregistered go/no-go rule (10-26 of 40 on the probe tasks) came out
+  no-go (Sonnet 1/40, Haiku 0/40), so the held-out run was not started.</li>
+<li>Finding validity (audit E1, registered before classifying): of 120
+  sampled deny-level findings in that agent-written code, two independent
+  classifiers confirmed <strong>0</strong> as reachable defects (exact 95% interval
+  0-3.0%); 118 refuted with a written bound argument, 2 undetermined. Neither
+  escaped defect was on a flagged line. On these hosts the profile's
+  findings are predominantly not defects. Untested: whether those bounds
+  survive later edits (maintenance chains, not run).</li>
 <li><code>#[refined]</code> wraps only <code>tauten::refine::Frozen</code> types (primitives,
   <code>String</code>, std containers of those): interior mutability or a user-written
   <code>Clone</code> could break a checked predicate (external review, 2026-11-19).
   Predicates are arbitrary closures, not a checked fragment.</li>
 <li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no
   Kani (<code>cfg(kani)</code>) lowering yet.</li>
-<li><strong>Development pilot completed; held-out benefit not established.</strong> The
-  dev-split pilot could not separate the arms on escaped defects; nothing
-  here supports a claim that the profile reduces escaped defects.</li>
+<li><strong>No defect-reduction benefit established.</strong> The pilot could not
+  separate the arms, the held-out run was stopped by its own go/no-go rule,
+  and audited findings were not defects; nothing here supports a claim that
+  the profile reduces escaped defects.</li>
 </ul></div>
 <h2 id="dropped">Out of scope for now</h2>
 <div class="prose"><p>Out of scope for now (a scope decision, not a claim that Rust cannot
@@ -280,7 +290,7 @@ does not enforce them yet. Benchmark results set their priority; a low
 frequency in one task suite does not rule a defect class out.</p></div>
 </div>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>bbb20eb</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>d3bdea7</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
 <script src="/assets/copy.js?v=c5343030" defer></script>
 </body>
 </html>

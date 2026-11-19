@@ -33,7 +33,7 @@
 <section class="hero"><div class="wrap home">
 <h1><img class="logo-light" src="/assets/tauten-icon.svg" width="52" height="52" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="52" height="52" alt="">tauten</h1>
 <p class="pitch">Strict Rust for code written by agents. The mistakes the compiler accepts (<code>unwrap</code> on input, unchecked arithmetic, stubs left behind, dropped errors, library code reading the clock) become checked rules, each with a stable ID and a repair hint.</p>
-<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>Version 0.0.3 is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>. Development pilot completed; held-out benefit not established (<a href="/benchmark/">benchmark</a>).</span></p>
+<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>Version 0.0.3 is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>. No defect-reduction benefit established (<a href="/benchmark/">benchmark</a>).</span></p>
 
 <h2>Use it</h2>
 <div class="copy-line"><span class="prompt" aria-hidden="true">$</span><code>cargo install --locked cargo-tauten</code><button class="copy-btn" type="button" hidden data-copy="cargo install --locked cargo-tauten" aria-label="Copy command: cargo install --locked cargo-tauten">Copy</button></div><p class="small muted">Needs Rust 1.98 or newer, with clippy.</p>
@@ -43,7 +43,7 @@
 <span class="muted"># one diagnostic per line, for agents</span>
 <span class="prompt">$</span> cargo tauten check --format json</code></pre>
 <div class="panel diag"><div class="panel-head"><span class="path">$ cargo tauten check</span><span class="meta"><span class="chip prov">Captured</span></span></div><pre class="diag-body" tabindex="0" aria-label="cargo tauten check output for the rej-unwrap fixture"><code><span class="line" style="padding-left:17ch;text-indent:-17ch"><span class="d-err">error</span>[<a href="/rules/tau-p001/">TAU-P001</a>]: used `unwrap()` on a `Result` value</span><span class="line" style="padding-left:6ch;text-indent:-6ch">  <span class="d-mut">--&gt;</span> rej-unwrap/src/lib.rs:6:5 (core crate `rej-unwrap`)</span><span class="line" style="padding-left:10ch;text-indent:-10ch">  <span class="d-mut">=</span> <span class="d-lab">rule:</span> No unwrap/expect on fallible values (enforced by Clippy)</span><span class="line" style="padding-left:9ch;text-indent:-9ch">  <span class="d-mut">=</span> <span class="d-lab">fix:</span> Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose.</span></code></pre></div>
-<p class="small muted">Captured from the <code>rej-unwrap</code> fixture in the tauten repository at <code>bbb20eb</code>.</p>
+<p class="small muted">Captured from the <code>rej-unwrap</code> fixture in the tauten repository at <code>d3bdea7</code>.</p>
 
 <h2>What it is</h2>
 <p>Each crate declares a tier; the less it may touch, the stricter its rules. Dependencies point inward only.</p>
@@ -53,7 +53,7 @@
 <ul class="home-links"><li><a href="/status/">Status</a> <span class="muted">all 37 rules; open one for an example and the diagnostic it prints</span></li><li><a href="/rules/">Rules</a> <span class="muted">the reference table, with filters</span></li><li><a href="/proofs/">Proofs</a> <span class="muted">Lean proofs over tauten's own decision code</span></li><li><a href="/benchmark/">Benchmark</a> <span class="muted">the dev-split pilot and the preregistered design</span></li><li><a href="/start/">Docs</a> <span class="muted">getting started, tiers, the baseline ratchet</span></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a> <span class="muted">tauten-dev/tauten</span></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a> <span class="muted">cargo-tauten and the support crates</span></li></ul>
 </div></section>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>bbb20eb</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="/enforcement/">Enforcement</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>d3bdea7</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
 <script src="/assets/copy.js?v=c5343030" defer></script>
 </body>
 </html>
