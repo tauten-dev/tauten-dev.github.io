@@ -305,6 +305,8 @@ def crate_pages(site: Site) -> None:
         ("refined_field_unreachable", "Even the defining module cannot build <code>Percent(200)</code>."),
         ("refined_public_field", "A public field is rejected: it would let callers skip the check."),
         ("refined_derive_default", "Derives that could construct a value without the check are rejected."),
+        ("refined_interior_mutability", "A <code>Cell</code> inside a refined type could change after the check, so it is rejected."),
+        ("refined_custom_clone", "A user-written <code>Clone</code> could break the predicate, so the inner type must be <code>Frozen</code>."),
         ("contract_needs_result", "Contracts need a <code>Result</code> return type to return a violation."),
         ("old_needs_copy", "<code>old(..)</code> snapshots only <code>Copy</code> values."),
     ]

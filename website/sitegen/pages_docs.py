@@ -93,9 +93,9 @@ def start(site: Site) -> None:
 def enforcement(site: Site) -> None:
     d = site.data
     mapping = d.core.blob("docs/MAPPING.md")
-    head, sep, dropped = mapping.partition("\nDropped as not portable to Rust")
+    head, sep, dropped = mapping.partition("\nOut of scope for now")
     if not sep:
-        raise BuildError("MAPPING.md: 'Dropped as not portable to Rust' paragraph not found")
+        raise BuildError("MAPPING.md: 'Out of scope for now' paragraph not found")
     status = d.core.blob("docs/STATUS.md")
     body = f"""<div class="wrap page-head"><p class="eyebrow">Enforcement</p><h1>What is enforced, and what is not</h1>
 <p class="lede">Every mechanism, what enforces it, how far it has got, and the honest gap. The table is the core repository's, reproduced unedited.</p></div>
@@ -105,8 +105,8 @@ def enforcement(site: Site) -> None:
 <h2 id="known-gaps">Known gaps</h2>
 {_repro(site, "docs/STATUS.md")}
 <div class="prose">{_md(site, md.section(status, "Known gaps"), "docs/STATUS.md")}</div>
-<h2 id="dropped">Dropped as not portable to Rust</h2>
-<div class="prose">{_md(site, "Dropped as not portable to Rust" + dropped, "docs/MAPPING.md")}</div>
+<h2 id="dropped">Out of scope for now</h2>
+<div class="prose">{_md(site, "Out of scope for now" + dropped, "docs/MAPPING.md")}</div>
 </div>"""
     site.add("/enforcement/", "Enforcement", "What tauten enforces, with what, and what it does not enforce: the mapping table and known gaps.", body)
 

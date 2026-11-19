@@ -1,4 +1,4 @@
-# core: 77c559fc06f4dfe8d14e030f9273f62b6817f0f1
+# core: bbb20ebc7f1fb587fccd6b580aa3a2c23d6d95fb
 # cmd: cargo tauten explain TAU-P004
 # cwd: .
 # exit: 0
