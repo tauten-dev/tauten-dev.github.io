@@ -1,9 +1,9 @@
 # tauten.dev
 
-Source of the website for [tauten](https://github.com/tauten-dev/tauten), a discipline
-for Rust: authority passed explicitly, effects visible in signatures, checked
-evidence, refinement types, and proofs over the shipped code. Most pages are generated from the core
-repository at one pinned commit; nothing is copied by hand.
+Source of the website for [tauten](https://github.com/tauten-dev/tauten), a strict
+discipline for Rust with Lean proofs over the shipped code. Most pages are
+generated from the core repository at one pinned commit; nothing is copied by
+hand.
 
 ## Build and preview
 
@@ -55,9 +55,9 @@ the release switches live in `website/config.toml`:
    files are allow-listed.
    6b. `/status/` carries the benchmark sentence from
    `docs/DISCIPLINE-PROPOSAL.md` and "tauten makes no defect-reduction claim";
-   any page naming an unreleased command or API (`ship`, `verify --level`,
-   `#[effects]`, `#[evidence]`, `#[derive(Cap)]`, `effects.lock`) carries an
-   "In progress" or "Planned" label.
+   any page naming an unreleased command (`cargo tauten ship`,
+   `verify --level`, `effects.lock`) carries a "Planned" label.
+   (`#[effects]`, `#[evidence]` and `#[derive(Cap)]` shipped in 0.0.4.)
 7. Internal links and anchors resolve, ids are unique per page, nothing
    is loaded from a third party, and docs.rs links carry `latest_release`.
 
@@ -69,23 +69,31 @@ Also checked: WCAG AA contrast of every colour pair in both themes
 ## Content rules
 
 - Every fact is reproduced from a core file at the pinned commit, computed by
-  the build, or captured CLI output. Nothing is asserted from memory.
-- Status badges come only from STATUS.md through `status-map.toml`.
+  the build, or captured CLI output. Nothing is asserted from memory. Every
+  code excerpt resolves through `website/snippets.toml`; every output panel
+  comes from a capture.
+- Few, sharp examples. The home page has exactly three, each a source panel,
+  its captured output and one "Limit" line: authority as a parameter
+  (TAU-A001), declared effects (TAU-F001), and a proof that subsumes a
+  finding (`fixtures/proofs-subsume`).
+- Two badges only: `Proved` in the claims table on `/proofs/`, and `Planned`
+  where something unreleased must be named. Status badges, if any return,
+  come only from STATUS.md through `status-map.toml` (currently empty).
 - Lint and convention rules "flag" or "reject"; nothing "prevents".
 - No defect-reduction claim. The benchmark appears as one sentence on
   `/status/#benchmark`, quoted from `docs/DISCIPLINE-PROPOSAL.md`; the bench
   design and reports stay in the core repository.
-- Every page has the home page's shape: a pitch line, one code or CLI panel,
-  a short list, links. Pages: `/`, `/discipline/` (four ideas plus proofs and
-  cadence, each with a before/after, a strength label and one honest gap),
-  `/proofs/`, `/start/` (includes the agent profile and the CLI reference),
-  `/rules/` with one page per rule, `/status/`. `/benchmark/`, `/enforcement/`,
-  `/agents/` and `/crates/…` are redirects; API docs live on docs.rs.
-- Anything not released carries "In progress" (being built, milestone D0)
-  or "Planned" / "Planned (0.1)". Before/after snippets come from the
-  proposal at the pinned commit (`snippets.toml`), labelled "Proposed API".
+- The site describes tauten, not any adopting project.
+- Pages, one column each: `/` (pitch, install, three examples, what it does
+  not do), `/start/` (install, tiers, check, baseline, proofs, agent profile,
+  commands), `/proofs/` (what "proved" means, the gate, the claims table,
+  what is trusted), `/rules/` with one page per rule, `/status/` (benchmark,
+  known gaps, links to STATUS.md, ROADMAP.md, CHANGELOG.md and
+  `bench/README.md`). `/discipline/`, `/benchmark/`, `/enforcement/`,
+  `/agents/` and `/crates/…` are redirects; `/agents/AGENTS.tauten.md` serves
+  the raw agent profile; API docs live on docs.rs.
 - Palettes: paper (light) and paper-dark, shared with the sibling sites; the
-  theme select offers System, Paper and Paper dark.
+  theme select in the footer offers System, Paper and Paper dark.
 
 ## Publish
 
@@ -109,8 +117,7 @@ $ python3 website/publish.py
 commits it to the `published-site` branch without force-pushing, and
 dispatches `.github/workflows/pages.yml` with that commit's full SHA. The
 workflow checks out exactly that commit and uploads it. The pinned action
-SHAs are the ones writfold uses; confirm them against upstream before first
-use.
+SHAs must be confirmed against upstream before first use.
 
 ## License
 

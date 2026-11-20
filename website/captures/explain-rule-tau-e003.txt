@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-E003
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: `let _ = fallible()` is visible but still loses the failure. In library cod
 
 Fix: Handle or propagate the result. If discarding is correct, say why: `#[expect(clippy::let_underscore_must_use, reason = "best-effort cleanup")]`.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: No `let _ =` discard of a `#[must_use]` value.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts.
 Applies to tests: no
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

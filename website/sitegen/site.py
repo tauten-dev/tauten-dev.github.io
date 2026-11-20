@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import hashlib
-import html
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from .render import code_html, diag_html, esc, panel
 from .source import Capture, Data, exceptions_label
 
-NAV = [("Start", "/start/"), ("Discipline", "/discipline/"), ("Proofs", "/proofs/"), ("Rules", "/rules/"),
-       ("Status", "/status/")]
+NAV = [("Start", "/start/"), ("Proofs", "/proofs/"), ("Rules", "/rules/"), ("Status", "/status/")]
 
 
 @dataclass
@@ -81,41 +79,31 @@ class Site:
 
     # ------------------------------------------------------- components ---
     def snippet_panel(self, *names: str, title: str | None = None, tier: str | None = None,
-                      provenance: str = "From the repo", numbers: bool = False, marks: dict | None = None,
-                      label: str | None = None, compact: bool = False) -> str:
+                      marks: dict | None = None, label: str | None = None, tail: str | None = None) -> str:
+        """Excerpts from snippets.toml, numbered with their real line numbers; `tail` is a muted last line."""
         snips = [self.snippets[n] for n in names]
         lang = snips[0]["lang"]
         parts = []
         for i, s in enumerate(snips):
             if i:
-                parts.append('<span class="line elide">// …</span>')
-            parts.append(code_html(s["code"], lang, numbers=numbers, marks=marks, first_line=s["first_line"]))
+                parts.append('<span class="line elide">…</span>')
+            parts.append(code_html(s["code"], lang, numbers=True, marks=marks, first_line=s["first_line"]))
+        if tail:
+            parts.append(f'<span class="line elide">{esc(tail)}</span>')
         path = snips[0]["path"]
-        head = esc(title or path)
-        foot = f"Excerpt of {self.src(path)} at <code>{self.short}</code>"
-        return panel("".join(parts), title=head, label=label or f"Code from {path}", tier=tier,
-                     provenance=None if compact else provenance, foot=foot, tier_chip=not compact)
+        return panel("".join(parts), caption=self.src(path, title), label=label or f"Code from {path}", tier=tier)
 
     def capture_panel(self, name: str, text: str | None = None, *, title: str | None = None,
-                      tier: str | None = None, label: str | None = None, copy: bool = False) -> str:
+                      label: str | None = None) -> str:
         cap = self.captures[name]
         body = cap.body.rstrip("\n") if text is None else text
-        return panel(diag_html(body, self.rule_ids), title=esc(title or f"$ {cap.cmd}"),
-                     label=label or f"Output of {cap.cmd}", tier=tier, provenance="Captured", diag=True,
-                     copy_raw=body if copy else None)
+        return panel(diag_html(body, self.rule_ids), caption=esc(title or f"$ {cap.cmd}"),
+                     label=label or f"Output of {cap.cmd}", diag=True)
 
-    def block_panel(self, rule_id: str, crate: str, *, capture: str = "check-fixtures-warnings",
-                    tier: str | None = None, title: str = "$ cargo tauten check") -> str:
-        block = self.captures[capture].block(rule_id, crate)
-        return self.capture_panel(capture, block["text"], title=title, tier=tier,
-                                  label=f"cargo tauten check output: {rule_id} in {crate}")
-
-    def fixture_panel(self, fixture, *, marks: dict[int, int] | None = None, title: str | None = None) -> str:
-        foot = f"{self.src(fixture.src_path)} at <code>{self.short}</code>"
+    def fixture_panel(self, fixture, *, marks: dict[int, int] | None = None) -> str:
         return panel(code_html(fixture.src, "rust", numbers=bool(marks), marks=marks),
-                     title=esc(title or fixture.src_path.removeprefix("fixtures/cases/")),
-                     label=f"Source of fixture {fixture.name}", tier=fixture.tier,
-                     provenance="From the repo", foot=foot)
+                     caption=self.src(fixture.src_path, fixture.src_path.removeprefix("fixtures/cases/")),
+                     label=f"Source of fixture {fixture.name}", tier=fixture.tier)
 
     # ------------------------------------------------------------ shell ---
     def asset_version(self) -> str:
@@ -158,21 +146,21 @@ class Site:
         for label, href in NAV:
             current = ' aria-current="page"' if path.startswith(href) else ""
             nav.append(f'<li><a href="{href}"{current}>{label}</a></li>')
+        gh = f"https://github.com/{self.config['repository']}"
         if self.repo_public:
-            nav.append(f'<li><a href="https://github.com/{self.config["repository"]}">GitHub</a></li>')
-        if self.published:
-            nav.append(f'<li><a href="{self.docs_url}">API</a></li>')
+            nav.append(f'<li><a href="{gh}">GitHub</a></li>')
         footer = ["<li>MIT</li>"]
         if self.repo_public:
-            footer.append(f'<li><a href="https://github.com/{self.config["repository"]}">GitHub</a></li>')
-        else:
-            footer.append("<li>Source repository not public yet</li>")
+            footer.append(f'<li><a href="{gh}">GitHub</a></li>')
         if self.published:
             footer.append('<li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li>')
             footer.append(f'<li><a href="{self.docs_url}">docs.rs</a></li>')
-        footer += ['<li><a href="/discipline/">Discipline</a></li>', '<li><a href="/status/">Status</a></li>',
-                   f"<li>built from tauten@<code>{self.short}</code>, {self.data.core.date}</li>",
-                   '<li><span class="badge b-planned">pre-release</span></li>']
+        built = f"<code>{self.short}</code>"
+        if self.repo_public:
+            built = f'<a href="{gh}/tree/{self.ref}">{built}</a>'
+        footer.append(f"<li>built from tauten@{built}</li>")
+        footer.append('<li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option>'
+                      '<option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li>')
         script_tags = "".join(f'<script src="/assets/{s}?v={v}" defer></script>' for s in ("copy.js", *scripts))
         d = esc(description)
         t = esc(page_title)
@@ -202,9 +190,8 @@ class Site:
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap bar">
-<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="24" height="24" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="24" height="24" alt="">tauten</a>
 <nav class="site-nav" aria-label="Primary"><ul>{"".join(nav)}</ul></nav>
-<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label>
 </div></header>
 <main id="main">
 {body}
@@ -216,14 +203,6 @@ class Site:
 """
 
 
-def toc(items: list[tuple[str, str]], title: str = "On this page") -> tuple[str, str]:
-    """(desktop rail, mobile details) for a reference page."""
-    links = "".join(f'<li><a href="#{i}">{html.escape(t)}</a></li>' for i, t in items)
-    rail = f'<nav class="rail" aria-label="{title}"><p class="eyebrow">{title}</p><ul>{links}</ul></nav>'
-    mobile = f'<details class="toc-m"><summary>{title}</summary><nav class="toc" aria-label="{title} (compact)"><ul>{links}</ul></nav></details>'
-    return rail, mobile
-
-
-def ref_layout(items: list[tuple[str, str]], body: str, title: str = "On this page") -> str:
-    rail, mobile = toc(items, title)
-    return f'<div class="wrap ref">{rail}<div>{mobile}{body}</div></div>'
+def ref_layout(body: str) -> str:
+    """Reference pages use the same single column as every other page."""
+    return f'<div class="wrap">{body}</div>'

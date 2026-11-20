@@ -1,0 +1,20 @@
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# cmd: cargo tauten explain TAU-H001
+# cwd: .
+# exit: 0
+# ---
+TAU-H001: Release builds check integer overflow
+
+Why: Integer overflow panics in debug builds but silently wraps in release builds unless `overflow-checks` is on. The arithmetic lints cover the source tauten scans; this setting covers everything compiled in the workspace, dependencies included. The decision is proved (tauten_check_kernel::manifest::hardening): a setting tauten cannot read is never clean. Limits: it covers binaries built from this workspace, not downstream users of a library crate (their own profile decides), and an environment override (`CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS`) or a Cargo config outside the workspace (for example `~/.cargo/config.toml`) at build time is not seen.
+
+Fix: Add `overflow-checks = true` under `[profile.release]` in the workspace Cargo.toml (`cargo tauten init --write` does), and remove any `[profile.release.package.<name>]` or `.cargo/config.toml` entry that sets it to false.
+
+Decided by: Tauten
+Decides: Release builds of the workspace check integer overflow.
+Sees: manifest; complete: yes
+Does not see: Settings outside the workspace manifests (environment variables, Cargo configs outside the workspace). Downstream builds of a library crate.
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

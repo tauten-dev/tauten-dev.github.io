@@ -88,6 +88,10 @@ def main() -> None:
         cap("check-fixtures-warnings", ["check", "--warnings"], fixtures, "fixtures/cases")
         cap("check-fixtures-json", ["check", "--format", "json"], fixtures, "fixtures/cases")
         cap("explain-p001", ["explain", "TAU-P001"], src, ".")
+        # A kernel crate whose recorded proofs subsume some findings. Without
+        # --warnings only the summary line prints.
+        cap("check-proofs-subsume", ["check", "--warnings"], src / "fixtures" / "proofs-subsume",
+            "fixtures/proofs-subsume")
         # One explain capture per rule, for the status page's rule table.
         rules = tomllib.loads((src / "crates" / "tauten-check" / "rules.toml").read_text())["rule"]
         for rule in rules:

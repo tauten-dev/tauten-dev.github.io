@@ -18,11 +18,14 @@ BANNED = [
     r"\bsignificant(ly)?\b", r"\bproves\b",
     # No defect-reduction claim (docs/DISCIPLINE-PROPOSAL.md, section 6).
     r"\breduc(e|es|ed|ing) (escaped )?(defects|bugs)\b", r"\bfewer (escaped )?(defects|bugs)\b",
+    # The site describes tauten, not one adopting project (owner, 2026-11-20).
+    r"\bwritfold\b",
 ]
 
-# Commands and APIs that are not released yet. A page that names one must
+# Commands that are not released yet (`#[effects]`, `#[evidence]` and
+# `#[derive(Cap)]` shipped in 0.0.4). A page that names one must
 # also carry an "In progress" or "Planned" label.
-UNRELEASED = ["cargo tauten ship", "verify --level", "#[effects", "#[evidence", "#[derive(Cap)]", "effects.lock"]
+UNRELEASED = ["cargo tauten ship", "verify --level", "effects.lock"]
 
 # Exact sentences reproduced from core files that use those words in a
 # negative sense. They are removed before the grep; nothing else is excused.

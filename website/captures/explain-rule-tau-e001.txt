@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-E001
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Dropping a Result or discarding the original error is how failures go silen
 
 Fix: Propagate with `?`, handle the error, or wrap it with context (`.map_err(|e| MyError::Io(e))`) instead of discarding it.
 
-Enforced by: Rustc
+Decided by: Rustc
+Decides: No `#[must_use]` value (a `Result`) dropped silently.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

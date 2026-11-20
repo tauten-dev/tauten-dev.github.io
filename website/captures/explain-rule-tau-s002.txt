@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-S002
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Comments such as 'for now', 'placeholder', 'TODO' or 'FIXME' usually mark u
 
 Fix: Finish the work, or track it in your issue tracker and remove the comment.
 
-Enforced by: Tauten
+Decided by: Tauten
+Decides: Comments that read like placeholders ("for now", "TODO") are flagged (a text heuristic).
+Sees: source; complete: no (a heuristic: it never blocks)
+Does not see: Attributes and items produced by macros; files outside a member's `src/`. Placeholder wording it has no pattern for.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel warn

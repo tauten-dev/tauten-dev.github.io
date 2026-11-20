@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-U002
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Each unsafe operation needs its own stated justification for review.
 
 Fix: Split blocks to one unsafe operation each and add a `// SAFETY:` comment explaining why the contract holds.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: Every `unsafe` block in the edge has a `SAFETY:` comment and one unsafe operation.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel -

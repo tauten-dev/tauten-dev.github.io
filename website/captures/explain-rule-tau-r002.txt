@@ -1,0 +1,20 @@
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# cmd: cargo tauten explain TAU-R002
+# cwd: .
+# exit: 0
+# ---
+TAU-R002: Recorded proof claims are not weakened
+
+Why: A proof claim is only as strong as its theorems and the mutants that show they bite, and as the assumptions it rests on. Deleting a mutant, dropping a theorem or adding an assumption makes a claim weaker while its badge still says proved. The committed proofs/claims.json is the record; proofs/claims.toml may not drop a recorded theorem or mutant, or add an assumption, unless an `[[amend]]` entry names the change and gives a reason. The decision is proved (tauten_check_kernel::registry::conserves); it is relative to the committed record, and reviewing that record's diff is trusted.
+
+Fix: Restore the theorem, mutant or assumption, or add `[[amend]]` with `file`, `function`, `kind` (theorem, mutant or assumption), `name` and `reason` to proofs/claims.toml. After `cargo tauten proofs` re-records proofs/claims.json, remove the amendment.
+
+Decided by: Tauten
+Decides: A recorded proof claim keeps its theorems and mutants and gains no assumption, unless amended with a reason.
+Sees: record; complete: yes
+Does not see: The committed `proofs/claims.json` itself (its diff is reviewed).
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

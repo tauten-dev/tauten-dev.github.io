@@ -1,0 +1,31 @@
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# cmd: cargo tauten check --warnings
+# cwd: fixtures/proofs-subsume
+# exit: 1
+# ---
+subsumed[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
+  --> sub-kernel/src/lib.rs:8:12 (kernel crate `sub-kernel`)
+  = rule: Checked arithmetic (decided by Clippy)
+  = subsumed by proof Proofs.SubKernel.add_capped_spec (proofs/claims.json; not an error)
+
+subsumed[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
+  --> sub-kernel/src/lib.rs:8:45 (kernel crate `sub-kernel`)
+  = rule: Checked arithmetic (decided by Clippy)
+  = subsumed by proof Proofs.SubKernel.add_capped_spec (proofs/claims.json; not an error)
+
+subsumed[TAU-P003]: indexing may panic
+  --> sub-kernel/src/lib.rs:14:39 (kernel crate `sub-kernel`)
+  = rule: No panicking index or slice (decided by Clippy)
+  = subsumed by proof Proofs.SubKernel.first_or_zero_spec (proofs/claims.json; not an error)
+
+error[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
+  --> sub-kernel/src/lib.rs:21:5 (kernel crate `sub-kernel`)
+  = rule: Checked arithmetic (decided by Clippy)
+  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+
+error[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
+  --> sub-kernel/src/lib.rs:27:5 (kernel crate `sub-kernel`)
+  = rule: Checked arithmetic (decided by Clippy)
+  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+
+tauten: 2 error(s), 0 warning(s), 3 subsumed by proofs

@@ -21,7 +21,7 @@ def rules_index(site: Site) -> None:
     by = {k: site.count_by(k) for k in ("clippy", "rustc", "tauten", "convention")}
     never = len(site.no_exception_rules)
     conv = f", {by['convention']} by convention" if by["convention"] else ""
-    counts = (f"{n} rules: {by['clippy']} enforced by Clippy, {by['rustc']} by rustc, {by['tauten']} by a tauten "
+    counts = (f"{n} rules: {by['clippy']} decided by Clippy, {by['rustc']} by rustc, {by['tauten']} by a tauten "
               f"structural check{conv}. {never} admit no exception.")
     rows, attrs = [], []
     families = []
@@ -42,7 +42,7 @@ def rules_index(site: Site) -> None:
         data = "".join(f' data-{t}="{lv[t]}"' for t in TIERS)
         body_rows.append(f'<tr data-id="{r["id"]}" data-fam="{fam}" data-by="{r["enforced_by"]}" data-exc="{exc}"{data}>'
                          + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
-    headers = ["ID", "Rule", "kernel", "core", "edge", "Tests", "Exceptions", "Enforced by"]
+    headers = ["ID", "Rule", "kernel", "core", "edge", "Tests", "Exceptions", "Decided by"]
     thead = "".join(f'<th scope="col">{h}</th>' for h in headers)
     tbl = (f'<div class="table-scroll" tabindex="0" role="region" aria-label="Rule table">'
            f'<table id="rules" class="sticky"><caption>Generated from <code>crates/tauten-check/rules.toml</code> at '
@@ -54,15 +54,13 @@ def rules_index(site: Site) -> None:
     filters = f"""<form id="rule-filters" class="filters" hidden onsubmit="return false" aria-label="Filter rules">
 <label>Search<input type="search" name="q" placeholder="ID, title or lint"></label>
 <label>Applies in tier<select name="tier"><option value="">any</option><option>kernel</option><option>core</option><option>edge</option></select></label>
-<label>Enforced by<select name="by"><option value="">any</option>{enforcer_opts}</select></label>
+<label>Decided by<select name="by"><option value="">any</option>{enforcer_opts}</select></label>
 <label class="cb"><input type="checkbox" name="nx"> No exceptions</label>
 <span id="rule-count" class="muted" aria-live="polite"></span></form>"""
     body = f"""<div class="wrap page-head"><p class="eyebrow">Rule reference</p><h1>Rules</h1>
-<p class="lede">{counts} Each rule has a stable ID; <code>cargo tauten explain &lt;ID&gt;</code> prints it in the terminal.</p>
-<p>What a rule cannot catch is listed with each idea on <a href="/discipline/">Discipline</a>.</p></div>
-{ref_layout([(f"family-{f.lower()}", f"{f} · {FAMILIES.get(f, f)}") for f in families],
-            filters + tbl + f'<p class="small">{inline_md(notes_line)}</p>', "Families")}"""
-    site.add("/rules/", "Rules", f"The {n} rules of the tauten profile, with level per tier, test scope, exceptions and what enforces each.",
+<p class="lede">{counts} Each rule has a stable ID; <code>cargo tauten explain &lt;ID&gt;</code> prints it in the terminal.</p></div>
+{ref_layout(filters + tbl + f'<p class="small">{inline_md(notes_line)}</p>')}"""
+    site.add("/rules/", "Rules", f"The {n} rules of the tauten profile, with level per tier, test scope, exceptions and what decides each.",
              body, scripts=("rules.js",))
 
 
@@ -72,7 +70,6 @@ def rule_pages(site: Site) -> None:
     for i, r in enumerate(rules):
         rid = r["id"]
         exc = exceptions_label(r)
-        toc = [("why", "Why"), ("fix", "Fix")]
         parts = [f'<h2 id="why">Why</h2><p>{inline_md(r["why"])}</p>', f'<h2 id="fix">Fix</h2><p>{inline_md(r["fix"])}</p>']
         detail = []
         if r.get("lints"):
@@ -85,11 +82,9 @@ def rule_pages(site: Site) -> None:
             else:
                 detail.append(f"<p><strong>{head}:</strong> {items}</p>")
         if detail:
-            toc.append(("what", "What it checks"))
             parts.append('<h2 id="what">What it checks</h2>' + "".join(detail))
         seen = [f for f in site.data.fixtures if rid in f.expect]
         if seen:
-            toc.append(("fixtures", "Seen in fixtures"))
             figs = []
             for f in seen:
                 blocks = [b for b in warnings_cap.blocks() if b["id"] == rid and b["crate"] == f.name]
@@ -97,12 +92,11 @@ def rule_pages(site: Site) -> None:
                     continue
                 marks = {b["line"]: b["column"] for b in blocks if b["line"]}
                 text = "\n\n".join(b["text"] for b in blocks)
-                figs.append(f'<figure><div class="pair">{site.fixture_panel(f, marks=marks)}'
+                figs.append(f'<figure class="ex">{site.fixture_panel(f, marks=marks)}'
                             f'{site.capture_panel("check-fixtures-warnings", text, title="$ cargo tauten check", label=f"Output for {f.name}")}'
-                            f'</div><figcaption><span class="chip prov">Captured</span> Fixture <code>{f.name}</code> '
-                            f'({f.tier or "no tier"}); it expects {", ".join(f.expect)}.</figcaption></figure>')
+                            f'<figcaption>Fixture <code>{f.name}</code> ({f.tier or "no tier"}) expects '
+                            f'{", ".join(f.expect)}. Output captured at <code>{site.short}</code>.</figcaption></figure>')
             parts.append('<h2 id="fixtures">Seen in fixtures</h2>' + "".join(figs))
-        toc.append(("explain", "In the terminal"))
         explain = site.captures.get(f"explain-rule-{rid.lower()}")
         shown = site.capture_panel(explain.name, label=f"cargo tauten explain {rid}") if explain else ""
         parts.append(f'<h2 id="explain">In the terminal</h2>{copy_line(f"cargo tauten explain {rid}")}{shown}')
@@ -115,9 +109,9 @@ def rule_pages(site: Site) -> None:
         levels = " ".join(f'<span class="small muted">{t}</span> {level_chip(level(r, t))}' for t in TIERS)
         head = f"""<p class="eyebrow"><a href="/rules/">Rules</a> / <span class="id">{rid}</span></p>
 <h1 id="{rid}">{inline_md(r["title"])}</h1>
-<div class="facts"><span class="chip">enforced by {ENFORCERS[r["enforced_by"]]}</span> {levels}</div>
+<div class="facts"><span class="chip">decided by {ENFORCERS[r["enforced_by"]]}</span> {levels}</div>
 <div class="facts small"><span>Applies to tests: <strong>{"yes" if r.get("in_tests", True) else "no"}</strong></span>
 <span>Exceptions: <strong>{EXC_TEXT[exc]}</strong></span></div>"""
-        body = f'<div class="wrap page-head"></div>{ref_layout(toc, head + "".join(parts) + pn)}'
+        body = f'<div class="wrap page-head"></div>{ref_layout(head + "".join(parts) + pn)}'
         site.add(f"/rules/{rid.lower()}/", f"{rid}: {re.sub(r'`', '', r['title'])}",
                  f"{rid}: {r['title']}. {r['why']}", body)

@@ -61,6 +61,8 @@ def pairs(t: dict[str, str]) -> list[tuple[str, str, str, str, float]]:
             out.append((fg, t[fg], name, bg, 4.5))
     out.append(("err", t["err"], "deny-chip", mix(t["err"], t["card"], 0.12), 4.5))
     out.append(("accent-ink", t["accent-ink"], "accent-text", t["accent-text"], 4.5))
+    # subsumed[...] in diagnostics (.d-sub) on the output panel
+    out.append(("d-sub (ok)", t["ok"], "card", t["card"], 4.5))
     for fg in SYNTAX:
         for name in ("card", "hl-line"):
             out.append((fg, t[fg], name, backs[name], 4.5))

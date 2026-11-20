@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten init
 # cwd: website/scratch/init
 # exit: 0
@@ -6,6 +6,7 @@
 rules                        tier = "kernel"   (no_std library; crates/rules/Cargo.toml)
 ledger                       tier = "core"   (library; crates/ledger/Cargo.toml)
 cli                          tier = "edge"   (binary only; crates/cli/Cargo.toml)
+Cargo.toml                   [profile.release] overflow-checks = true
 AGENTS.tauten.md             agent instructions
 
 Nothing written. Re-run with --write to apply; change any tier afterwards by hand.

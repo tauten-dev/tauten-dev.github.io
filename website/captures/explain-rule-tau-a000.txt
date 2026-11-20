@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-A000
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: The API is banned in this tier; see the specific rule named in the diagnost
 
 Fix: See the specific rule named in the diagnostic.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: No call to an API on the tier's ban list (reported under the specific rule the ban names).
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts. APIs not on the tier's ban list (clippy.toml), including dependency functions that wrap a banned one; foreign code.
 Applies to tests: no
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

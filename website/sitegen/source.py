@@ -230,7 +230,7 @@ class Capture:
             if not m:
                 continue
             loc = re.search(r"^  --> (\S+?)(?::(\d+):(\d+))? \((\w+) crate `([^`]+)`\)$", chunk, re.M)
-            rule = re.search(r"^  = rule: (.*) \(enforced by (\w+)\)$", chunk, re.M)
+            rule = re.search(r"^  = rule: (.*) \(decided by (\w+)\)$", chunk, re.M)
             fix = re.search(r"^  = fix: (.*)$", chunk, re.M)
             out.append({
                 "text": chunk.rstrip("\n"), "severity": m.group(1), "id": m.group(2),

@@ -1,0 +1,20 @@
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# cmd: cargo tauten explain TAU-F001
+# cwd: .
+# exit: 0
+# ---
+TAU-F001: Declared effects match the signature
+
+Why: A function's capability parameters, `Result` return and `async` bound what it can do; `#[effects(..)]` states that row so readers and agents see it without reading the body. The decision is proved (tauten_check_kernel::effects::verdict); classifying parameter types is by name, so a type tauten cannot classify only ever warns.
+
+Fix: Make `#[effects(..)]` list exactly the labels the signature grants (the message names the missing and extra ones), or change the signature. In a crate with `effects = "required"` under `[package.metadata.tauten]`, every `pub fn` needs `#[effects(..)]`; mismatches there are errors.
+
+Decided by: Tauten
+Decides: `#[effects(..)]` lists exactly the labels the signature grants.
+Sees: source; complete: yes
+Does not see: Attributes and items produced by macros; files outside a member's `src/`. Parameter types it cannot classify by name (reported as unresolved, never clean); effects of called functions.
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel warn
+  core warn
+  edge warn

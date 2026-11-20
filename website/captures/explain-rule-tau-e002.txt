@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-E002
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: `Result<T, ()>`, `anyhow::Error` and similar erase which failures are possi
 
 Fix: Define an error enum (for example with `thiserror`) whose variants name each failure. Convert to anyhow/eyre only in edge crates.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: No `Result<_, ()>` error type outside the edge.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts.
 Applies to tests: no
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

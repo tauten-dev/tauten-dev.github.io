@@ -1,0 +1,20 @@
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# cmd: cargo tauten explain TAU-K004
+# cwd: .
+# exit: 0
+# ---
+TAU-K004: Proved kernel code translates
+
+Why: A kernel crate listed in `[gate] crates` of proofs/claims.toml is proved over its Charon/Aeneas translation, so it must stay inside what the pinned toolchain translates, without opaque library functions (axioms the proof audit refuses). No syntax rule can predict that exactly across toolchain releases, so the translation decides: `cargo tauten check --extract` (or `cargo tauten proofs extract`) runs it. When the toolchain is not available the check fails as tool-missing; it is never reported clean. The kernel section of the agent profile lists the known limits of the pinned toolchain.
+
+Fix: Rewrite the code at the reported location inside the translatable subset (the agent profile's kernel section lists the known limits), then re-run `cargo tauten proofs extract --crate <dir>`.
+
+Decided by: Tauten
+Decides: The crates of `[gate] crates` translate with the pinned Charon/Aeneas, without opaque functions.
+Sees: translation; complete: yes
+Does not see: Kernel crates not listed in `[gate] crates`.
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core -
+  edge -

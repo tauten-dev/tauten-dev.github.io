@@ -1,190 +1,250 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten check
 # cwd: fixtures/cases
 # exit: 1
 # ---
 error[TAU-X001]: `allow` attribute without specifying a reason
   --> rej-allow/src/lib.rs:4:1 (core crate `rej-allow`)
-  = rule: Lint exceptions must be `#[expect]` with a reason (enforced by Clippy)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
   = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
 
 error[TAU-X001]: #[allow] attribute found
   --> rej-allow/src/lib.rs:4:3 (core crate `rej-allow`)
-  = rule: Lint exceptions must be `#[expect]` with a reason (enforced by Clippy)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
   = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
 
 error[TAU-A001]: use of a disallowed method `std::time::SystemTime::now`
   --> rej-ambient-clock/src/lib.rs:6:5 (core crate `rej-ambient-clock`)
-  = rule: No ambient authority (enforced by Clippy)
+  = rule: No ambient authority (decided by Clippy)
   = fix: Take a capability parameter (for example a `&cap_std::fs::Dir` from `Authority::dir`, `&dyn tauten::cap::Clock`, or `&tauten::cap::Env`) and let an edge crate construct it.
 
 error[TAU-A002]: use of a disallowed method `tauten::cap::Authority::acquire`
   --> rej-authority-alias/src/lib.rs:8:31 (core crate `rej-authority-alias`)
-  = rule: Authority minted outside the edge (enforced by Clippy)
+  = rule: Authority minted outside the edge (decided by Clippy)
   = fix: Accept the capability as a parameter and create it in the edge crate's `main`.
 
 error[TAU-A001]: use of a disallowed method `cap_std::fs::Dir::open_ambient_dir`
   --> rej-authority-alias/src/lib.rs:17:5 (core crate `rej-authority-alias`)
-  = rule: No ambient authority (enforced by Clippy)
+  = rule: No ambient authority (decided by Clippy)
   = fix: Take a capability parameter (for example a `&cap_std::fs::Dir` from `Authority::dir`, `&dyn tauten::cap::Clock`, or `&tauten::cap::Env`) and let an edge crate construct it.
 
 error[TAU-A001]: use of a disallowed method `ambient_authority::ambient_authority`
   --> rej-authority-alias/src/lib.rs:17:45 (core crate `rej-authority-alias`)
-  = rule: No ambient authority (enforced by Clippy)
+  = rule: No ambient authority (decided by Clippy)
   = fix: Take a capability parameter (for example a `&cap_std::fs::Dir` from `Authority::dir`, `&dyn tauten::cap::Clock`, or `&tauten::cap::Env`) and let an edge crate construct it.
+
+error[TAU-C002]: this `MutexGuard` is held across an await point
+  --> rej-await-lock/src/lib.rs:7:15 (edge crate `rej-await-lock`)
+  = rule: Async hazards (decided by Clippy)
+  = fix: Release guards before awaiting; await or explicitly spawn-and-join futures.
 
 error[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
   --> rej-contract-overflow/src/lib.rs:6:5 (core crate `rej-contract-overflow`)
-  = rule: Checked arithmetic (enforced by Clippy)
+  = rule: Checked arithmetic (decided by Clippy)
   = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
 
 error[TAU-X002]: crate-wide exception for `clippy::unwrap_used`
   --> rej-crate-wide/src/lib.rs:1:1 (core crate `rej-crate-wide`)
-  = rule: No crate-wide exceptions to profile lints (enforced by Tauten)
+  = rule: No crate-wide exceptions to profile lints (decided by Tauten)
   = fix: Move the exception to the single item that needs it, with a reason.
 
 error[TAU-P003]: indexing may panic
   --> rej-dependent/src/lib.rs:6:22 (core crate `rej-dependent`)
-  = rule: No panicking index or slice (enforced by Clippy)
+  = rule: No panicking index or slice (decided by Clippy)
   = fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`.
 
 error[TAU-C001]: use of a disallowed method `std::thread::spawn`
   --> rej-detached-thread/src/lib.rs:5:10 (core crate `rej-detached-thread`)
-  = rule: Structured concurrency only (enforced by Clippy)
+  = rule: Structured concurrency only (decided by Clippy)
   = fix: Use `std::thread::scope`, or `tokio::task::JoinSet` owned by the caller and awaited before returning.
+
+error[TAU-F001]: effects of `load`: declared but not granted `fs_write`
+  --> rej-effects/src/lib.rs:12:8 (core crate `rej-effects`)
+  = rule: Declared effects match the signature (decided by Tauten)
+  = fix: Make `#[effects(..)]` list exactly the labels the signature grants (the message names the missing and extra ones), or change the signature. In a crate with `effects = "required"` under `[package.metadata.tauten]`, every `pub fn` needs `#[effects(..)]`; mismatches there are errors.
+
+error[TAU-F001]: `double` has no `#[effects(..)]`; its signature grants `#[effects()]`
+  --> rej-effects/src/lib.rs:18:8 (core crate `rej-effects`)
+  = rule: Declared effects match the signature (decided by Tauten)
+  = fix: Make `#[effects(..)]` list exactly the labels the signature grants (the message names the missing and extra ones), or change the signature. In a crate with `effects = "required"` under `[package.metadata.tauten]`, every `pub fn` needs `#[effects(..)]`; mismatches there are errors.
+
+error[TAU-P005]: usage of `process::exit`
+  --> rej-exit/src/lib.rs:5:5 (core crate `rej-exit`)
+  = rule: No process exit or leaked values outside the edge (decided by Clippy)
+  = fix: Return an error to the edge and let `main` decide the exit code; drop values normally.
+
+error[TAU-P005]: use of a disallowed method `std::process::exit`
+  --> rej-exit/src/lib.rs:5:5 (core crate `rej-exit`)
+  = rule: No process exit or leaked values outside the edge (decided by Clippy)
+  = fix: Return an error to the edge and let `main` decide the exit code; drop values normally.
 
 error[TAU-X001]: file-level `#![allow(clippy::needless_return)]`: use `#![expect(clippy::needless_return, reason = "...")]`, or narrow it to the item that needs it
   --> rej-file-allow/src/lib.rs:3:1 (kernel crate `rej-file-allow`)
-  = rule: Lint exceptions must be `#[expect]` with a reason (enforced by Clippy)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
   = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
+
+error[TAU-N004]: strict comparison of `f32` or `f64`
+  --> rej-float-eq/src/lib.rs:6:5 (core crate `rej-float-eq`)
+  = rule: No exact float comparison (decided by Clippy)
+  = fix: Compare with an explicit tolerance, or use integers in fixed units.
 
 error[TAU-A002]: `Authority::acquire` in core crate `rej-forged-capability`
   --> rej-forged-capability/src/lib.rs:17:16 (core crate `rej-forged-capability`)
-  = rule: Authority minted outside the edge (enforced by Clippy)
+  = rule: Authority minted outside the edge (decided by Clippy)
   = fix: Accept the capability as a parameter and create it in the edge crate's `main`.
 
 error[TAU-G001]: use of a disallowed type `std::sync::OnceLock`
   --> rej-global-state/src/lib.rs:3:1 (core crate `rej-global-state`)
-  = rule: No hidden global state (enforced by Clippy)
+  = rule: No hidden global state (decided by Clippy)
   = fix: Pass the state explicitly, or own it in a struct created by the edge.
 
 error[TAU-G001]: use of a disallowed type `std::sync::OnceLock`
   --> rej-global-state/src/lib.rs:5:15 (core crate `rej-global-state`)
-  = rule: No hidden global state (enforced by Clippy)
+  = rule: No hidden global state (decided by Clippy)
   = fix: Pass the state explicitly, or own it in a struct created by the edge.
 
 error[TAU-G001]: use of a disallowed type `std::sync::OnceLock`
   --> rej-global-state/src/lib.rs:5:31 (core crate `rej-global-state`)
-  = rule: No hidden global state (enforced by Clippy)
+  = rule: No hidden global state (decided by Clippy)
   = fix: Pass the state explicitly, or own it in a struct created by the edge.
 
 error[TAU-A001]: use of a disallowed method `std::fs::read_to_string`
   --> rej-hidden-authority/src/lib.rs:8:5 (core crate `rej-hidden-authority`)
-  = rule: No ambient authority (enforced by Clippy)
+  = rule: No ambient authority (decided by Clippy)
   = fix: Take a capability parameter (for example a `&cap_std::fs::Dir` from `Authority::dir`, `&dyn tauten::cap::Clock`, or `&tauten::cap::Env`) and let an edge crate construct it.
 
 error[TAU-E001]: unused `std::result::Result` that must be used
   --> rej-ignored-result/src/lib.rs:13:5 (core crate `rej-ignored-result`)
-  = rule: Never ignore a result (enforced by Rustc)
+  = rule: Never ignore a result (decided by Rustc)
   = fix: Propagate with `?`, handle the error, or wrap it with context (`.map_err(|e| MyError::Io(e))`) instead of discarding it.
 
 error[TAU-P003]: indexing may panic
   --> rej-index/src/lib.rs:6:5 (core crate `rej-index`)
-  = rule: No panicking index or slice (enforced by Clippy)
+  = rule: No panicking index or slice (decided by Clippy)
   = fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`.
 
 error[TAU-L001]: infinite loop detected
   --> rej-infinite-loop/src/lib.rs:5:5 (core crate `rej-infinite-loop`)
-  = rule: No unbounded loops outside the edge (enforced by Clippy)
+  = rule: No unbounded loops outside the edge (decided by Clippy)
   = fix: Bound the loop, return a value from it, or move the event loop to the edge.
+
+error[TAU-T003]: kernel crate `rej-kernel-dep` depends on `tauten-check-kernel`, which is not in kernel-deps
+  --> rej-kernel-dep/Cargo.toml (kernel crate `rej-kernel-dep`)
+  = rule: Kernel dependencies are allowlisted (decided by Tauten)
+  = fix: Remove the dependency, or list it in `[package.metadata.tauten] kernel-deps = ["name"]` with a justification in review.
 
 error[TAU-X004]: exception for `clippy::indexing_slicing` (TAU-P003) is not permitted in kernel crates
   --> rej-kernel-exception/src/lib.rs:5:1 (kernel crate `rej-kernel-exception`)
-  = rule: No exceptions to this rule here (enforced by Tauten)
+  = rule: No exceptions to this rule here (decided by Tauten)
   = fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
 
 error[TAU-K003]: kernel crate `rej-kernel-impure` is missing `#![no_std]`
   --> rej-kernel-impure/src/lib.rs:1:1 (kernel crate `rej-kernel-impure`)
-  = rule: Kernel crate attributes (enforced by Tauten)
+  = rule: Kernel crate attributes (decided by Tauten)
   = fix: Add `#![no_std]` at the top of the kernel crate's `lib.rs`.
 
 error[TAU-K001]: use of a disallowed type `std::collections::HashMap`
   --> rej-kernel-impure/src/lib.rs:3:1 (kernel crate `rej-kernel-impure`)
-  = rule: Kernel determinism and purity (enforced by Clippy)
+  = rule: Kernel determinism and purity (decided by Clippy)
   = fix: Use `BTreeMap`/`BTreeSet` and plain owned values; pass state explicitly.
 
 error[TAU-K001]: use of a disallowed type `std::collections::HashMap`
   --> rej-kernel-impure/src/lib.rs:7:20 (kernel crate `rej-kernel-impure`)
-  = rule: Kernel determinism and purity (enforced by Clippy)
+  = rule: Kernel determinism and purity (decided by Clippy)
   = fix: Use `BTreeMap`/`BTreeSet` and plain owned values; pass state explicitly.
 
 error[TAU-N003]: floating-point arithmetic detected
   --> rej-kernel-impure/src/lib.rs:14:5 (kernel crate `rej-kernel-impure`)
-  = rule: No floating point in the kernel (enforced by Clippy)
+  = rule: No floating point in the kernel (decided by Clippy)
   = fix: Use integers in fixed units (cents, milliseconds, basis points) or a rational type.
+
+error[TAU-K002]: used import from `std` instead of `core`
+  --> rej-kernel-std/src/lib.rs:7:31 (kernel crate `rej-kernel-std`)
+  = rule: Kernel uses core/alloc paths (decided by Clippy)
+  = fix: Import from `core::` or `alloc::`.
 
 error[TAU-T002]: kernel crate `rej-kernel-up` depends on core crate `acc-core`
   --> rej-kernel-up/Cargo.toml (kernel crate `rej-kernel-up`)
-  = rule: Tier dependency direction (enforced by Tauten)
+  = rule: Tier dependency direction (decided by Tauten)
   = fix: Invert the dependency: move the shared code down a tier, or pass the capability in.
+
+error[TAU-E003]: non-binding `let` on an expression with `#[must_use]` type
+  --> rej-let-underscore/src/lib.rs:20:5 (core crate `rej-let-underscore`)
+  = rule: Explicit discards of results need a reason (decided by Clippy)
+  = fix: Handle or propagate the result. If discarding is correct, say why: `#[expect(clippy::let_underscore_must_use, reason = "best-effort cleanup")]`.
 
 error[TAU-N002]: casting `u64` to `u32` may truncate the value
   --> rej-lossy-cast/src/lib.rs:6:5 (core crate `rej-lossy-cast`)
-  = rule: No lossy `as` casts (enforced by Clippy)
+  = rule: No lossy `as` casts (decided by Clippy)
   = fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors.
 
 error[TAU-N002]: using a potentially dangerous silent `as` conversion
   --> rej-lossy-cast/src/lib.rs:6:5 (core crate `rej-lossy-cast`)
-  = rule: No lossy `as` casts (enforced by Clippy)
+  = rule: No lossy `as` casts (decided by Clippy)
   = fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors.
 
 error[TAU-T001]: crate `rej-no-tier` declares no tier
   --> rej-no-tier/Cargo.toml (untiered crate `rej-no-tier`)
-  = rule: Every workspace crate declares a tier (enforced by Tauten)
+  = rule: Every workspace crate declares a tier (decided by Tauten)
   = fix: Add `[package.metadata.tauten]` with `tier = "kernel"`, `"core"` or `"edge"` to the crate's Cargo.toml.
+
+error[TAU-P004]: used `panic!()` or assertion in a function that returns `Result`
+  --> rej-panic-in-result/src/lib.rs:14:1 (core crate `rej-panic-in-result`)
+  = rule: No panics inside fallible functions (decided by Clippy)
+  = fix: Map the failure into the function's error type and return it with `?`.
+
+error[TAU-P002]: `panic` should not be present in production code
+  --> rej-panic/src/lib.rs:7:9 (core crate `rej-panic`)
+  = rule: No explicit panics (decided by Clippy)
+  = fix: Return a typed error variant. If the state is truly impossible, restructure the types so it cannot be represented.
 
 error[TAU-O001]: use of `println!`
   --> rej-print/src/lib.rs:5:5 (core crate `rej-print`)
-  = rule: No direct console output outside the edge (enforced by Clippy)
+  = rule: No direct console output outside the edge (decided by Clippy)
   = fix: Return the data, or write to an `impl std::io::Write` passed in by the caller.
 
 error[TAU-X004]: exception for `clippy::todo` (TAU-S001) is not permitted in edge crates
   --> rej-stub-excused/src/lib.rs:4:1 (edge crate `rej-stub-excused`)
-  = rule: No exceptions to this rule here (enforced by Tauten)
+  = rule: No exceptions to this rule here (decided by Tauten)
   = fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
 
 error[TAU-S001]: `todo` should not be present in production code
   --> rej-stub/src/lib.rs:6:5 (core crate `rej-stub`)
-  = rule: No stubs or debug leftovers (enforced by Clippy)
+  = rule: No stubs or debug leftovers (decided by Clippy)
   = fix: Implement the branch, or return a typed `Unsupported` error if the case is deliberately out of scope.
 
 error[TAU-E001]: unused `std::result::Result` that must be used
   --> rej-test-hygiene/src/lib.rs:32:9 (core crate `rej-test-hygiene`)
-  = rule: Never ignore a result (enforced by Rustc)
+  = rule: Never ignore a result (decided by Rustc)
   = fix: Propagate with `?`, handle the error, or wrap it with context (`.map_err(|e| MyError::Io(e))`) instead of discarding it.
+
+error[TAU-U002]: unsafe block missing a safety comment
+  --> rej-undocumented-unsafe/src/lib.rs:9:10 (edge crate `rej-undocumented-unsafe`)
+  = rule: Documented, minimal unsafe blocks (decided by Clippy)
+  = fix: Split blocks to one unsafe operation each and add a `// SAFETY:` comment explaining why the contract holds.
 
 error[TAU-E002]: this returns a `Result<_, ()>`
   --> rej-unit-error/src/lib.rs:7:1 (core crate `rej-unit-error`)
-  = rule: Typed errors outside the edge (enforced by Clippy)
+  = rule: Typed errors outside the edge (decided by Clippy)
   = fix: Define an error enum (for example with `thiserror`) whose variants name each failure. Convert to anyhow/eyre only in edge crates.
 
 error[TAU-U001]: usage of an `unsafe` block
   --> rej-unsafe/src/lib.rs:7:5 (core crate `rej-unsafe`)
-  = rule: No unsafe outside the edge (enforced by Rustc)
+  = rule: No unsafe outside the edge (decided by Rustc)
   = fix: Move the unsafe code into an edge crate (or a dedicated `-sys` crate) behind a safe, documented API.
 
 error[TAU-P001]: used `unwrap()` on a `Result` value
   --> rej-unwrap/src/lib.rs:6:5 (core crate `rej-unwrap`)
-  = rule: No unwrap/expect on fallible values (enforced by Clippy)
+  = rule: No unwrap/expect on fallible values (decided by Clippy)
   = fix: Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose.
 
 error[TAU-M001]: wildcard match will also match any future added variants
   --> rej-wildcard/src/lib.rs:19:9 (core crate `rej-wildcard`)
-  = rule: No wildcard arms over enums you own (enforced by Clippy)
+  = rule: No wildcard arms over enums you own (decided by Clippy)
   = fix: List every variant. Group them with `A | B => ...` if they share behaviour.
 
 warnings (run with --warnings to list them):
-       3  TAU-D001  Documented public API
+       5  TAU-D001  Documented public API
        1  TAU-S002  Suspicious placeholder comments
        1  clippy::match_like_matches_macro  
-tauten: 36 error(s), 5 warning(s)
+tauten: 48 error(s), 7 warning(s)

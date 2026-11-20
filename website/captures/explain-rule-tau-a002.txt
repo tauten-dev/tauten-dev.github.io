@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-A002
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Capabilities may only be created at startup in edge crates; minting them de
 
 Fix: Accept the capability as a parameter and create it in the edge crate's `main`.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: No `Authority::acquire` outside the edge.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts. APIs not on the tier's ban list (clippy.toml), including dependency functions that wrap a banned one; foreign code.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

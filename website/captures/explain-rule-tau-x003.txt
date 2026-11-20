@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-X003
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: `[lints]` entries that allow or warn profile lints have no effect under `ca
 
 Fix: Remove the entry from `[lints]` / `[workspace.lints]`.
 
-Enforced by: Tauten
+Decided by: Tauten
+Decides: No `[lints]` entry that lowers a lint the profile keeps blocking.
+Sees: manifest; complete: yes
+Does not see: Settings outside the workspace manifests (environment variables, Cargo configs outside the workspace).
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel warn

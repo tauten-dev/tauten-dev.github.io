@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-T002
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Dependencies must point inward (edge -> core -> kernel); otherwise a pure c
 
 Fix: Invert the dependency: move the shared code down a tier, or pass the capability in.
 
-Enforced by: Tauten
+Decided by: Tauten
+Decides: Normal dependencies between members point inward (edge to core to kernel).
+Sees: manifest; complete: yes
+Does not see: Dev- and build-dependencies.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

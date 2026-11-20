@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-L001
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: A loop with no exit cannot be reasoned about or terminated by the caller.
 
 Fix: Bound the loop, return a value from it, or move the event loop to the edge.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: No loop without an exit outside the edge.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts.
 Applies to tests: no
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

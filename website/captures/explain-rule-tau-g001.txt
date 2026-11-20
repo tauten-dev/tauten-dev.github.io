@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-G001
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Global and thread-local state creates invisible coupling between calls and 
 
 Fix: Pass the state explicitly, or own it in a struct created by the edge.
 
-Enforced by: Clippy
+Decided by: Clippy
+Decides: No banned global-state type or API (`static mut`, `thread_local!`, interior-mutable statics) outside the edge.
+Sees: resolved; complete: yes
+Does not see: Code expanded from macros defined in other crates (clippy skips it); code disabled by `cfg`; build scripts. APIs not on the tier's ban list (clippy.toml), including dependency functions that wrap a banned one; foreign code.
 Applies to tests: no
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

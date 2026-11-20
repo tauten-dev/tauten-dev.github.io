@@ -4,124 +4,60 @@
 # excerpt by whole lines, `strip` removes a prefix, `dedent` removes common
 # indentation. Line numbers are never used to locate code.
 
-# --- start: what each tier looks like
-[edge-main]
-path = "fixtures/cases/acc-edge/src/main.rs"
-start = "fn main() -> Result<(), Box<dyn std::error::Error>> {"
+# --- home, example 1: authority is a parameter (TAU-A001)
+[ambient-clock]
+path = "fixtures/cases/rej-ambient-clock/src/lib.rs"
+start = "pub fn now() -> std::time::SystemTime {"
 end = "}"
 lang = "rust"
 
-[core-load]
-path = "fixtures/cases/acc-core/src/lib.rs"
-start = "pub fn load_amount(source: &mut impl Read) -> Result<u64, LoadError> {"
+[effects-age]
+path = "fixtures/cases/acc-effects/src/lib.rs"
+start = "#[effects(clock)]"
 end = "}"
 lang = "rust"
 
-[core-stamp]
-path = "fixtures/cases/acc-core/src/lib.rs"
-start = "pub fn stamp(clock: &impl Clock, balance: u64) -> (u64, u64) {"
+# --- home, example 2: declared effects match the signature (TAU-F001)
+[effects-load]
+path = "fixtures/cases/rej-effects/src/lib.rs"
+start = "#[effects(fs_read, fs_write, fail)]"
 end = "}"
 lang = "rust"
 
-[kernel-head]
-path = "fixtures/cases/acc-kernel/src/lib.rs"
-start = "#![no_std]"
-end = "//! A pure decision kernel: exact, total, no IO."
-lang = "rust"
-
-[kernel-withdraw]
-path = "fixtures/cases/acc-kernel/src/lib.rs"
-start = "/// Decide a withdrawal; returns the new balance."
+# --- home, example 3: a proof replaces a finding
+[sub-add-capped]
+path = "fixtures/proofs-subsume/sub-kernel/src/lib.rs"
+start = "pub fn add_capped(a: u32, b: u32) -> u32 {"
 end = "}"
 lang = "rust"
 
-# --- tauten-check
-[rule-p001]
-path = "crates/tauten-check/rules.toml"
-start = 'id = "TAU-P001"'
-before = 1
-end = 'fix = "Propagate with `?` and a typed error, or handle the None/Err case explicitly with match, if let, or a default chosen on purpose."'
+[sub-double]
+path = "fixtures/proofs-subsume/sub-kernel/src/lib.rs"
+start = "pub fn double(a: u32) -> u32 {"
+end = "}"
+lang = "rust"
+
+[sub-theorem]
+path = "fixtures/proofs-subsume/proofs/Proofs/SubKernel.lean"
+start = "theorem add_capped_spec (a b : U32) :"
+end = "    add_capped a b ⦃ r => r.val = min (a.val + b.val) U32.max ⦄ := by"
+lang = "lean"
+
+# --- start
+[tier-manifest]
+path = "README.md"
+start = "[package.metadata.tauten]"
+end = 'tier = "core"   # "kernel" | "core" | "edge"'
 lang = "toml"
 
-[diag-struct]
-path = "crates/tauten-check/src/diag.rs"
-start = "/// One finding, in the stable schema printed by `--format json`."
-end = "}"
-lang = "rust"
+[check-commands]
+path = "README.md"
+start = "$ cargo tauten check                 # human output"
+end = "$ cargo tauten explain TAU-A001      # why the rule exists and how to fix it"
+lang = "text"
 
-[diag-enforced]
-path = "crates/tauten-check/src/diag.rs"
-start = "/// What enforces a rule. Shown with every diagnostic so claims stay honest."
-end = "}"
-lang = "rust"
-
-[diag-severity]
-path = "crates/tauten-check/src/diag.rs"
-start = "/// Diagnostic severity."
-end = "}"
-lang = "rust"
-
-# --- tauten
-[cap-doc-example]
-path = "crates/tauten/src/cap.rs"
-start = "//! use tauten::cap::{Authority, Clock, ManualClock};"
-end = "//! assert!(is_expired(&ManualClock::at(10), 5));"
-strip = "//! "
-lang = "rust"
-
-# --- tauten-macros (crates/tauten/tests/behaviour.rs)
-[refined-percent]
-path = "crates/tauten/tests/behaviour.rs"
-start = "    #[refined(|v| *v <= 100)]"
-end = "    pub struct Percent(u8);"
-dedent = true
-lang = "rust"
-
-[newtype-userid]
-path = "crates/tauten/tests/behaviour.rs"
-start = "    #[newtype]"
-end = "    pub struct UserId(u64);"
-dedent = true
-lang = "rust"
-
-[refined-asserts]
-path = "crates/tauten/tests/behaviour.rs"
-start = "        assert_eq!(Percent::try_new(100).map(|p| *p.get()), Ok(100));"
-end = '        assert_eq!(err.type_name(), "Percent");'
-dedent = true
-lang = "rust"
-
-[contract-withdraw]
-path = "crates/tauten/tests/behaviour.rs"
-start = "    #[derive(Debug, PartialEq, Eq)]"
-end = "    fn withdraw(balance: u64, amount: u64) -> Result<u64, BankError> {"
-after = 2
-dedent = true
-lang = "rust"
-
-[contract-asserts]
-path = "crates/tauten/tests/behaviour.rs"
-start = "        assert_eq!(withdraw(10, 3), Ok(7));"
-end = "        assert_eq!(withdraw(1, 3), Err(BankError::Insufficient));"
-dedent = true
-lang = "rust"
-
-# --- discipline: before/after, from the approved proposal (APIs there are proposals)
-[disc-cap]
-path = "docs/DISCIPLINE-PROPOSAL.md"
-start = "// before: core crate"
-end = "pub fn is_stale(dir: &Dir, clock: &impl Clock, name: &str) -> Result<bool, StaleError> { ... }"
-lang = "rust"
-
-[disc-origin]
-path = "docs/DISCIPLINE-PROPOSAL.md"
-start = "// before: check-then-use compiles even if `plan` changed in between"
-end = "plan.advance(ok)                                             // consumes the evidence"
-lang = "rust"
-
-[disc-refine]
-path = "docs/DISCIPLINE-PROPOSAL.md"
-start = "pub fn set_volume(v: u8) { assert!(v <= 100); ... }"
-end = "pub fn set_volume(v: Percent) { ... }   // kernel crate: try_new proved (ok iff v <= 100)"
-before = 1
-lang = "rust"
+[proof-commands]
+path = "README.md"
+start = "$ cargo tauten init --proofs my-kernel --write   # writes proofs/ (claims.toml, gate, Lean project)"
+end = "$ cargo tauten proofs                            # run the gate; one JSON outcome per claim"
+lang = "text"

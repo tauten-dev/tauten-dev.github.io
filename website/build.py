@@ -59,7 +59,6 @@ def build(args: argparse.Namespace) -> int:
 
     pages_home.build(site)
     pages_docs.start(site)
-    pages_docs.discipline(site)
     pages_docs.proofs(site)
     pages_ref.rules_index(site)
     pages_ref.rule_pages(site)

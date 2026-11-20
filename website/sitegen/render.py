@@ -10,7 +10,7 @@ from pygments.token import STANDARD_TYPES
 
 esc = html.escape
 
-LEXERS = {"rust": "rust", "toml": "toml", "json": "json", "console": "console", "text": "text", "yaml": "yaml"}
+LEXERS = {"lean": "lean4", "rust": "rust", "toml": "toml", "json": "json", "console": "console", "text": "text", "yaml": "yaml"}
 
 
 def _cls(ttype) -> str:
@@ -81,16 +81,19 @@ def code_html(code: str, lang: str, *, numbers: bool = False, marks: dict[int, i
     return "".join(rows)
 
 
+SEV = {"error": "err", "warning": "warn", "subsumed": "sub"}
+
+
 def diag_html(text: str, rule_ids: set[str]) -> str:
     """Captured CLI text with colour and links; nothing is reworded."""
     rows = []
     for line in text.split("\n"):
         e = esc(line)
         hang = 0
-        m = re.match(r"(error|warning)(\[([^\]]+)\])?(:.*)$", line)
+        m = re.match(r"(error|warning|subsumed)(\[([^\]]+)\])?(:.*)$", line)
         if m:
             sev, ident = m.group(1), m.group(3)
-            label = f'<span class="d-{"err" if sev == "error" else "warn"}">{sev}</span>'
+            label = f'<span class="d-{SEV[sev]}">{sev}</span>'
             if ident:
                 inner = esc(ident)
                 if ident in rule_ids:
@@ -102,6 +105,10 @@ def diag_html(text: str, rule_ids: set[str]) -> str:
             pre = line.index("-->")
             e = esc(line[:pre]) + '<span class="d-mut">--&gt;</span>' + esc(line[pre + 3:])
             hang = pre + 4
+        elif re.match(r"\s+= subsumed by proof ", line):
+            pre = line.index("=")
+            e = esc(line[:pre]) + '<span class="d-mut">=</span> <span class="d-lab">subsumed by proof</span>' + esc(line[pre + 19:])
+            hang = pre + 2
         elif re.match(r"\s+= (rule|fix|note|help): ", line):
             pre = line.index("=")
             lab = re.match(r"\s+= (\w+):", line).group(1)
@@ -121,10 +128,6 @@ def chip_tier(tier: str | None) -> str:
     return f'<span class="chip chip-tier {tier[0]}">{esc(tier)}</span>'
 
 
-def prov(kind: str) -> str:
-    return f'<span class="chip prov">{esc(kind)}</span>'
-
-
 GLYPHS = {"specified": "○", "implemented": "◐", "exercised": "●"}
 
 
@@ -134,19 +137,10 @@ def badge(kind: str, label: str) -> str:
     return f'<span class="badge b-{kind}">{g}{esc(label)}</span>'
 
 
-def status_badge(item: dict) -> str:
-    q = f' <span class="qual">{esc(item["qualifier"])}</span>' if item.get("qualifier") else ""
-    return badge(item["kind"], item["label"]) + q
-
-
 def level_chip(value: str) -> str:
     if value == "-":
         return '<span class="chip lvl lvl-none" aria-label="not applied">–</span>'
     return f'<span class="chip lvl lvl-{value}">{value}</span>'
-
-
-def rule_chip(rule_id: str) -> str:
-    return f'<a class="chip rule-id" href="/rules/{rule_id.lower()}/">{rule_id}</a>'
 
 
 def copy_line(command: str, label: str | None = None) -> str:
@@ -156,33 +150,17 @@ def copy_line(command: str, label: str | None = None) -> str:
             f' aria-label="Copy command: {esc(label or command)}">Copy</button></div>')
 
 
-def panel(inner: str, *, title: str | None = None, label: str, tier: str | None = None, rail: bool = True,
-          provenance: str | None = None, copy_raw: str | None = None, wrapped: bool = False,
-          diag: bool = False, foot: str | None = None, extra_cls: str = "", tier_chip: bool = True) -> str:
-    classes = ["panel"]
-    if diag:
-        classes.append("diag")
-    if wrapped:
-        classes.append("wrapped")
-    if tier and rail:
-        classes.append(f"tier-{tier}")
-    if extra_cls:
-        classes.append(extra_cls)
-    meta = []
-    if tier and tier_chip:
-        meta.append(chip_tier(tier))
-    if provenance:
-        meta.append(prov(provenance))
-    if copy_raw is not None:
-        meta.append(f'<button class="copy-btn" type="button" hidden data-copy="{esc(copy_raw)}" aria-label="Copy {esc(label)}">Copy</button>')
-    head = ""
-    if title is not None or meta:
-        head = (f'<div class="panel-head"><span class="path">{title or ""}</span>'
-                f'<span class="meta">{"".join(meta)}</span></div>')
+def panel(inner: str, *, label: str, caption: str | None = None, tier: str | None = None,
+          diag: bool = False, wrapped: bool = False) -> str:
+    """A code or output panel: an optional caption line above (path and tier chip), then the block."""
+    cap = ""
+    if caption is not None or tier:
+        chip = f" {chip_tier(tier)}" if tier else ""
+        cap = f'<p class="cap">{caption or ""}{chip}</p>'
+    classes = "panel" + (" diag" if diag else "") + (" wrapped" if wrapped else "")
     pre_cls = "diag-body" if diag else "code"
-    footer = f'<div class="panel-foot">{foot}</div>' if foot else ""
-    return (f'<div class="{" ".join(classes)}">{head}'
-            f'<pre class="{pre_cls}" tabindex="0" aria-label="{esc(label)}"><code>{inner}</code></pre>{footer}</div>')
+    return (f'{cap}<div class="{classes}"><pre class="{pre_cls}" tabindex="0" aria-label="{esc(label)}">'
+            f'<code>{inner}</code></pre></div>')
 
 
 def table(headers: list[str], rows: list[list[str]], *, caption: str | None = None, label: str,

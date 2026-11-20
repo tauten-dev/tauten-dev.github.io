@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-K003
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: A kernel crate root must declare `#![no_std]` so the compiler enforces the 
 
 Fix: Add `#![no_std]` at the top of the kernel crate's `lib.rs`.
 
-Enforced by: Tauten
+Decided by: Tauten
+Decides: A kernel crate root declares `#![no_std]`.
+Sees: source; complete: yes
+Does not see: Nothing: the crate root is read in full.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

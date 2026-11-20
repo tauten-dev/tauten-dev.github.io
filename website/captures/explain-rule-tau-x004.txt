@@ -1,4 +1,4 @@
-# core: 8fb6ade8a7174fb7924eb684132794ae383cb45d
+# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
 # cmd: cargo tauten explain TAU-X004
 # cwd: .
 # exit: 0
@@ -9,7 +9,10 @@ Why: Some rules admit no exceptions: stub macros anywhere, and any profile lint 
 
 Fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
 
-Enforced by: Tauten
+Decided by: Tauten
+Decides: No exception of a rule that admits none (any rule, in kernel crates).
+Sees: source; complete: yes
+Does not see: Attributes and items produced by macros; files outside a member's `src/`.
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny
