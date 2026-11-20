@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAU-H001: Release builds check integer overflow · tauten</title>
+<meta name="description" content="TAU-H001: Release builds check integer overflow. Integer overflow panics in debug builds but silently wraps in release builds unless `overflow-checks` is on. The arithmetic lints cover the source tauten scans; this setting covers everything compiled in the workspace, dependencies included. The decision is proved (tauten_check_kernel::manifest::hardening): a setting tauten cannot read is never clean. Limits: it covers binaries built from this workspace, not downstream users of a library crate (their own profile decides), and an environment override (`CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS`) or a Cargo config outside the workspace (for example `~/.cargo/config.toml`) at build time is not seen.">
+<link rel="canonical" href="https://tauten.dev/rules/tau-h001/">
+<meta property="og:title" content="TAU-H001: Release builds check integer overflow · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/rules/tau-h001/">
+<meta property="og:description" content="TAU-H001: Release builds check integer overflow. Integer overflow panics in debug builds but silently wraps in release builds unless `overflow-checks` is on. The arithmetic lints cover the source tauten scans; this setting covers everything compiled in the workspace, dependencies included. The decision is proved (tauten_check_kernel::manifest::hardening): a setting tauten cannot read is never clean. Limits: it covers binaries built from this workspace, not downstream users of a library crate (their own profile decides), and an environment override (`CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS`) or a Cargo config outside the workspace (for example `~/.cargo/config.toml`) at build time is not seen.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: A discipline for Rust, with proofs over the shipped code.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=58194cb0">
+<script src="/assets/theme.js?v=58194cb0"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="24" height="24" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="24" height="24" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/" aria-current="page">Rules</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+</div></header>
+<main id="main">
+<div class="wrap page-head"></div><div class="wrap"><p class="eyebrow"><a href="/rules/">Rules</a> / <span class="id">TAU-H001</span></p>
+<h1 id="TAU-H001">Release builds check integer overflow</h1>
+<div class="facts"><span class="chip">decided by Tauten</span> <span class="small muted">kernel</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">core</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">edge</span> <span class="chip lvl lvl-deny">deny</span></div>
+<div class="facts small"><span>Applies to tests: <strong>yes</strong></span>
+<span>Exceptions: <strong>never</strong></span></div><h2 id="why">Why</h2><p>Integer overflow panics in debug builds but silently wraps in release builds unless <code>overflow-checks</code> is on. The arithmetic lints cover the source tauten scans; this setting covers everything compiled in the workspace, dependencies included. The decision is proved (tauten_check_kernel::manifest::hardening): a setting tauten cannot read is never clean. Limits: it covers binaries built from this workspace, not downstream users of a library crate (their own profile decides), and an environment override (<code>CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS</code>) or a Cargo config outside the workspace (for example <code>~/.cargo/config.toml</code>) at build time is not seen.</p><h2 id="fix">Fix</h2><p>Add <code>overflow-checks = true</code> under <code>[profile.release]</code> in the workspace Cargo.toml (<code>cargo tauten init --write</code> does), and remove any <code>[profile.release.package.&lt;name&gt;]</code> or <code>.cargo/config.toml</code> entry that sets it to false.</p><h2 id="explain">In the terminal</h2><div class="copy-line"><span class="prompt" aria-hidden="true">$</span><code>cargo tauten explain TAU-H001</code><button class="copy-btn" type="button" hidden data-copy="cargo tauten explain TAU-H001" aria-label="Copy command: cargo tauten explain TAU-H001">Copy</button></div><p class="cap">$ cargo tauten explain TAU-H001</p><div class="panel diag"><pre class="diag-body" tabindex="0" aria-label="cargo tauten explain TAU-H001"><code><span class="line">TAU-H001: Release builds check integer overflow</span><span class="line"> </span><span class="line">Why: Integer overflow panics in debug builds but silently wraps in release builds unless `overflow-checks` is on. The arithmetic lints cover the source tauten scans; this setting covers everything compiled in the workspace, dependencies included. The decision is proved (tauten_check_kernel::manifest::hardening): a setting tauten cannot read is never clean. Limits: it covers binaries built from this workspace, not downstream users of a library crate (their own profile decides), and an environment override (`CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS`) or a Cargo config outside the workspace (for example `~/.cargo/config.toml`) at build time is not seen.</span><span class="line"> </span><span class="line">Fix: Add `overflow-checks = true` under `[profile.release]` in the workspace Cargo.toml (`cargo tauten init --write` does), and remove any `[profile.release.package.&lt;name&gt;]` or `.cargo/config.toml` entry that sets it to false.</span><span class="line"> </span><span class="line">Decided by: Tauten</span><span class="line">Decides: Release builds of the workspace check integer overflow.</span><span class="line">Sees: manifest; complete: yes</span><span class="line">Does not see: Settings outside the workspace manifests (environment variables, Cargo configs outside the workspace). Downstream builds of a library crate.</span><span class="line">Applies to tests: yes</span><span class="line">Exceptions allowed: with #[expect(.., reason)]</span><span class="line">  kernel deny</span><span class="line">  core deny</span><span class="line">  edge deny</span></code></pre></div><nav class="pn" aria-label="Previous and next rule"><a href="/rules/tau-l001/">← TAU-L001</a><a href="/rules/tau-k001/">TAU-K001 →</a></nav></div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.0.4/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2"><code>bc4b9a4</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
+<script src="/assets/copy.js?v=58194cb0" defer></script>
+</body>
+</html>

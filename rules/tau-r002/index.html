@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAU-R002: Recorded proof claims are not weakened · tauten</title>
+<meta name="description" content="TAU-R002: Recorded proof claims are not weakened. A proof claim is only as strong as its theorems and the mutants that show they bite, and as the assumptions it rests on. Deleting a mutant, dropping a theorem or adding an assumption makes a claim weaker while its badge still says proved. The committed proofs/claims.json is the record; proofs/claims.toml may not drop a recorded theorem or mutant, or add an assumption, unless an `[[amend]]` entry names the change and gives a reason. The decision is proved (tauten_check_kernel::registry::conserves); it is relative to the committed record, and reviewing that record&#x27;s diff is trusted.">
+<link rel="canonical" href="https://tauten.dev/rules/tau-r002/">
+<meta property="og:title" content="TAU-R002: Recorded proof claims are not weakened · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/rules/tau-r002/">
+<meta property="og:description" content="TAU-R002: Recorded proof claims are not weakened. A proof claim is only as strong as its theorems and the mutants that show they bite, and as the assumptions it rests on. Deleting a mutant, dropping a theorem or adding an assumption makes a claim weaker while its badge still says proved. The committed proofs/claims.json is the record; proofs/claims.toml may not drop a recorded theorem or mutant, or add an assumption, unless an `[[amend]]` entry names the change and gives a reason. The decision is proved (tauten_check_kernel::registry::conserves); it is relative to the committed record, and reviewing that record&#x27;s diff is trusted.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: A discipline for Rust, with proofs over the shipped code.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=58194cb0">
+<script src="/assets/theme.js?v=58194cb0"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="24" height="24" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="24" height="24" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/" aria-current="page">Rules</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+</div></header>
+<main id="main">
+<div class="wrap page-head"></div><div class="wrap"><p class="eyebrow"><a href="/rules/">Rules</a> / <span class="id">TAU-R002</span></p>
+<h1 id="TAU-R002">Recorded proof claims are not weakened</h1>
+<div class="facts"><span class="chip">decided by Tauten</span> <span class="small muted">kernel</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">core</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">edge</span> <span class="chip lvl lvl-deny">deny</span></div>
+<div class="facts small"><span>Applies to tests: <strong>yes</strong></span>
+<span>Exceptions: <strong>never</strong></span></div><h2 id="why">Why</h2><p>A proof claim is only as strong as its theorems and the mutants that show they bite, and as the assumptions it rests on. Deleting a mutant, dropping a theorem or adding an assumption makes a claim weaker while its badge still says proved. The committed proofs/claims.json is the record; proofs/claims.toml may not drop a recorded theorem or mutant, or add an assumption, unless an <code>[[amend]]</code> entry names the change and gives a reason. The decision is proved (tauten_check_kernel::registry::conserves); it is relative to the committed record, and reviewing that record's diff is trusted.</p><h2 id="fix">Fix</h2><p>Restore the theorem, mutant or assumption, or add <code>[[amend]]</code> with <code>file</code>, <code>function</code>, <code>kind</code> (theorem, mutant or assumption), <code>name</code> and <code>reason</code> to proofs/claims.toml. After <code>cargo tauten proofs</code> re-records proofs/claims.json, remove the amendment.</p><h2 id="explain">In the terminal</h2><div class="copy-line"><span class="prompt" aria-hidden="true">$</span><code>cargo tauten explain TAU-R002</code><button class="copy-btn" type="button" hidden data-copy="cargo tauten explain TAU-R002" aria-label="Copy command: cargo tauten explain TAU-R002">Copy</button></div><p class="cap">$ cargo tauten explain TAU-R002</p><div class="panel diag"><pre class="diag-body" tabindex="0" aria-label="cargo tauten explain TAU-R002"><code><span class="line">TAU-R002: Recorded proof claims are not weakened</span><span class="line"> </span><span class="line">Why: A proof claim is only as strong as its theorems and the mutants that show they bite, and as the assumptions it rests on. Deleting a mutant, dropping a theorem or adding an assumption makes a claim weaker while its badge still says proved. The committed proofs/claims.json is the record; proofs/claims.toml may not drop a recorded theorem or mutant, or add an assumption, unless an `[[amend]]` entry names the change and gives a reason. The decision is proved (tauten_check_kernel::registry::conserves); it is relative to the committed record, and reviewing that record&#x27;s diff is trusted.</span><span class="line"> </span><span class="line">Fix: Restore the theorem, mutant or assumption, or add `[[amend]]` with `file`, `function`, `kind` (theorem, mutant or assumption), `name` and `reason` to proofs/claims.toml. After `cargo tauten proofs` re-records proofs/claims.json, remove the amendment.</span><span class="line"> </span><span class="line">Decided by: Tauten</span><span class="line">Decides: A recorded proof claim keeps its theorems and mutants and gains no assumption, unless amended with a reason.</span><span class="line">Sees: record; complete: yes</span><span class="line">Does not see: The committed `proofs/claims.json` itself (its diff is reviewed).</span><span class="line">Applies to tests: yes</span><span class="line">Exceptions allowed: with #[expect(.., reason)]</span><span class="line">  kernel deny</span><span class="line">  core deny</span><span class="line">  edge deny</span></code></pre></div><nav class="pn" aria-label="Previous and next rule"><a href="/rules/tau-r001/">← TAU-R001</a><span></span></nav></div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.0.4/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2"><code>bc4b9a4</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
+<script src="/assets/copy.js?v=58194cb0" defer></script>
+</body>
+</html>

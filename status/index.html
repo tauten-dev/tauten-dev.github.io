@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Status · tauten</title>
-<meta name="description" content="What tauten has exercised, the approved path with what is in progress and planned, and the benchmark result: no defect-reduction claim.">
+<meta name="description" content="The benchmark result (no defect-reduction claim), the known gaps, and where the milestones and roadmap live.">
 <link rel="canonical" href="https://tauten.dev/status/">
 <meta property="og:title" content="Status · tauten">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tauten.dev/status/">
-<meta property="og:description" content="What tauten has exercised, the approved path with what is in progress and planned, and the benchmark result: no defect-reduction claim.">
+<meta property="og:description" content="The benchmark result (no defect-reduction claim), the known gaps, and where the milestones and roadmap live.">
 <meta property="og:image" content="https://tauten.dev/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -18,268 +18,29 @@
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/site.css?v=c5343030">
-<script src="/assets/theme.js?v=c5343030"></script>
+<link rel="stylesheet" href="/assets/site.css?v=58194cb0">
+<script src="/assets/theme.js?v=58194cb0"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap bar">
-<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="30" height="30" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="30" height="30" alt="">tauten</a>
-<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/discipline/">Discipline</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/">Rules</a></li><li><a href="/status/" aria-current="page">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://docs.rs/tauten/0.0.3/tauten/">API</a></li></ul></nav>
-<label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label>
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="24" height="24" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="24" height="24" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/">Rules</a></li><li><a href="/status/" aria-current="page">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
 </div></header>
 <main id="main">
-<div class="wrap page-head"><p class="eyebrow">Status</p><h1>Status</h1>
-<p class="maturity"><span class="badge b-planned">Pre-release</span> <span>Version 0.0.3 is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>; the discipline APIs are in progress. No defect-reduction claim (<a href="/status/#benchmark">why</a>).</span></p><ul class="small legend"><li><span class="badge b-specified"><span class="g" aria-hidden="true">○</span>Specified</span> written down only.</li><li><span class="badge b-implemented"><span class="g" aria-hidden="true">◐</span>Implemented</span> code exists.</li><li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> ran against real input in the repository; the evidence is named.</li><li><span class="badge b-progress">In progress</span> / <span class="badge b-planned">Planned</span> not released.</li></ul></div>
+<div class="wrap page-head"><h1>Status</h1><p class="lede">Version 0.0.4 is on <a href="https://crates.io/crates/cargo-tauten">crates.io</a>. Early release. No defect-reduction claim (<a href="/status/#benchmark">why</a>).</p></div>
 <div class="wrap">
-<section id="exercised">
-<div class="status-grid">
-<div class="card"><h3>Exercised</h3><ul>
-<li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> 37 rules; 28 reject and 3 accept fixture crates, each producing exactly its expected rule IDs. <span class="ev"><a href="https://github.com/tauten-dev/tauten/blob/8fb6ade8a7174fb7924eb684132794ae383cb45d/crates/cargo-tauten/tests/fixtures.rs"><code>crates/cargo-tauten/tests/fixtures.rs</code></a></span></li>
-<li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span> Proof tier: tauten's own kernel and the user template. <a href="/proofs/">Proofs</a></li>
-<li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <code>#[refined]</code>, <code>#[newtype]</code>, contracts.</li>
-<li><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(worktree, not merged)</span> Writfold adoption, on a worktree: 151 claims proved, 142 findings subsumed, baseline 527. <span class="ev">docs/STATUS.md, M8</span></li>
-<li>tauten passes its own profile on every gate run. <span class="ev">scripts/gate</span></li>
-</ul></div>
-<div class="card"><h3>The approved path</h3><ul><li><span class="badge b-progress">In progress</span> <strong>D0</strong> Worked example with all four ideas and one proved claim; the attribute macros</li><li><span class="badge b-planned">Planned</span> <strong>X1–X3</strong> One-day experiments: automatic Lean tactics, Charon facts, Kani on the audited findings</li><li><span class="badge b-planned">Planned</span> <strong>D1</strong> One shared proof gate and public image, replacing forked scripts</li><li><span class="badge b-planned">Planned (0.1)</span> <strong>D2</strong> Cadence: <code>ship</code>, <code>verify --level</code>, per-claim fingerprints</li><li><span class="badge b-planned">Planned (0.1)</span> <strong>D3</strong> Findings reframed as obligations: fixed, proved, justified or open</li><li><span class="badge b-planned">Planned</span> <strong>D4–D7</strong> Capabilities and effects ratchet, evidence, the refinement fragment, TLC claims</li><li><span class="badge b-progress">In progress</span> <strong>D8</strong> This site, rustdoc on docs.rs, release 0.1.0</li></ul>
-<p class="small muted">From <a href="https://github.com/tauten-dev/tauten/blob/8fb6ade8a7174fb7924eb684132794ae383cb45d/docs/DISCIPLINE-PROPOSAL.md"><code>docs/DISCIPLINE-PROPOSAL.md</code></a>; no step depends on a defect benchmark.</p></div>
-</div>
-</section>
-<section id="benchmark">
-<h2>Benchmark</h2>
-<p class="boundary">We measured defect reduction and did not find it: 2 escaped defects in 200 unassisted trials; 0 of 120 sampled findings were reachable defects. tauten makes no defect-reduction claim.</p>
-<p class="prose">Agents without the profile almost never shipped a defect the hidden tests catch, so the held-out run was stopped by its preregistered rule. The profile does change the code; on these tasks that code was not wrong. The harness, design and pilot are in <a href="https://github.com/tauten-dev/tauten/blob/8fb6ade8a7174fb7924eb684132794ae383cb45d/bench/README.md"><code>bench/README.md</code></a>; the audit is summarised under Known gaps in <a href="https://github.com/tauten-dev/tauten/blob/8fb6ade8a7174fb7924eb684132794ae383cb45d/docs/STATUS.md"><code>docs/STATUS.md</code></a>.</p>
-</section>
-<section id="status-doc">
-<details><summary>Every milestone, from docs/STATUS.md</summary>
-<p class="small muted">Reproduced from <code>docs/STATUS.md</code> at <code>8fb6ade</code>.</p><div class="prose wide"><h2 id="status">Status</h2>
-<p>Updated 2026-11-19. Name final: tauten; license MIT; code at github.com/tauten-dev/tauten (public). Every line says how far an item got:
-<strong>specified → implemented → exercised</strong>. "Exercised" means it ran against
-real input in this repository, and the evidence is named. Versions 0.0.1
-0.0.2 and 0.0.3 are on crates.io; the site is at tauten.dev. Benchmark: no
-defect-reduction benefit established (ceiling; held-out run stopped by its
-go/no-go rule; audited findings were not defects).</p>
-<h3 id="milestones-see-plan-md-6">Milestones (see PLAN.md §6)</h3>
-<div class="table-scroll" tabindex="0" role="region" aria-label="Milestones"><table>
-<thead>
-<tr>
-<th scope="col">#</th>
-<th scope="col">Item</th>
-<th scope="col">State</th>
-<th scope="col">Evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>M0</td>
-<td>Plan, mapping, agent profile, rule table (37 rules, ~200 banned API paths)</td>
-<td><span class="badge b-specified"><span class="g" aria-hidden="true">○</span>Done</span></td>
-<td><code>docs/</code>, <code>crates/tauten-check/agents.md</code>, <code>crates/tauten-check/rules.toml</code>, generated <code>docs/RULES.md</code> (drift-checked)</td>
-</tr>
-<tr>
-<td>M0</td>
-<td>Fixtures ported from Sovel examples</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>fixtures/cases</code>: 28 reject + 3 accept crates, exact expected IDs, one tier per crate (<code>tests/fixtures.rs</code>)</td>
-</tr>
-<tr>
-<td>M0b</td>
-<td>Writfold dry run</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>docs/dry-runs/writfold-2026-11-18.md</code>. It found 4 defects in tauten, now fixed.</td>
-</tr>
-<tr>
-<td>M1</td>
-<td><code>cargo tauten check</code> (human/JSON), <code>explain</code> (+<code>--markdown</code>), <code>profile</code>, <code>--assume-tier</code></td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td>fixtures, self-check, writfold</td>
-</tr>
-<tr>
-<td>M1</td>
-<td>Ratchet: <code>cargo tauten baseline</code>, <code>--baseline</code>, stale-baseline rule TAU-R001, increases refused</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td>unit tests; <code>tests/ratchet.rs</code>; writfold clone (707 accepted → 1 new <code>unwrap</code> = 1 error → stale slot = R001 → increase refused)</td>
-</tr>
-<tr>
-<td>M1</td>
-<td><code>init</code> (proposes tiers; <code>--write</code> adds them and <code>AGENTS.tauten.md</code>)</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(manually)</span></td>
-<td>scratch two-crate workspace, 2026-11-18; no automated test yet</td>
-</tr>
-<tr>
-<td>M2</td>
-<td><code>tauten</code>: <code>Authority</code>, <code>Clock</code>/<code>SystemClock</code>/<code>ManualClock</code>, <code>Env</code>, <code>dir</code> (feature <code>fs</code>, cap-std)</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td>doc tests; <code>crates/tauten/tests/ui/forged_authority.rs</code>; fixture <code>rej-authority-alias</code></td>
-</tr>
-<tr>
-<td>M2</td>
-<td><code>tauten-macros</code>: <code>#[newtype]</code>, <code>#[refined]</code>, <code>#[requires]</code>, <code>#[ensures]</code> with <code>old()</code></td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>crates/tauten/tests/behaviour.rs</code> (runtime), 6 trybuild compile-fail tests; generated code proved in Lean for listed instances (P3)</td>
-</tr>
-<tr>
-<td>P0</td>
-<td>Proof plan probe: Charon/Aeneas on tauten-shaped code</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local, 32 CPUs)</span></td>
-<td><code>docs/proofs/probe.md</code>; probe retired in P1 (kept at <code>2885ee1</code>)</td>
-</tr>
-<tr>
-<td>P1</td>
-<td><code>tauten-check-kernel</code> (tier order, severity, lint exceptions); <code>tauten-check</code> calls it; 13 Lean theorems over the extraction; axiom + coverage audit; drift check; 9 mutants; <code>proofs.yml</code> workflow</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
-<td><code>docs/proofs/README.md</code>; <code>proofs.yml</code> green on main 2026-11-18 (gate 2 min, job 7 min incl. image pull). Every claim is broken by at least one mutant</td>
-</tr>
-<tr>
-<td>P2</td>
-<td>Baseline ratchet in <code>tauten-check-kernel</code> (<code>apply</code>, <code>stale</code>, <code>count_errors</code>, <code>increases</code>); <code>tauten-check</code> interns keys and calls it; 14 more Lean claims (R-conserve, R-cover, R-stale, R-exact, R-headroom, R-shrink, 2 non-vacuity examples); 8 more mutants; differential test against the old <code>BTreeMap</code> ratchet</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
-<td><code>docs/proofs/README.md</code>; local proof gate passed (27 claims, 17 mutants); interning is trusted and covered by the differential test; <code>proofs.yml</code> green on main 2026-11-18 (gate 206 s)</td>
-</tr>
-<tr>
-<td>P3</td>
-<td>Proofs over what the macros generate, for listed instances: <code>crates/tauten-proof-instances</code> (unpublished; 4 <code>#[refined]</code> types, a <code>#[newtype]</code> control, 4 contract functions incl. <code>&amp;mut</code> and <code>old</code>); a schematic shape per macro; per instance a shape theorem plus Plyward F01 targets 1, 2, 3, 5 and the contract claims; constructor audit; 60 more Lean claims (87 in all); 10 macro-source mutants</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
-<td><code>docs/proofs/README.md</code> (P3 section); local proof gate passed (87 claims, 27 mutants). Wording: "proved for listed instances"; the macros themselves are not verified. <code>proofs.yml</code> green on main 2026-11-19 (gate 408 s)</td>
-</tr>
-<tr>
-<td>P4</td>
-<td>Rule-table well-formedness in <code>tauten-check-kernel</code> (<code>table::validate</code>: unique IDs, unique lint owner, API bans name existing rules, every emitted ID present); <code>Profile::parse</code> interns names and calls it; <code>validate_ok_iff</code> + non-vacuity examples (2 claims, 89 in all); 5 mutants (32 in all); differential test against the old checks; reject fixture <code>fixtures/profiles/rej-missing-r001.toml</code></td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
-<td><code>docs/proofs/README.md</code> (P4 section); local proof gate passed (89 claims, 32 mutants, 339 s warm). Error order is not a theorem; the differential test compares error texts on 3,000 random tables</td>
-</tr>
-<tr>
-<td>P5</td>
-<td>Proof tier for users (M3): <code>proofs/claims.toml</code>; <code>cargo tauten proofs</code> (JSON outcome per claim: proved, drift, build-failed, audit-failed, mutant-survived, tool-missing; records <code>proofs/claims.json</code> with a source fingerprint); template <code>crates/cargo-tauten/templates/proofs</code> + <code>cargo tauten init --proofs</code>; N001/P003 findings in kernel functions with a fresh, total, proved claim reported as subsumed (kernel <code>subsume::subsumes</code>, 4 claims, 4 mutants); <code>proofs/TRUST.md</code>; badge data <code>proofs/claims.json</code></td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
-<td>Worked example <code>bench/hosts/ledger</code> (<code>apply_spec</code>, 2 mutants, <code>proved</code>, gate 53 s cold); fixture <code>fixtures/proofs-subsume</code> with a recorded gate run and <code>tests/proofs.rs</code> (fresh/stale/non-total/unclaimed, tool-missing without the toolchain); tauten's own gate via <code>cargo tauten proofs</code>: 20 of 20 claims <code>proved</code> (93 audited claims, 36 mutants, 409 s cold). CI does not run <code>cargo tauten proofs</code> yet; the site's proofs page is rendered from <code>claims.json</code></td>
-</tr>
-<tr>
-<td>M3</td>
-<td>Proof tier for users (Aeneas/Lean template from writfold)</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(local and GitHub CI)</span></td>
-<td>see P5; <code>proofs.yml</code> green on main 2026-11-19 (93 claims, 36 mutants, gate 928 s)</td>
-</tr>
-<tr>
-<td>M4</td>
-<td>Benchmark harness: host, 4 dev tasks, runner, analysis, admission gate</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">with built-in agents only</span></td>
-<td><code>bench/README.md</code> (validation table); <code>scripts/bench-validate</code> in the gate</td>
-</tr>
-<tr>
-<td>M4</td>
-<td>Pilot with a real agent (dev split)</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td><code>bench/reports/2026-11-18-pilot</code>: 36 trials, Sonnet 5.5. Ceiling: 0 escaped defects in every arm; enforcement removed unchecked arithmetic (A 6/12, B 5/12, C 0/12 trials). Calibration rounds 1-3 (200 trials, 2 escaped) and the E1 audit: see Known gaps</td>
-</tr>
-<tr>
-<td>M5</td>
-<td>Repo (public), CI gate, tag-driven release workflow with crates.io trusted publishing (no stored token)</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span></td>
-<td>0.0.1 (stored token) and 0.0.2 (trusted publishing) of all four crates published 2026-11-18 by <code>release.yml</code> after the gate passed. <code>tauten-check-kernel</code> first published 0.0.2 with a one-off token (2026-11-19), then trusted publishing; 0.0.3 of all five crates by <code>release.yml</code></td>
-</tr>
-<tr>
-<td>M7</td>
-<td>Website (tauten.dev)</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(live)</span></td>
-<td><code>tauten-dev/tauten-dev.github.io</code>, generated from a pinned commit with drift checks; benchmark section shows the dev-split pilot</td>
-</tr>
-<tr>
-<td>M8</td>
-<td>Writfold adoption</td>
-<td><span class="badge b-exercised"><span class="g" aria-hidden="true">●</span>Exercised</span> <span class="qual">(worktree, not merged)</span></td>
-<td>branch <code>tauten-adoption</code> in a separate worktree: tiers, 19 reasoned expects, baseline 712 → 679, then proof claims subsume 130 of 159 kernel N001/P003 findings → baseline 549; then four helpers rewritten to be total and re-proved (151 claims proved, 105-minute gate) → 142 subsumed, baseline 527; <code>scripts/tauten-check</code> passes with cargo-tauten 0.0.3 from crates.io. Awaiting the owner's review</td>
-</tr>
-<tr>
-<td>—</td>
-<td>Plyward review</td>
-<td><span class="badge b-specified"><span class="g" aria-hidden="true">○</span>Done</span></td>
-<td><code>docs/reviews/plyward-2026-11-18.md</code>; three defects fixed in <code>e7fbc8c</code></td>
-</tr>
-</tbody>
-</table></div>
-<h3 id="quality">Quality</h3>
-<ul>
-<li>Gate (<code>docker compose run --rm gate</code>):</li>
-<li>format;</li>
-<li>build;</li>
-<li>unit, fixture, ratchet, behaviour and compile-fail tests;</li>
-<li>self-check (tauten passes its own profile);</li>
-<li><code>docs/RULES.md</code> drift check;</li>
-<li>benchmark admission;</li>
-<li><code>cargo deny</code>.</li>
-<li>Mutation testing (<code>docker compose run --rm mutants</code>): first run 14 of 137
-  viable mutants missed in <code>tauten-check</code>; after the new tests, 0 missed.</li>
-</ul>
-<h3 id="design-decisions-made-while-building-with-reasons">Design decisions made while building (with reasons)</h3>
-<ul>
-<li><strong>The CLI is the rustc wrapper.</strong> One <code>cargo check</code> with
-  <code>RUSTC_WORKSPACE_WRAPPER=cargo-tauten</code>, so each crate gets exactly its own
-  tier's flags. <code>cargo clippy -- flags</code> applied flags to dependencies too.</li>
-<li><strong>Lints compile at warn level; the profile assigns severity.</strong> With deny
-  levels, rustc fails and dependents are never checked.</li>
-<li><strong>No rustc <code>forbid</code>.</strong> Derive macros (clap, among others) emit
-  <code>#[allow(clippy::...)]</code>, which rustc rejects under forbid. "No exceptions"
-  is a structural check instead (TAU-X004).</li>
-<li><strong>Separate profile for test targets</strong> (<code>in_tests</code>). Calibrated on writfold,
-  where most panic and IO findings were legitimate test code.</li>
-<li><strong>Refined types live in a private generated module</strong>, so even the defining
-  module cannot bypass <code>try_new</code>.</li>
-<li><strong>Contracts only on <code>Result</code>-returning functions.</strong> A violation is a
-  returned error in every build profile; there is no release-mode disabling
-  and no panic.</li>
-<li><strong>Baseline keyed without line numbers, and it may only shrink.</strong></li>
-<li><strong>The build directory is keyed by a hash of the profile and tier map</strong>,
-  because cargo does not fingerprint what a wrapper adds.</li>
-</ul>
-<h3 id="known-gaps">Known gaps</h3>
-<ul>
-<li>The capability rule is discipline, not confinement (see MAPPING.md).</li>
-<li>The kernel's arithmetic and indexing rules duplicate what an Aeneas proof
-  already establishes (dry-run report). P5 subsumes them only for functions
-  with a recorded, current, total proof. Writfold's adoption branch
-  subsumes 142 of its 159 extracted-kernel findings this way, after
-  rewriting four helpers to be total (<code>get</code> instead of indexing; 10 more
-  findings disappeared with the indexing). The remaining 7 are in <code>splice</code>,
-  whose only panic is a length overflow past <code>usize::MAX</code>.</li>
-<li>No credit through callers: a helper with a precondition gets no
-  subsumption even when every caller is proved total.</li>
-<li>tauten trusts the project's gate output, including its total-shape check;
-  it does not re-check the Lean theorems itself.</li>
-<li>Any edit under a claimed crate or <code>proofs/</code> stales every claim of that
-  crate (writfold: a 1.5 h re-run). The workspace manifest (without its
-  <code>version</code> lines) and the toolchain pin count too, since 2026-11-19.</li>
-<li>Mutant counting differs: writfold's gate counts only direct proof
-  failures, tauten's also counts theorems that depend on a broken one.</li>
-<li>S002 (placeholder comments) is a heuristic.</li>
-<li>The benchmark hits a ceiling. Three calibration rounds without the
-  profile (200 trials, Sonnet 5.5 and Haiku 5.5, 7 tasks on 3 hosts, hidden
-  oracles in dev and release builds) had 2 escaped defects. The
-  preregistered go/no-go rule (10-26 of 40 on the probe tasks) came out
-  no-go (Sonnet 1/40, Haiku 0/40), so the held-out run was not started.</li>
-<li>Finding validity (audit E1, registered before classifying): of 120
-  sampled deny-level findings in that agent-written code, two independent
-  classifiers confirmed <strong>0</strong> as reachable defects (exact 95% interval
-  0-3.0%); 118 refuted with a written bound argument, 2 undetermined. Neither
-  escaped defect was on a flagged line. On these hosts the profile's
-  findings are predominantly not defects. Untested: whether those bounds
-  survive later edits (maintenance chains, not run).</li>
-<li><code>#[refined]</code> wraps only <code>tauten::refine::Frozen</code> types (primitives,
-  <code>String</code>, std containers of those): interior mutability or a user-written
-  <code>Clone</code> could break a checked predicate (external review, 2026-11-19).
-  Predicates are arbitrary closures, not a checked fragment.</li>
-<li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no
-  Kani (<code>cfg(kani)</code>) lowering yet.</li>
-<li><strong>No defect-reduction benefit established.</strong> The pilot could not
-  separate the arms, the held-out run was stopped by its own go/no-go rule,
-  and audited findings were not defects; nothing here supports a claim that
-  the profile reduces escaped defects.</li>
-</ul></div></details>
-</section>
-<p>Every rule, with a fixture that triggers it and the diagnostic it prints: <a href="/rules/">Rules</a>.</p>
+<section id="benchmark"><h2>Benchmark</h2>
+<p class="limit">We measured defect reduction and did not find it: 2 escaped defects in 200 unassisted trials; 0 of 120 sampled findings were reachable defects. tauten makes no defect-reduction claim.</p>
+<p>Agents without the profile almost never shipped a defect the hidden tests catch, so the held-out run was stopped by its preregistered rule. The profile does change the code; on these tasks that code was not wrong. Design, pilot and audit: <a href="https://github.com/tauten-dev/tauten/blob/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2/bench/README.md"><code>bench/README.md</code></a>.</p></section>
+<section id="gaps"><h2>Known gaps</h2>
+<ul><li>The capability rule is discipline, not confinement (see MAPPING.md).</li><li>No credit through callers: a helper with a precondition gets no subsumption even when every caller is proved total.</li><li>tauten trusts the project's gate output, including its total-shape check; it does not re-check the Lean theorems itself.</li><li>Any edit under a claimed crate or <code>proofs/</code> stales every claim of that crate. The workspace manifest (without its <code>version</code> lines) and the toolchain pin count too, since 2026-11-19.</li><li>S002 (placeholder comments) is a heuristic.</li><li><code>#[refined]</code> wraps only <code>tauten::refine::Frozen</code> types (primitives, <code>String</code>, std containers of those): interior mutability or a user-written <code>Clone</code> could break a checked predicate (external review, 2026-11-19). Predicates are arbitrary closures, not a checked fragment.</li><li>Contracts do not yet support <code>async fn</code> or generic newtypes; they have no Kani (<code>cfg(kani)</code>) lowering yet.</li></ul>
+<p class="small muted">From <a href="https://github.com/tauten-dev/tauten/blob/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2/docs/STATUS.md"><code>docs/STATUS.md</code></a>, Known gaps, at <code>bc4b9a4</code>.</p></section>
+<section id="more"><h2>More</h2>
+<ul><li><a href="https://github.com/tauten-dev/tauten/blob/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2/docs/STATUS.md"><code>docs/STATUS.md</code></a>: milestones and evidence</li><li><a href="https://github.com/tauten-dev/tauten/blob/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2/docs/ROADMAP.md"><code>docs/ROADMAP.md</code></a>: what comes next</li><li><a href="https://github.com/tauten-dev/tauten/blob/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2/CHANGELOG.md"><code>CHANGELOG.md</code></a>: what each release changed</li><li><a href="https://github.com/tauten-dev/tauten/blob/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2/bench/README.md"><code>bench/README.md</code></a>: the benchmark harness and reports</li></ul></section>
 </div>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.0.3/tauten/">docs.rs</a></li><li><a href="/discipline/">Discipline</a></li><li><a href="/status/">Status</a></li><li>built from tauten@<code>8fb6ade</code>, 2026-11-19</li><li><span class="badge b-planned">pre-release</span></li></ul></div></footer>
-<script src="/assets/copy.js?v=c5343030" defer></script>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.0.4/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2"><code>bc4b9a4</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
+<script src="/assets/copy.js?v=58194cb0" defer></script>
 </body>
 </html>

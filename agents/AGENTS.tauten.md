@@ -17,6 +17,13 @@ per line; each has a rule `id`, the `file`/`line`, and a `fix`.
 
 Dependencies point inward only: edge → core → kernel.
 
+**Protocols are step machines.** Write a protocol (a publish, a lease, a
+retry) as `tauten::machine::Machine`: a pure `step(state, event) ->
+(state, command)` with an empty effect row, and let an edge or core driver
+carry out the commands. The empty effect row is what makes a recorded tape
+replay exactly (`tauten::machine::replay`) and what lets the protocol be
+proved once by induction (`Tauten.Machine.inv_of_step` in the proofs).
+
 **When a rule fires, fix the cause.**
 - Do not add `#[allow]`. If an exception is truly correct, use
   `#[expect(lint, reason = "why this is safe here")]` on the smallest item,
