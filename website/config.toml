@@ -4,7 +4,7 @@
 # file is read with `git show <core_ref>:<path>`, never from the working tree.
 # Both can be overridden on the command line (--core, --core-ref).
 core = "../tauten"
-core_ref = "acd52b318c7f845690919f228f12d2c10c64694e"
+core_ref = "719d4e982a4e6d0d778d6fea2c71025323d638a1"
 
 site_url = "https://tauten.dev"
 domain = "tauten.dev"
@@ -17,7 +17,7 @@ site_repository = "tauten-dev/tauten-dev.github.io"
 # from the first release, and there are no crates.io or docs.rs links.
 published = true
 first_release = "0.0.1"
-latest_release = "0.0.6"
+latest_release = "0.1.0"
 
 # Source switch: tauten-dev/tauten is public. While false, paths into
 # the core repository are shown as plain text, with no github.com links, and
