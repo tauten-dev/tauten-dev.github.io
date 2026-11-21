@@ -23,9 +23,10 @@ BANNED = [
 ]
 
 # Commands that are not released yet (`#[effects]`, `#[evidence]` and
-# `#[derive(Cap)]` shipped in 0.0.4). A page that names one must
-# also carry an "In progress" or "Planned" label.
-UNRELEASED = ["cargo tauten ship", "verify --level", "effects.lock"]
+# `#[derive(Cap)]` shipped in 0.0.4; `cargo tauten ship` and
+# `verify --level` in 0.0.5). A page that names one must also carry an
+# "In progress" or "Planned" label.
+UNRELEASED = ["effects.lock"]
 
 # Exact sentences reproduced from core files that use those words in a
 # negative sense. They are removed before the grep; nothing else is excused.

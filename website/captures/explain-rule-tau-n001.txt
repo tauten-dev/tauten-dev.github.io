@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten explain TAU-N001
 # cwd: .
 # exit: 0
@@ -7,7 +7,7 @@ TAU-N001: Checked arithmetic
 
 Why: Integer overflow and division by zero either panic or wrap silently depending on build profile; both are logic errors agents rarely test.
 
-Fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+Fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
 Decided by: Clippy
 Decides: No arithmetic that can overflow, divide by zero or truncate silently in linted code.

@@ -1,0 +1,20 @@
+# core: acd52b318c7f845690919f228f12d2c10c64694e
+# cmd: cargo tauten explain TAU-T004
+# cwd: .
+# exit: 0
+# ---
+TAU-T004: Declared layers point backwards
+
+Why: Inside a tier, a workspace may order its crates in named layers (`[workspace.metadata.tauten] layers`); a crate that uses a later layer turns the intended dependency order into a cycle waiting to happen.
+
+Fix: Move the shared code into the same or an earlier layer, or declare the crate in a later layer. Give every crate a `layer` from the workspace's list.
+
+Decided by: Tauten
+Decides: When the workspace declares layers, every member names one of them and depends only on members of the same or an earlier layer.
+Sees: manifest; complete: yes
+Does not see: Dev- and build-dependencies. Workspaces that declare no `layers` are not checked.
+Applies to tests: yes
+Exceptions allowed: with #[expect(.., reason)]
+  kernel deny
+  core deny
+  edge deny

@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten check --warnings
 # cwd: fixtures/cases
 # exit: 1
@@ -6,12 +6,12 @@
 error[TAU-X001]: `allow` attribute without specifying a reason
   --> rej-allow/src/lib.rs:4:1 (core crate `rej-allow`)
   = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
-  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
 
 error[TAU-X001]: #[allow] attribute found
   --> rej-allow/src/lib.rs:4:3 (core crate `rej-allow`)
   = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
-  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
 
 warning[TAU-D001]: docs for function which may panic missing `# Panics` section
   --> rej-allow/src/lib.rs:6:1 (core crate `rej-allow`)
@@ -43,12 +43,37 @@ error[TAU-C002]: this `MutexGuard` is held across an await point
   = rule: Async hazards (decided by Clippy)
   = fix: Release guards before awaiting; await or explicitly spawn-and-join futures.
 
+error[TAU-X001]: `cfg_attr(.., allow(clippy::unwrap_used))`: use `expect(clippy::unwrap_used, reason = "...")`, or narrow it to the item that needs it
+  --> rej-cfg-attr-allow/src/lib.rs:4:1 (core crate `rej-cfg-attr-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
+
+error[TAU-X001]: #[allow] attribute found
+  --> rej-cfg-attr-allow/src/lib.rs:4:23 (core crate `rej-cfg-attr-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
+
+error[TAU-X001]: `allow` attribute without specifying a reason
+  --> rej-cfg-attr-allow/src/lib.rs:4:23 (core crate `rej-cfg-attr-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
+
+warning[TAU-D001]: docs for function which may panic missing `# Panics` section
+  --> rej-cfg-attr-allow/src/lib.rs:6:1 (core crate `rej-cfg-attr-allow`)
+  = rule: Documented public API (decided by Rustc)
+  = fix: Add a doc comment; document each error variant a function can return under `# Errors`.
+
+error[TAU-K003]: kernel crate `rej-conditional-no-std` declares `no_std` only under a condition other than `not(test)`
+  --> rej-conditional-no-std/src/lib.rs:1:1 (kernel crate `rej-conditional-no-std`)
+  = rule: Kernel crate attributes (decided by Tauten)
+  = fix: Add `#![no_std]` (or `#![cfg_attr(not(test), no_std)]`) at the top of the kernel crate's `lib.rs`, with no other condition.
+
 error[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
   --> rej-contract-overflow/src/lib.rs:6:5 (core crate `rej-contract-overflow`)
   = rule: Checked arithmetic (decided by Clippy)
-  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
-error[TAU-X002]: crate-wide exception for `clippy::unwrap_used`
+error[TAU-X002]: crate-wide exception for `clippy::unwrap_used` (TAU-P001)
   --> rej-crate-wide/src/lib.rs:1:1 (core crate `rej-crate-wide`)
   = rule: No crate-wide exceptions to profile lints (decided by Tauten)
   = fix: Move the exception to the single item that needs it, with a reason.
@@ -61,7 +86,7 @@ warning[TAU-D001]: docs for function which may panic missing `# Panics` section
 error[TAU-P003]: indexing may panic
   --> rej-dependent/src/lib.rs:6:22 (core crate `rej-dependent`)
   = rule: No panicking index or slice (decided by Clippy)
-  = fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`.
+  = fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
 error[TAU-C001]: use of a disallowed method `std::thread::spawn`
   --> rej-detached-thread/src/lib.rs:5:10 (core crate `rej-detached-thread`)
@@ -88,10 +113,10 @@ error[TAU-P005]: use of a disallowed method `std::process::exit`
   = rule: No process exit or leaked values outside the edge (decided by Clippy)
   = fix: Return an error to the edge and let `main` decide the exit code; drop values normally.
 
-error[TAU-X001]: file-level `#![allow(clippy::needless_return)]`: use `#![expect(clippy::needless_return, reason = "...")]`, or narrow it to the item that needs it
+error[TAU-X001]: file-level `#![allow(clippy::needless_return)]`: use `expect(clippy::needless_return, reason = "...")`, or narrow it to the item that needs it
   --> rej-file-allow/src/lib.rs:3:1 (kernel crate `rej-file-allow`)
   = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
-  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code.
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
 
 error[TAU-N004]: strict comparison of `f32` or `f64`
   --> rej-float-eq/src/lib.rs:6:5 (core crate `rej-float-eq`)
@@ -118,6 +143,11 @@ error[TAU-G001]: use of a disallowed type `std::sync::OnceLock`
   = rule: No hidden global state (decided by Clippy)
   = fix: Pass the state explicitly, or own it in a struct created by the edge.
 
+error[TAU-X004]: exception for `clippy::all` (a lint group that may cover 22 profile rules) is not permitted in core crates
+  --> rej-group-allow/src/lib.rs:4:1 (core crate `rej-group-allow`)
+  = rule: No exceptions to this rule here (decided by Tauten)
+  = fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
+
 error[TAU-A001]: use of a disallowed method `std::fs::read_to_string`
   --> rej-hidden-authority/src/lib.rs:8:5 (core crate `rej-hidden-authority`)
   = rule: No ambient authority (decided by Clippy)
@@ -131,7 +161,7 @@ error[TAU-E001]: unused `std::result::Result` that must be used
 error[TAU-P003]: indexing may panic
   --> rej-index/src/lib.rs:6:5 (core crate `rej-index`)
   = rule: No panicking index or slice (decided by Clippy)
-  = fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`.
+  = fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
 error[TAU-L001]: infinite loop detected
   --> rej-infinite-loop/src/lib.rs:5:5 (core crate `rej-infinite-loop`)
@@ -151,7 +181,7 @@ error[TAU-X004]: exception for `clippy::indexing_slicing` (TAU-P003) is not perm
 error[TAU-K003]: kernel crate `rej-kernel-impure` is missing `#![no_std]`
   --> rej-kernel-impure/src/lib.rs:1:1 (kernel crate `rej-kernel-impure`)
   = rule: Kernel crate attributes (decided by Tauten)
-  = fix: Add `#![no_std]` at the top of the kernel crate's `lib.rs`.
+  = fix: Add `#![no_std]` (or `#![cfg_attr(not(test), no_std)]`) at the top of the kernel crate's `lib.rs`, with no other condition.
 
 error[TAU-K001]: use of a disallowed type `std::collections::HashMap`
   --> rej-kernel-impure/src/lib.rs:3:1 (kernel crate `rej-kernel-impure`)
@@ -186,12 +216,12 @@ error[TAU-E003]: non-binding `let` on an expression with `#[must_use]` type
 error[TAU-N002]: casting `u64` to `u32` may truncate the value
   --> rej-lossy-cast/src/lib.rs:6:5 (core crate `rej-lossy-cast`)
   = rule: No lossy `as` casts (decided by Clippy)
-  = fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors.
+  = fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors. In a kernel crate `cargo tauten obligations` lists it, but a recorded proof that the function never fails does not discharge it: an `as` cast never fails, it changes the value. Only a lossless or checked conversion does.
 
 error[TAU-N002]: using a potentially dangerous silent `as` conversion
   --> rej-lossy-cast/src/lib.rs:6:5 (core crate `rej-lossy-cast`)
   = rule: No lossy `as` casts (decided by Clippy)
-  = fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors.
+  = fix: Use `From`/`TryFrom` (`u32::try_from(x)?`) so out-of-range values become errors. In a kernel crate `cargo tauten obligations` lists it, but a recorded proof that the function never fails does not discharge it: an `as` cast never fails, it changes the value. Only a lossless or checked conversion does.
 
 error[TAU-T001]: crate `rej-no-tier` declares no tier
   --> rej-no-tier/Cargo.toml (untiered crate `rej-no-tier`)
@@ -228,6 +258,21 @@ error[TAU-O001]: use of `println!`
   = rule: No direct console output outside the edge (decided by Clippy)
   = fix: Return the data, or write to an `impl std::io::Write` passed in by the caller.
 
+error[TAU-X001]: `allow` attribute without specifying a reason
+  --> rej-shared-test-allow/tests/support/mod.rs:2:1 (core crate `rej-shared-test-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
+
+error[TAU-X001]: file-level `#![allow(dead_code)]`: use `expect(dead_code, reason = "...")` on the item that needs it; for a module compiled into several targets (shared test helpers), put it on the `mod` declaration in each target where the lint fires
+  --> rej-shared-test-allow/tests/support/mod.rs:2:1 (core crate `rej-shared-test-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
+
+error[TAU-X001]: file-level `#![allow(dead_code)]`: use `expect(dead_code, reason = "...")`, or narrow it to the item that needs it
+  --> rej-shared-test-allow/tests/two.rs:2:1 (core crate `rej-shared-test-allow`)
+  = rule: Lint exceptions must be `#[expect]` with a reason (decided by Clippy)
+  = fix: Replace `#[allow(x)]` with `#[expect(x, reason = "why this is safe here")]` on the smallest item possible, or fix the code. A module compiled into several targets (helpers under `tests/` declared with `mod support;` by several test files) cannot carry an inner `#![expect]`: it is unfulfilled in every target where the lint does not fire. For `dead_code` only, it may carry `#![allow(dead_code, reason = "...")]`. Otherwise put `#[expect(x, reason = "...")]` on the `mod` declaration in exactly the targets where it fires, or remove the sharing: one integration-test target per crate (`tests/it/main.rs` with the tests as modules), or a support crate used as a dev-dependency.
+
 error[TAU-X004]: exception for `clippy::todo` (TAU-S001) is not permitted in edge crates
   --> rej-stub-excused/src/lib.rs:4:1 (edge crate `rej-stub-excused`)
   = rule: No exceptions to this rule here (decided by Tauten)
@@ -237,6 +282,11 @@ error[TAU-S001]: `todo` should not be present in production code
   --> rej-stub/src/lib.rs:6:5 (core crate `rej-stub`)
   = rule: No stubs or debug leftovers (decided by Clippy)
   = fix: Implement the branch, or return a typed `Unsupported` error if the case is deliberately out of scope.
+
+error[TAU-X004]: exception for `clippy::todo` (TAU-S001) is not permitted in core crates
+  --> rej-test-exception/tests/two.rs:4:1 (core crate `rej-test-exception`)
+  = rule: No exceptions to this rule here (decided by Tauten)
+  = fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
 
 error[TAU-E001]: unused `std::result::Result` that must be used
   --> rej-test-hygiene/src/lib.rs:32:9 (core crate `rej-test-hygiene`)
@@ -276,4 +326,4 @@ error[TAU-M001]: wildcard match will also match any future added variants
   = rule: No wildcard arms over enums you own (decided by Clippy)
   = fix: List every variant. Group them with `A | B => ...` if they share behaviour.
 
-tauten: 48 error(s), 7 warning(s)
+tauten: 57 error(s), 8 warning(s)

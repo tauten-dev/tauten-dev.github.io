@@ -55,9 +55,9 @@ the release switches live in `website/config.toml`:
    files are allow-listed.
    6b. `/status/` carries the benchmark sentence from
    `docs/DISCIPLINE-PROPOSAL.md` and "tauten makes no defect-reduction claim";
-   any page naming an unreleased command (`cargo tauten ship`,
-   `verify --level`, `effects.lock`) carries a "Planned" label.
-   (`#[effects]`, `#[evidence]` and `#[derive(Cap)]` shipped in 0.0.4.)
+   any page naming an unreleased command (`effects.lock`) carries a
+   "Planned" label. (`#[effects]`, `#[evidence]` and `#[derive(Cap)]` shipped
+   in 0.0.4; `cargo tauten ship` and `verify --level` in 0.0.5.)
 7. Internal links and anchors resolve, ids are unique per page, nothing
    is loaded from a third party, and docs.rs links carry `latest_release`.
 

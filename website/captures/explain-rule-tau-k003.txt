@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten explain TAU-K003
 # cwd: .
 # exit: 0
@@ -7,10 +7,10 @@ TAU-K003: Kernel crate attributes
 
 Why: A kernel crate root must declare `#![no_std]` so the compiler enforces the absence of IO.
 
-Fix: Add `#![no_std]` at the top of the kernel crate's `lib.rs`.
+Fix: Add `#![no_std]` (or `#![cfg_attr(not(test), no_std)]`) at the top of the kernel crate's `lib.rs`, with no other condition.
 
 Decided by: Tauten
-Decides: A kernel crate root declares `#![no_std]`.
+Decides: A kernel library root declares `#![no_std]` unconditionally or as `#![cfg_attr(not(test), no_std)]`; any other condition, and a root that does not parse, is a finding.
 Sees: source; complete: yes
 Does not see: Nothing: the crate root is read in full.
 Applies to tests: yes

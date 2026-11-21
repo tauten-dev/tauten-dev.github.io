@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten check --warnings
 # cwd: fixtures/proofs-subsume
 # exit: 1
@@ -21,11 +21,11 @@ subsumed[TAU-P003]: indexing may panic
 error[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
   --> sub-kernel/src/lib.rs:21:5 (kernel crate `sub-kernel`)
   = rule: Checked arithmetic (decided by Clippy)
-  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
 error[TAU-N001]: arithmetic operation that can potentially result in unexpected side-effects
   --> sub-kernel/src/lib.rs:27:5 (kernel crate `sub-kernel`)
   = rule: Checked arithmetic (decided by Clippy)
-  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment.
+  = fix: Use `checked_*` and return an error on None, or `saturating_*`/`wrapping_*` when that behaviour is the specification. Say which in a comment. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
 tauten: 2 error(s), 0 warning(s), 3 subsumed by proofs

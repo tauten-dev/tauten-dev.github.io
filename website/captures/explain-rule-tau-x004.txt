@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten explain TAU-X004
 # cwd: .
 # exit: 0
@@ -10,9 +10,9 @@ Why: Some rules admit no exceptions: stub macros anywhere, and any profile lint 
 Fix: Remove the `#[expect]`/`#[allow]` and fix the code it excused.
 
 Decided by: Tauten
-Decides: No exception of a rule that admits none (any rule, in kernel crates).
+Decides: No exception of a rule that admits none (any rule, in kernel crates), and no conditional (`cfg_attr`) exception in kernel crates.
 Sees: source; complete: yes
-Does not see: Attributes and items produced by macros; files outside a member's `src/`.
+Does not see: Attributes and items produced by macros. Read in `src/`, `tests/`, `benches/`, `examples/` and the build script, including inside `cfg_attr`; a lint group counts as every profile rule it may contain (an over-approximation).
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny

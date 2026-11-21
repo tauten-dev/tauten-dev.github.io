@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten explain TAU-P003
 # cwd: .
 # exit: 0
@@ -7,7 +7,7 @@ TAU-P003: No panicking index or slice
 
 Why: `v[i]` and `&s[a..b]` panic on out-of-range or non-char-boundary input; off-by-one errors become crashes.
 
-Fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`.
+Fix: Use `.get(i)` / `.get(a..b)` and handle None, iterate instead of indexing, or use `split_at_checked`. In a kernel crate this is a proof obligation: a recorded proof that the function never fails discharges it (`cargo tauten obligations`).
 
 Decided by: Clippy
 Decides: No panicking index or string slice in linted code.

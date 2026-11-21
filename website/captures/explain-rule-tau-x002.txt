@@ -1,4 +1,4 @@
-# core: bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2
+# core: acd52b318c7f845690919f228f12d2c10c64694e
 # cmd: cargo tauten explain TAU-X002
 # cwd: .
 # exit: 0
@@ -12,7 +12,7 @@ Fix: Move the exception to the single item that needs it, with a reason.
 Decided by: Tauten
 Decides: No crate-level `#![allow]`/`#![expect]` of a profile lint.
 Sees: source; complete: yes
-Does not see: Attributes and items produced by macros; files outside a member's `src/`.
+Does not see: Attributes and items produced by macros. Read in `src/`, `tests/`, `benches/`, `examples/` and the build script, including inside `cfg_attr`; a lint group counts as every profile rule it may contain (an over-approximation).
 Applies to tests: yes
 Exceptions allowed: with #[expect(.., reason)]
   kernel deny
