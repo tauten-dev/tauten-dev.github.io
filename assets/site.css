@@ -167,3 +167,13 @@ details>summary{cursor:pointer}
 .logo-dark{display:none!important}.logo-light{display:inline!important}
 .panel pre{white-space:pre-wrap}
 }
+
+/* changelog */
+.releases{list-style:none;padding:0;margin:0 0 32px;display:flex;flex-wrap:wrap;gap:6px 20px;font:.86rem/1.5 var(--mono)}
+.releases time{color:var(--muted)}
+.release{border-top:1px solid var(--border);padding-top:8px;margin-top:40px}
+.release>h2:first-child{margin:16px 0 4px;font-family:var(--mono)}
+.release h2 .anchor{color:inherit;text-decoration:none}
+.release h2 .anchor:hover{text-decoration:underline;text-decoration-color:var(--accent)}
+.release-meta{margin-top:0}
+.release li{margin-bottom:.6em}

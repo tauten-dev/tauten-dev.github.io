@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog · tauten</title>
+<meta name="description" content="What each tauten release changed, up to 0.1.0.">
+<link rel="canonical" href="https://tauten.dev/changelog/">
+<meta property="og:title" content="Changelog · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/changelog/">
+<meta property="og:description" content="What each tauten release changed, up to 0.1.0.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: A discipline for Rust, with proofs over the shipped code.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=9977e598">
+<script src="/assets/theme.js?v=9977e598"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="24" height="24" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="24" height="24" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/">Rules</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+</div></header>
+<main id="main">
+<div class="wrap page-head"><h1>Changelog</h1>
+<p class="lede">What each release changed, from <a href="https://github.com/tauten-dev/tauten/blob/719d4e982a4e6d0d778d6fea2c71025323d638a1/CHANGELOG.md"><code>CHANGELOG.md</code></a> at <code>719d4e9</code>.</p></div>
+<div class="wrap">
+<nav aria-label="Releases"><ol class="releases"><li><a href="#v0.1.0">0.1.0</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.6">0.0.6</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.5">0.0.5</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.4">0.0.4</a> <time datetime="2026-11-20">2026-11-20</time></li><li><a href="#v0.0.3">0.0.3</a> <time datetime="2026-11-19">2026-11-19</time></li><li><a href="#v0.0.2">0.0.2</a> <time datetime="2026-11-18">2026-11-18</time></li><li><a href="#v0.0.1">0.0.1</a> <time datetime="2026-11-18">2026-11-18</time></li></ol></nav>
+<section class="release" id="v0.1.0" aria-labelledby="v0.1.0-h"><h2 id="v0.1.0-h"><a class="anchor" href="#v0.1.0">0.1.0</a></h2><p class="release-meta small muted"><time datetime="2026-11-21">2026-11-21</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.1.0">Release v0.1.0</a> · <a href="https://docs.rs/tauten/0.1.0/tauten/">docs.rs</a></p><p>Milestone 0.1.0: #54, #55, #58, #14 and #38. The publish driver (#13), the
+shared proof gate (#35) and bounded capability reads (#64) moved to 0.2.</p>
+<ul>
+<li>
+<p>Shared proved helpers for other kernels (A10, #14), in
+  <code>tauten-check-kernel</code> (no new crate): <code>binding::contains_bytes</code>
+  (<code>contains_bytes_spec</code>), <code>budget::charge</code> and <code>budget::charge_repeated</code>
+  over checked arithmetic (<code>charge_spec</code>, <code>charges_never_exceed_initial</code>,
+  <code>charge_repeated_no_overflow</code>), and <code>version::admit</code> (<code>version_admit_total</code>,
+  <code>version_admit_spec</code>, <code>never_admits_newer</code>, <code>absent_is_invalid</code>). Five new
+  mutants. A consumer kernel cites them with <code>inherit =
+  "tauten-check-kernel@&lt;version&gt;:&lt;function&gt;"</code>, against the <code>claims.json</code>
+  that <code>tauten-check-kernel</code> now ships. tauten reads <code>proofs/claims.toml</code>,
+  <code>claims.json</code> (recorded, shipped or pending) and the baseline through
+  <code>version::admit</code> (new module <code>tauten_check::format</code>): a file from a newer
+  tauten is refused with "upgrade cargo-tauten" instead of being read as
+  the current format, and a missing version is an error.
+  <code>ClaimsError::Version</code> now carries the message, and <code>Record::parse</code> is new.
+  The bounded <code>ReadDir</code> reads and <code>Env::only</code> moved to 0.2 (#64).</p>
+</li>
+<li>
+<p>Publishing to an absent target, proved (#58, RFC
+  <code>2026-11-21-publish-absent-target</code>). Companion theorems in
+  <code>proofs/Tauten/Durable.lean</code> for a publish started with the target durably
+  absent (<code>init0Absent</code>). <code>publish_absent_or_new</code>: in every reachable
+  configuration and after any crash, a reader sees nothing or the new
+  content. It needs only <code>FS.sync-file</code>, because a non-atomic rename can only
+  leave a fresh name missing. <code>publish_absent_durable_on_done</code>: once <code>Done</code>,
+  every crash leaves the new content (all three FS assumptions). Non-vacuity:
+  <code>posix_absent_done_reachable</code>. Necessity: <code>absent_or_new_needs_sync_file</code>,
+  <code>absent_durable_needs_sync_dir</code> (a crash loses the new name) and
+  <code>absent_durable_needs_rename_atomic</code>. The theorems join the existing
+  <code>step</code> and <code>durable</code> claims (one claim per function); no published
+  theorem, name or assumption changes. New mutant <code>skip-dir-sync</code>.</p>
+</li>
+<li>
+<p><code>cargo tauten init --write</code> keeps valid manifests valid (#54). An existing
+  <code>[package.metadata.tauten]</code> table gets the proposed <code>tier</code> in whatever form
+  it has (explicit header, dotted keys, inline table), instead of a second,
+  duplicate header that Cargo refuses. Comments and other keys are kept, a
+  second run changes nothing, and a <code>tier</code> that is present but not a string
+  is refused before anything is written. TAU-H001's <code>overflow-checks</code> is
+  likewise added to an existing <code>[profile.release]</code> table. Manifests are
+  edited with <code>toml_edit</code>, and every edit is re-parsed before it is written.</p>
+</li>
+<li>Library and binary roots come from Cargo's declared targets (#55). A
+  library at a non-default path or file name (<code>[lib] path =
+  "code/kernel.rs"</code>) now gets the same structural findings (TAU-K003 and the
+  other source rules) and the same <code>init</code> tier proposal as <code>src/lib.rs</code>.
+  Before, such a crate was checked as if it had no library and was proposed
+  as <code>edge</code>. Files outside <code>src/</code>, <code>tests/</code>, <code>benches/</code> and <code>examples/</code> are
+  collected from each declared target's directory. Library targets of any
+  crate type (<code>cdylib</code>, <code>staticlib</code>, ...) count as crate roots.
+  <code>tauten_check::SourceFile</code> gains <code>is_lib_root</code>.</li>
+</ul></section><section class="release" id="v0.0.6" aria-labelledby="v0.0.6-h"><h2 id="v0.0.6-h"><a class="anchor" href="#v0.0.6">0.0.6</a></h2><p class="release-meta small muted"><time datetime="2026-11-21">2026-11-21</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.6">Release v0.0.6</a></p><ul>
+<li>TAU-X001 advice for modules shared by several targets (#59): an inner
+  <code>#![expect]</code> in a module compiled into several targets (helpers under
+  <code>tests/</code> declared with <code>mod support;</code> by several test files) is unfulfilled
+  wherever the lint does not fire, so the old advice could not work. In a
+  module file the finding now names the form that does: a reasoned
+  <code>#[expect]</code> on the <code>mod</code> declaration in each target where the lint fires.
+  The rule's repair text also names the structural repairs (one
+  integration-test target, or a dev-dependency support crate). New fixtures
+  <code>acc-shared-test-module</code> and <code>rej-shared-test-allow</code>.</li>
+<li>
+<p>TAU-X001 accepts a reasoned file-level <code>#![allow(dead_code, reason =
+  "...")]</code> in a module under <code>tests/</code> or <code>benches/</code> that is not the root of a
+  Cargo target (#59, RFC <code>2026-11-21-shared-test-module-allow</code>). An
+  unreasoned one, another lint or group, <code>cfg_attr</code>, a target root, or any
+  file in <code>src/</code>, <code>examples/</code> or the build script is still reported. Target
+  roots come from <code>cargo metadata</code>. <code>tauten_check::SourceFile</code> gains
+  <code>is_target_root</code>, and <code>scan::LintException</code> gains <code>reasoned</code>.</p>
+</li>
+<li>
+<p>TAU-N002 no longer promises a proof discharge (#57): its repair text said a
+  recorded never-fails proof discharges a lossy cast, but only TAU-N001 and
+  TAU-P003 are subsumable (a cast never fails, it changes the value). The text
+  now points to a lossless or checked conversion, <code>cargo tauten obligations
+  --list</code> labels TAU-N002 entries as not dischargeable by a proof, and a test
+  ties every repair text that promises a discharge to the subsumable rules. No
+  verdict changes.</p>
+</li>
+<li>
+<p><code>cargo tauten proofs reconcile</code> (#50): in a two-parent merge whose
+  human-authored conflicts are resolved, checks the resolved <code>claims.toml</code>
+  against both parents' recorded claims (TAU-R002 twice, decided together by
+  the proved <code>control::admit</code>), regenerates the declared translation, and
+  writes a <code>pending-merge</code> record (<code>version: 2</code>, <code>parents</code>, <code>registry</code>; no
+  results). A pending record is never evidence: it subsumes nothing, <code>proofs
+  export</code> refuses it, the ship level reuses nothing, and a v1 reader refuses
+  it. It stays the TAU-R002 baseline until a gate on a snapshot of the merge
+  commit (its parents checked against the record) proves every claim.</p>
+</li>
+<li>
+<p>A missing proof tool no longer overwrites the record (#52): when the gate
+  cannot start, prints nothing, or reports only <code>tools</code> missing, <code>cargo tauten
+  proofs</code> still prints a <code>tool-missing</code> outcome per claim and exits 1, but
+  leaves <code>proofs/claims.json</code> byte-identical (or absent), so the same command
+  can be retried from the clean checkout. A gate that started and then failed
+  (drift, build, audit, mutants) is recorded as before.</p>
+</li>
+<li>
+<p>Draft claim entries (#49, RFC <code>2026-11-21-draft-claim-entries</code>):
+  <code>cargo tauten proofs draft [--crate &lt;package&gt;] [--inventory &lt;file&gt;]</code>
+  prints a unified diff to <code>proofs/claims.toml</code> for new or changed
+  functions, ready for <code>git apply</code> after review; empty stdout and exit 0
+  when there is nothing to draft. It runs <code>[gate] try</code> with no mutant
+  selected (tools, extract, drift, build, audit), joins each theorem to the
+  fully qualified extracted declaration the audit names as its subject
+  (never a short name; a loop's theorems join its function only through the
+  translation's <code>loop</code> header), and locates each <code>[[mutant]]</code> no claim lists
+  by its unique site. <code>total</code> and <code>subsumes</code> are suggested only for a
+  premise-free total theorem about the function itself, and <code>subsumes</code>
+  only on an unconditional claim. Existing claims are only extended in
+  place; comments, other entries and <code>[[amend]]</code> are kept byte for byte,
+  and a second draft is empty. Unknown packages, missing tools, a stale
+  translation, ambiguous or contradictory associations and layouts it
+  cannot edit refuse with no patch (exit 1). It writes no file, runs no
+  mutant and grants no proof credit; exit 0 is never a gate result. The
+  template's <code>Audit.lean</code> prints <code>SUBJECT &lt;theorem&gt; &lt;function&gt;</code> and
+  <code>gate.py</code> emits it as <code>{"theorem", "subject"}</code> (read only by the draft;
+  projects set up earlier copy both from <code>cargo tauten init --proofs</code> or use
+  <code>--inventory</code>, a version-1 JSON of functions, theorems and mutants checked
+  against the translation and the audit). Fixture <code>fixtures/proofs-draft</code>.</p>
+</li>
+<li>
+<p>Publishing waits for the full proofs gate on the tag commit (#53):
+  <code>release.yml</code> calls <code>proofs.yml</code> (extract, drift, Lean build and audit,
+  every mutant) in the same run as the CI gate, and <code>publish</code> needs both, so a
+  failed, cancelled, timed-out or skipped proofs job blocks it. A
+  <code>workflow_dispatch</code> of <code>release.yml</code> rehearses the same path without
+  publishing. The hosted proofs timeout is 150 minutes (a full run takes about
+  an hour; 60 minutes cancelled runs that would have passed).</p>
+</li>
+<li>
+<p>An empty proof inventory never passes (#51): <code>cargo tauten proofs</code> (any
+  <code>--level</code>) and <code>cargo tauten verify</code> over a <code>proofs/claims.toml</code> with no
+  <code>[[claim]]</code> exit 1, say that no theorem was checked, and write no record; a
+  previous record still triggers TAU-R002. The run's verdict is now decided by
+  the proved <code>control::admit</code> (one <code>Pass</code> control per claim), which refuses an
+  empty required set. Projects without <code>proofs/claims.toml</code> are unaffected.</p>
+</li>
+</ul></section><section class="release" id="v0.0.5" aria-labelledby="v0.0.5-h"><h2 id="v0.0.5-h"><a class="anchor" href="#v0.0.5">0.0.5</a></h2><p class="release-meta small muted"><time datetime="2026-11-21">2026-11-21</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.5">Release v0.0.5</a></p><ul>
+<li>
+<p><code>cargo-tauten</code> packages: the <code>cargo tauten new</code> templates' manifests are
+  <code>Cargo.toml.in</code> (cargo leaves any subdirectory with a <code>Cargo.toml</code> out of a
+  package, so the first v0.0.5 publish failed its verification and uploaded
+  nothing). The CI gate runs <code>cargo package</code> over every published crate.</p>
+</li>
+<li>
+<p>Inherit a dependency's claim (A7b, #48): <code>inherit =
+  "crate@version:function"</code> in <code>proofs/claims.toml</code> reuses a claim the
+  dependency ships in the <code>claims.json</code> next to its <code>Cargo.toml</code>
+  (<code>cargo tauten proofs export --crate &lt;name&gt;</code> writes it; <code>tauten</code> ships
+  its publish claims). The badge is the proved <code>badge::inherit</code>
+  (<code>inherited_badge_le</code>: never stronger than the inherited one;
+  <code>inherit_needs_version_and_record</code>): a version other than the locked one
+  or a missing record establishes nothing. The record carries the
+  dependency's theorems and assumptions. Mutants <code>inherit-ignores-version</code>,
+  <code>inherit-strengthens</code>. Fixture <code>fixtures/inherit</code>.</p>
+</li>
+<li>
+<p>Cadence levels and incremental proofs (D2, #36). Each claim records its
+  named inputs (<code>inputs</code> in <code>proofs/claims.json</code>): the declarations of the
+  translation its function reaches, the Lean files stating and proving its
+  theorems (with their local imports), its mutants' definitions and the
+  toolchain pins. <code>cargo tauten proofs --level ship</code> runs every stage
+  (extract, drift, build, audit) but re-runs only the mutants of claims
+  whose inputs the proved <code>binding::fresh</code> finds changed (or that were not
+  proved), and reuses the other kills from the record; an edit to code the
+  translation does not reach re-runs no mutant. <code>cargo tauten ship</code> is
+  <code>check</code> then the gate at ship level; <code>cargo tauten verify --level
+  fast|ship|full</code> runs a cadence level. Needs <code>[gate] try</code>.</p>
+</li>
+<li>
+<p>Mutant verdicts report what broke directly (#39, with #40 and #47): the
+  template gate emits, per mutant, the declarations whose own proof failed
+  (<code>direct</code>) apart from those that failed only through them
+  (<code>dependent</code>). A <code>[[mutant]]</code> may declare <code>direct = [...]</code>, the exact set
+  of declarations (helpers included) that must fail directly; that kill is
+  decided by the proved <code>control::admit</code>: for expected <code>{L}</code>, <code>{L}</code>
+  calibrates, <code>{H}</code> and <code>{L, H}</code> do not, nothing observed or an
+  infrastructure failure never does. Without <code>direct</code>, the claim-level
+  policy is unchanged.</p>
+</li>
+<li>
+<p>The gate runs as the owner of the checkout, not root (#42):
+  <code>docker/entry.sh</code> (the tools services' entry point) hands the cache
+  volumes to that uid once and drops privileges with <code>setpriv</code>; root is an
+  explicit opt-in (<code>TAUTEN_GATE_ROOT=1</code>). The gate prints the uid it ran
+  as. <code>tests/host.rs</code> overwrites a 0444 file and expects
+  <code>PermissionDenied</code>, so a root-run gate fails it exactly as a host would.</p>
+</li>
+<li>
+<p>The fast extract stage builds the translation in Lean (#46):
+  <code>cargo tauten proofs extract</code> and <code>check --extract</code> now also compile the
+  fresh Lean (without the proofs), so a name Lean reserves (a parameter
+  <code>given</code>) or a generated-name clash (a parameter named like its module)
+  fails at extract speed, located at the Rust line, instead of one full
+  gate round later. Lean decides; there is no keyword list. About 10-15 s
+  more per crate. Fixtures <code>rej-lean-keyword</code>, <code>rej-name-clash</code>.</p>
+</li>
+<li>
+<p>Declared layers inside a tier (B6, #21): <code>[workspace.metadata.tauten] layers = [...]</code> orders a workspace's crates; each member names its <code>layer</code> and may depend only on the same or an earlier one. New rule TAU-T004, decided by the proved <code>layer::finding</code> (<code>layer_finding_iff</code>, <code>unknown_layer_is_finding</code>) over an order proved reflexive, transitive, antisymmetric and total; mutants <code>layer-strict</code>, <code>layer-inverted</code>, <code>unknown-layer-clean</code>. A missing, unknown or malformed declaration is a finding. Fixture workspace <code>fixtures/layers</code>.</p>
+</li>
+<li>
+<p>Scanner mutation gate and a rewritten <code>proofs/TRUST.md</code> (T7, #34). The CI
+  gate runs <code>cargo-mutants</code> over the fact extraction (<code>scan.rs</code>,
+  <code>effects.rs</code>, <code>manifest.rs</code>) and requires zero survivors: 147 mutants,
+  125 caught, 22 unviable. New unit tests cover every type form the effect
+  classifier reads, crate type expansion, where clauses, walked modules
+  and impls, and <code>cfg_attr</code> exceptions; two branches that no input could
+  reach were removed, one equivalent mutant is excluded with its reason.
+  <code>scripts/mutants</code> now builds each parallel job in its own target
+  directory (they used to share the image's, and tested each other's
+  binaries). <code>TRUST.md</code> lists what is proved, compiler-enforced and tested,
+  and what each scanner does not see.</p>
+</li>
+<li>
+<p>Evidence that cannot go stale (A5, #9). <code>#[evidence(subject = T,
+  exclusive)]</code> adds <code>mint_exclusive</code>, returning a <code>Permit</code> that holds the
+  only <code>&amp;mut T</code>: check and act are one chained call (<code>Permit::act</code>);
+  mutation between them, minting outside the module and cloning do not
+  compile (three new compile-fail tests). <code>#[evidence(subject = T,
+  stamped)]</code> with <code>T: Versioned</code> adds <code>mint_stamped</code>, returning a
+  <code>Stamped</code> fact that crosses an <code>await</code> or a queue without borrowing;
+  <code>Stamped::verify</code> returns <code>Stale</code> once the version moved.
+  <code>#[derive(Bindings)]</code> generates <code>diff</code> (every differing field, new fields
+  included) and <code>revalidate</code> into <code>Evidence&lt;'_, Fresh&lt;T&gt;&gt;</code>. Proved for an
+  example kernel action (<code>tauten_proof_instances::stamped::bump</code>):
+  <code>stale_refused</code> (a stale stamp returns <code>Stale</code> and leaves the state
+  unchanged) and <code>fresh_accepted</code>; mutants <code>stamp-ignored</code>,
+  <code>stale-accepted</code>. <code>tauten::origin</code> documents each carrier's label and the
+  three hand-written token shapes it replaces.</p>
+</li>
+<li>
+<p>Atomic publish, proved (A7, #11). <code>proofs/Tauten/Durable.lean</code> runs the
+  publish machine against a filesystem model with crashes; each filesystem
+  guarantee is a switchable flag and a named assumption
+  (<code>proofs/assumptions.toml</code>): <code>FS.rename-atomic</code>, <code>FS.sync-file</code>,
+  <code>FS.sync-dir</code>, <code>FS.exclusive-create</code>. Proved over the extracted steps:
+  <code>publish_old_or_new</code> (a reader, and a reader after any crash, sees the old
+  or the new content; under rename-atomic and sync-file),
+  <code>publish_durable_on_done</code> (adding sync-dir, <code>tauten::publish::durable</code>
+  phases survive any crash with the new content),
+  <code>create_new_never_replaces</code> (under exclusive-create, for the new
+  <code>tauten::publish::create_step</code>, which moves with <code>RenameNoReplace</code>),
+  <code>publish_stops_on_failure</code> and <code>publish_frame</code> (no assumption),
+  <code>profile_mono</code> and <code>crash_characterisation</code>. One profile satisfies every
+  assumption (<code>posix_satisfies</code>) and reaches <code>Done</code>; three necessity
+  theorems show each property failing with its guarantee switched off.
+  Mutants <code>skip-sync</code>, <code>failure-ignored</code>, <code>durable-too-early</code>,
+  <code>replace-under-create-new</code>, with <code>rename-before-sync</code> from A6. tauten's
+  own proof gate now derives each theorem's assumptions (<code>PREMISES</code>,
+  <code>ESTABLISHES</code>), as the template's does; the machine library gains
+  <code>RSysReachable</code> and <code>rsys_of_model</code> for extracted steps.</p>
+</li>
+<li>
+<p>The agent profile (<code>AGENTS.tauten.md</code>) opens with the architecture on
+  one page (A12, #16): decisions are total kernel functions with claims,
+  protocols are machines, the world is reached only through capabilities
+  in the effect row, a check travels as evidence or a binding, a result is
+  shown with the badge its controls admit, registries are never weakened.
+  Each line names the rule or type that enforces it and labels it proved,
+  compiler-enforced, lint, tested or not checked.</p>
+</li>
+<li>
+<p><code>cargo tauten new &lt;path&gt; [--tauten-path DIR]</code> (A12, #16) writes a fresh
+  workspace: a kernel crate with one total function (<code>affordable</code>) and its
+  claim, theorem and two mutants (through the <code>init --proofs</code> template), a
+  core crate with a <code>Clock</code> capability, <code>#[effects]</code> (<code>effects =
+  "required"</code>) and one <code>tauten::origin::Evidence</code> check (to be replaced by
+  the A5 permit), and a thin edge binary calling <code>run(caps, args)</code>. It
+  passes <code>cargo tauten check</code> with no findings (tested); after
+  <code>sh proofs/refresh.sh</code>, <code>cargo tauten proofs</code> records the claim <code>proved</code>
+  with both mutants killed (run once locally, 102 s). Acceptance trial: 3
+  of 3 fresh Claude Sonnet 5.5 sessions given only the profile added a
+  feature to the template and passed <code>check</code> and the proof gate
+  (<code>docs/dry-runs/a12-profile-2026-11-20.md</code>; one request, $0.39).</p>
+</li>
+<li>
+<p><code>cargo tauten obligations [--list]</code> (D3, #37): in kernel crates,
+  arithmetic and indexing findings (TAU-N001, TAU-N002, TAU-P003) are
+  listed as proof obligations: proved (subsumed by a recorded proof that the
+  function never fails), open and baselined, or open. The counts are the
+  ones <code>check</code> decides (proved = subsumed, open and baselined = accepted by
+  the baseline); it fails when an obligation is open. The rules' fix texts
+  say so.</p>
+</li>
+<li>
+<p><code>cargo tauten generated [--only NAME…]</code>: the generated-file stage (A11,
+  #15). Each <code>[[workspace.metadata.tauten.generated]]</code> entry names a
+  command and either the committed file its standard output must equal
+  (<code>stdout</code>) or the files it writes (<code>outputs</code>, run in a scratch copy so the
+  checkout is never written). Files are compared with the proved
+  <code>same_bytes</code> and the stage is decided by the proved <code>control::admit</code>: one
+  byte is <code>drift</code>, and an output the command did not produce or a failing
+  command is <code>failed</code>, never <code>ok</code>. tauten declares <code>rules</code>
+  (<code>docs/RULES.md</code>, now checked this way by the CI gate) and <code>translation</code>
+  (<code>proofs/Extracted</code>, needs Docker).</p>
+</li>
+<li>
+<p>Which compiler messages become findings, whether a rule applies to a
+  target (test targets included) and whether <code>check</code> passes are decided by
+  the proved kernel (<code>compiler::kept</code>, <code>applies</code>, <code>passes</code>; T5, #32):
+  <code>kept_iff</code>, <code>applies_spec</code>, <code>check_passes_iff</code>, <code>warnings_never_fail</code>.
+  The pinned toolchain's real compiler output on <code>fixtures/cases</code> is
+  recorded in <code>crates/cargo-tauten/tests/golden/</code> and replayed by a test;
+  <code>scripts/record-golden</code> re-records it for a new toolchain
+  (<code>TAUTEN_RECORD_COMPILER_JSON</code> keeps the raw messages).</p>
+</li>
+<li>
+<p>TAU-T001, TAU-T003 and TAU-K003 are decided by the proved kernel
+  (<code>layout::t001</code>, <code>t003</code>, <code>k003</code>; T6, #33). <code>no_std</code> is no longer found by
+  substring: only <code>#![no_std]</code> or <code>#![cfg_attr(not(test), no_std)]</code> satisfies
+  TAU-K003; <code>no_std</code> under any other condition (a feature, nesting) and a
+  library root that does not parse are findings. New fixtures
+  <code>rej-conditional-no-std</code> and <code>acc-kernel-not-test</code>.</p>
+</li>
+<li>
+<p>Lint exceptions are decided by the proved kernel in more places (T4,
+  #31). <code>exception::decide</code> takes how the attribute is written and every
+  rule it may cover: an exception inside <code>cfg_attr</code> is never accepted in a
+  kernel crate (<code>conditional_never_allowed_in_kernel</code>), and an exception for
+  a lint group (<code>warnings</code>, <code>clippy::all</code>, <code>unused</code>, …) is decided as the
+  worst over every profile rule the group may contain
+  (<code>group_never_weaker</code>). TAU-X003 is <code>exception::loosens</code> (<code>x003_iff</code>) and
+  now also sees groups in <code>[lints]</code>. The scanner reads exceptions inside
+  <code>cfg_attr</code> (reported under TAU-X001 when they <code>allow</code>) and in <code>tests/</code>,
+  <code>benches/</code>, <code>examples/</code> and the build script; in test targets a rule that
+  does not apply to tests covers nothing. New reject fixtures:
+  <code>rej-cfg-attr-allow</code>, <code>rej-group-allow</code>, <code>rej-test-exception</code>.</p>
+</li>
+</ul></section><section class="release" id="v0.0.4" aria-labelledby="v0.0.4-h"><h2 id="v0.0.4-h"><a class="anchor" href="#v0.0.4">0.0.4</a></h2><p class="release-meta small muted"><time datetime="2026-11-20">2026-11-20</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.4">Release v0.0.4</a></p><ul>
+<li>
+<p><code>cargo tauten proofs try --theorems T… | --mutants M…</code>: the developer
+  loop. Runs extract, drift, build and audit, then only the mutants of the
+  claims stating those theorems (or the named mutants), in parallel; prints
+  each affected claim as <code>PARTIAL</code>, never writes <code>proofs/claims.json</code>, and
+  says it is not a gate result. Needs <code>[gate] try</code> (the template writes it).
+  On tauten itself, one theorem's two mutants take 78 s against about 25
+  minutes for the full gate.</p>
+</li>
+<li>
+<p><code>cargo tauten proofs</code> gates a snapshot of the committed <code>HEAD</code> (<code>git
+  archive</code> into a private directory) instead of the live working tree, so
+  the checkout may be edited while a long gate runs; uncommitted changes in
+  the workspace are refused, and <code>proofs/claims.json</code> records the <code>commit</code>
+  it is about. <code>--live</code> keeps the old behaviour (any edit during the run is
+  drift). Outside Git, the live tree is gated as before.</p>
+</li>
+<li>
+<p><code>tauten::machine</code>: a protocol as a pure step function (<code>Machine</code>), with
+  <code>run</code> and <code>replay</code> (compare a recorded tape of events and commands). The
+  Lean library <code>Tauten.Machine</code> (shipped in the proofs template as
+  <code>Proofs/TautenMachine.lean</code>) proves the induction once: <code>inv_of_step</code>,
+  <code>inv_run</code>, <code>rinv_of_step</code> for extracted steps that return a <code>Result</code>,
+  <code>sys_inv_of_step</code> against a world that interprets commands and takes
+  adversary steps, and <code>discharged_of_inv</code>. Worked instance:
+  <code>tauten::publish</code> (write, sync, rename, sync the directory; remove the
+  temporary file on failure), proved over its translation to leave no
+  temporary file behind in any reachable terminal phase, with no
+  filesystem assumption.</p>
+</li>
+<li>
+<p>Every rule states its <code>family</code> (safety, obligation, style), exactly what it
+  decides (<code>invariant</code>), what it reads (<code>sees</code>), what it does not see
+  (<code>dominion</code>), whether it is <code>complete</code>, and its reject <code>fixtures</code>
+  (<code>docs/RULES.md</code>, <code>cargo tauten explain</code>). Proved laws: an incomplete rule
+  never blocks (only TAU-S002 is incomplete), an input a rule could not read
+  is never clean (a source file <code>syn</code> cannot parse is now reported under each
+  source-scanning rule instead of being skipped), and a complete rule that
+  blocks must name a reject fixture or the rule table is invalid. Nine new
+  reject fixtures cover the rules that had none.</p>
+</li>
+<li>
+<p><code>cargo tauten proofs extract [--crate &lt;dir&gt;]</code> and <code>cargo tauten check
+  --extract</code> (TAU-K004): translate the proved kernel crates without building
+  the proofs and report the first error with its location; code that
+  translates only through opaque library functions (axioms) is refused too.
+  Without the toolchain the result is tool-missing, never clean. Needs
+  <code>[gate] extract</code> in <code>proofs/claims.toml</code> (the template writes it). The
+  agent profile's kernel section is generated from <code>shapes.toml</code>, whose
+  every entry is a fixture re-checked against the pinned toolchain
+  (<code>scripts/extract-fixtures</code>): integer casts and derived <code>PartialEq</code> do
+  translate at this pin; trait objects, floats, slices of borrowing
+  structs, early returns across two loops, <code>match</code> on <code>get</code> in a loop and
+  iterator chains do not. The planned syntax lint (old TAU-K004 plan) and
+  <code>#[kernel]</code> macro are dropped.</p>
+</li>
+<li>
+<p>TAU-H001: release builds must check integer overflow
+  (<code>overflow-checks = true</code> under <code>[profile.release]</code> in the workspace
+  Cargo.toml, with no per-package or <code>.cargo/config.toml</code> override turning it
+  off). A value tauten cannot read is never clean. Decided by the proved
+  <code>tauten_check_kernel::manifest::hardening</code>; <code>cargo tauten init --write</code>
+  adds the setting.</p>
+</li>
+<li>
+<p>Named assumptions are derived, not just declared. Tag a Lean proposition
+  <code>@[tauten_assumption "ID"]</code> (template file <code>Proofs/TautenAssumption.lean</code>);
+  the audit derives which assumptions each theorem's hypotheses use, and a
+  claim's <code>assumes</code> must be exactly that list. A claim with assumptions names
+  a <code>witness</code> theorem showing they can hold together; optional <code>necessity</code>
+  theorems must pass like theorems. Decided by the proved
+  <code>tauten_check_kernel::assumption::assumptions_ok</code>. Existing proofs
+  directories: copy the template's <code>Audit.lean</code>, <code>gate.py</code> and
+  <code>Proofs/TautenAssumption.lean</code>.</p>
+</li>
+<li>
+<p>TAU-R002: a recorded proof claim may not be weakened. <code>proofs/claims.toml</code>
+  may not drop a theorem or mutant recorded in the committed
+  <code>proofs/claims.json</code>, nor add an assumption, unless an <code>[[amend]]</code> entry
+  (<code>file</code>, <code>function</code>, <code>kind</code>, <code>name</code>, <code>reason</code>) names the change;
+  <code>cargo tauten proofs</code> refuses to re-record otherwise. Decided by the proved
+  <code>tauten_check_kernel::registry::conserves</code>.</p>
+</li>
+</ul></section><section class="release" id="v0.0.3" aria-labelledby="v0.0.3-h"><h2 id="v0.0.3-h"><a class="anchor" href="#v0.0.3">0.0.3</a></h2><p class="release-meta small muted"><time datetime="2026-11-19">2026-11-19</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.3">Release v0.0.3</a></p><ul>
+<li><code>cargo tauten proofs</code>: runs a project's proof gate (<code>proofs/claims.toml</code>)
+  and prints one JSON outcome per claim (<code>proved</code>, <code>drift</code>,
+  <code>build-failed</code>, <code>audit-failed</code>, <code>mutant-survived</code>, <code>tool-missing</code>);
+  records them in <code>proofs/claims.json</code>.</li>
+<li><code>cargo tauten init --proofs &lt;crate&gt;</code> writes the Charon/Aeneas/Lean proof
+  template for a kernel crate.</li>
+<li>In kernel crates, TAU-N001/TAU-P003 findings inside a function with a
+  current, total, proved claim are reported as subsumed by the proof
+  (JSON field <code>subsumed_by</code>, severity <code>warning</code>), not as errors.</li>
+<li>Rule-table validation and proof subsumption are decided by
+  <code>tauten-check-kernel</code> and proved in Lean (<code>docs/proofs/README.md</code>).</li>
+<li><strong>Breaking:</strong> <code>#[refined]</code> accepts only an inner type that is
+  <code>tauten::refine::Frozen</code> (primitives, <code>String</code>, and <code>Box</code>, <code>Option</code>, <code>Vec</code>,
+  arrays, slices, tuples and <code>&amp;'static</code> references of those). A <code>Cell</code> could
+  be changed through <code>get()</code>, and a user-written <code>Clone</code> could break the
+  predicate, after <code>try_new</code> checked it. Every refined type implements
+  <code>tauten::refine::Refined</code>. Reported by an external review.</li>
+<li>Proof fingerprints include the workspace <code>Cargo.toml</code> (without <code>version</code>
+  lines) and the toolchain pin.</li>
+</ul></section><section class="release" id="v0.0.2" aria-labelledby="v0.0.2-h"><h2 id="v0.0.2-h"><a class="anchor" href="#v0.0.2">0.0.2</a></h2><p class="release-meta small muted"><time datetime="2026-11-18">2026-11-18</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.2">Release v0.0.2</a></p><ul>
+<li><code>#[refined]</code> rejects derives and attributes that could construct a value
+  without checking the predicate (<code>Default</code>, <code>Deserialize</code>, ...). Allowed:
+  <code>Clone</code>, <code>Copy</code>, <code>Debug</code>, <code>PartialEq</code>, <code>Eq</code>, <code>PartialOrd</code>, <code>Ord</code>, <code>Hash</code>.</li>
+<li>TAU-A002: <code>Authority::acquire</code> is banned outside the edge by resolved path,
+  so aliases and function pointers are caught; cap-std's ambient constructors
+  are banned under TAU-A001.</li>
+<li>TAU-A001's repair hint no longer names a type that does not exist.</li>
+<li><code>#[ensures]</code> violation messages show <code>old(..)</code> as written.</li>
+<li>The ratchet's TAU-R001 names the crate's real tier.</li>
+<li>Rule tables missing a rule the checker emits are rejected.</li>
+<li>Releases use crates.io trusted publishing.</li>
+</ul></section><section class="release" id="v0.0.1" aria-labelledby="v0.0.1-h"><h2 id="v0.0.1-h"><a class="anchor" href="#v0.0.1">0.0.1</a></h2><p class="release-meta small muted"><time datetime="2026-11-18">2026-11-18</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.1">Release v0.0.1</a></p><p>First release.</p></section>
+<p class="small muted">Reproduced from <a href="https://github.com/tauten-dev/tauten/blob/719d4e982a4e6d0d778d6fea2c71025323d638a1/CHANGELOG.md"><code>CHANGELOG.md</code></a> at <code>719d4e9</code>. 1 clause naming an adopting project is left out.</p>
+</div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="/changelog/">Changelog</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://github.com/tauten-dev/tauten/issues/new/choose">Feedback</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.1.0/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/719d4e982a4e6d0d778d6fea2c71025323d638a1"><code>719d4e9</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
+<script src="/assets/copy.js?v=9977e598" defer></script>
+</body>
+</html>
