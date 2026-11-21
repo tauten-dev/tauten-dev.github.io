@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TAU-T004: Declared layers point backwards · tauten</title>
+<meta name="description" content="TAU-T004: Declared layers point backwards. Inside a tier, a workspace may order its crates in named layers (`[workspace.metadata.tauten] layers`); a crate that uses a later layer turns the intended dependency order into a cycle waiting to happen.">
+<link rel="canonical" href="https://tauten.dev/rules/tau-t004/">
+<meta property="og:title" content="TAU-T004: Declared layers point backwards · tauten">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tauten.dev/rules/tau-t004/">
+<meta property="og:description" content="TAU-T004: Declared layers point backwards. Inside a tier, a workspace may order its crates in named layers (`[workspace.metadata.tauten] layers`); a crate that uses a later layer turns the intended dependency order into a cycle waiting to happen.">
+<meta property="og:image" content="https://tauten.dev/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The tauten mark and the headline: A discipline for Rust, with proofs over the shipped code.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F8F8F3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151D19">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css?v=58194cb0">
+<script src="/assets/theme.js?v=58194cb0"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap bar">
+<a class="brand" href="/"><img class="logo-light" src="/assets/tauten-icon.svg" width="24" height="24" alt=""><img class="logo-dark" src="/assets/tauten-icon-dark.svg" width="24" height="24" alt="">tauten</a>
+<nav class="site-nav" aria-label="Primary"><ul><li><a href="/start/">Start</a></li><li><a href="/proofs/">Proofs</a></li><li><a href="/rules/" aria-current="page">Rules</a></li><li><a href="/status/">Status</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li></ul></nav>
+</div></header>
+<main id="main">
+<div class="wrap page-head"></div><div class="wrap"><p class="eyebrow"><a href="/rules/">Rules</a> / <span class="id">TAU-T004</span></p>
+<h1 id="TAU-T004">Declared layers point backwards</h1>
+<div class="facts"><span class="chip">decided by Tauten</span> <span class="small muted">kernel</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">core</span> <span class="chip lvl lvl-deny">deny</span> <span class="small muted">edge</span> <span class="chip lvl lvl-deny">deny</span></div>
+<div class="facts small"><span>Applies to tests: <strong>yes</strong></span>
+<span>Exceptions: <strong>never</strong></span></div><h2 id="why">Why</h2><p>Inside a tier, a workspace may order its crates in named layers (<code>[workspace.metadata.tauten] layers</code>); a crate that uses a later layer turns the intended dependency order into a cycle waiting to happen.</p><h2 id="fix">Fix</h2><p>Move the shared code into the same or an earlier layer, or declare the crate in a later layer. Give every crate a <code>layer</code> from the workspace's list.</p><h2 id="explain">In the terminal</h2><div class="copy-line"><span class="prompt" aria-hidden="true">$</span><code>cargo tauten explain TAU-T004</code><button class="copy-btn" type="button" hidden data-copy="cargo tauten explain TAU-T004" aria-label="Copy command: cargo tauten explain TAU-T004">Copy</button></div><p class="cap">$ cargo tauten explain TAU-T004</p><div class="panel diag"><pre class="diag-body" tabindex="0" aria-label="cargo tauten explain TAU-T004"><code><span class="line">TAU-T004: Declared layers point backwards</span><span class="line"> </span><span class="line">Why: Inside a tier, a workspace may order its crates in named layers (`[workspace.metadata.tauten] layers`); a crate that uses a later layer turns the intended dependency order into a cycle waiting to happen.</span><span class="line"> </span><span class="line">Fix: Move the shared code into the same or an earlier layer, or declare the crate in a later layer. Give every crate a `layer` from the workspace&#x27;s list.</span><span class="line"> </span><span class="line">Decided by: Tauten</span><span class="line">Decides: When the workspace declares layers, every member names one of them and depends only on members of the same or an earlier layer.</span><span class="line">Sees: manifest; complete: yes</span><span class="line">Does not see: Dev- and build-dependencies. Workspaces that declare no `layers` are not checked.</span><span class="line">Applies to tests: yes</span><span class="line">Exceptions allowed: with #[expect(.., reason)]</span><span class="line">  kernel deny</span><span class="line">  core deny</span><span class="line">  edge deny</span></code></pre></div><nav class="pn" aria-label="Previous and next rule"><a href="/rules/tau-t003/">← TAU-T003</a><a href="/rules/tau-d001/">TAU-D001 →</a></nav></div>
+</main>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.0.6/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/acd52b318c7f845690919f228f12d2c10c64694e"><code>acd52b3</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
+<script src="/assets/copy.js?v=58194cb0" defer></script>
+</body>
+</html>

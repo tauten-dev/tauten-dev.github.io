@@ -1,11 +1,11 @@
 {
-  "core_commit": "bc4b9a45d90181ca6a4e34ab7b26b062f6e404f2",
-  "core_date": "2026-11-20",
-  "built_at": "2026-11-20T16:19:35+00:00",
-  "rules": 41,
+  "core_commit": "acd52b318c7f845690919f228f12d2c10c64694e",
+  "core_date": "2026-11-21",
+  "built_at": "2026-11-21T14:36:54+00:00",
+  "rules": 42,
   "fixtures": {
-    "reject": 38,
-    "accept": 4
+    "reject": 43,
+    "accept": 6
   },
   "published": true,
   "allow_stale_captures": false
