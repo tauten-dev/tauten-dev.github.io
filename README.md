@@ -88,10 +88,16 @@ Also checked: WCAG AA contrast of every colour pair in both themes
   not do), `/start/` (install, tiers, check, baseline, proofs, agent profile,
   commands), `/proofs/` (what "proved" means, the gate, the claims table,
   what is trusted), `/rules/` with one page per rule, `/status/` (benchmark,
-  known gaps, links to STATUS.md, ROADMAP.md, CHANGELOG.md and
-  `bench/README.md`). `/discipline/`, `/benchmark/`, `/enforcement/`,
+  known gaps, links to STATUS.md, ROADMAP.md, the changelog and
+  `bench/README.md`), `/changelog/` (`CHANGELOG.md` at the pinned commit,
+  one anchored section per release, linked to its GitHub release; a section
+  newer than `latest_release` or without a date is labelled Unreleased;
+  clauses naming an adopting project are left out through `OMIT` in
+  `sitegen/pages_changelog.py`, and any other mention fails the build). `/discipline/`, `/benchmark/`, `/enforcement/`,
   `/agents/` and `/crates/…` are redirects; `/agents/AGENTS.tauten.md` serves
   the raw agent profile; API docs live on docs.rs.
+- The footer links the changelog and a Feedback link to the core
+  repository's issue forms.
 - Palettes: paper (light) and paper-dark, shared with the sibling sites; the
   theme select in the footer offers System, Paper and Paper dark.
 

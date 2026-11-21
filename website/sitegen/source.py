@@ -13,10 +13,13 @@ from .errors import BuildError
 
 TIERS = ("kernel", "core", "edge")
 ENFORCERS = {"rustc": "Rustc", "clippy": "Clippy", "tauten": "Tauten", "convention": "Convention", "proof": "Proof"}
+# Heading for each rule-ID family letter on /rules/. rules.toml has no family
+# names, so they live here; a letter without an entry fails the build
+# (pages_ref.rules_index) instead of showing a bare "F · F" heading.
 FAMILIES = {
     "P": "Panics", "N": "Numbers", "E": "Errors", "M": "Matching", "S": "Stubs", "X": "Exceptions",
-    "U": "Unsafe", "A": "Authority", "G": "Globals", "C": "Concurrency", "O": "Output", "L": "Loops",
-    "K": "Kernel", "T": "Tiers", "D": "Docs", "R": "Ratchet",
+    "U": "Unsafe", "A": "Authority", "F": "Effects", "G": "Globals", "C": "Concurrency", "O": "Output",
+    "L": "Loops", "H": "Hardening", "K": "Kernel", "T": "Tiers", "D": "Docs", "R": "Ratchet",
 }
 CRATES = ("cargo-tauten", "tauten-check", "tauten", "tauten-macros")
 

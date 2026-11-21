@@ -162,7 +162,8 @@ def status(site: Site) -> None:
             ("CHANGELOG.md", "what each release changed"), ("bench/README.md", "the benchmark harness and reports")]
     for path, _ in docs:
         site.data.core.blob(path)  # fails the build if a linked file is gone
-    links = "".join(f"<li>{site.src(p)}: {w}</li>" for p, w in docs)
+    pages = {"CHANGELOG.md": '<a href="/changelog/">Changelog</a>'}  # core files the site renders as a page
+    links = "".join(f"<li>{pages.get(p) or site.src(p)}: {w}</li>" for p, w in docs)
     body = f"""{_head("Status", status_line(site))}
 <div class="wrap">
 <section id="benchmark"><h2>Benchmark</h2>

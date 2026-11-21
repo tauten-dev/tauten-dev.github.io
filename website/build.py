@@ -27,7 +27,7 @@ ROOT = HERE.parent
 OUT = ROOT / "public"
 sys.path.insert(0, str(HERE))
 
-from sitegen import checks, pages_docs, pages_home, pages_ref  # noqa: E402
+from sitegen import checks, pages_changelog, pages_docs, pages_home, pages_ref  # noqa: E402
 from sitegen.errors import BuildError  # noqa: E402
 from sitegen.site import Site  # noqa: E402
 from sitegen.source import Core, load, load_captures, load_results, load_snippets, status_item  # noqa: E402
@@ -63,6 +63,7 @@ def build(args: argparse.Namespace) -> int:
     pages_ref.rules_index(site)
     pages_ref.rule_pages(site)
     pages_docs.status(site)
+    pages_changelog.changelog(site)
     pages_docs.redirects(site)
     pages_docs.not_found(site)
 

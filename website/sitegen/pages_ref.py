@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 
+from .errors import BuildError
 from .render import copy_line, esc, inline_md, level_chip
 from .site import Site, ref_layout
 from .source import ENFORCERS, FAMILIES, TIERS, exceptions_label, level
@@ -27,13 +28,16 @@ def rules_index(site: Site) -> None:
     families = []
     current = None
     body_rows = []
+    missing = sorted({_family(r["id"]) for r in rules} - FAMILIES.keys())
+    if missing:
+        raise BuildError(f"no family heading for rule ID letter(s) {', '.join(missing)}; add them to FAMILIES in sitegen/source.py")
     for r in rules:
         fam = _family(r["id"])
         if fam != current:
             current = fam
             families.append(fam)
             body_rows.append(f'<tr class="fam" data-fam="{fam}"><th colspan="8" scope="colgroup" id="family-{fam.lower()}">'
-                             f'{fam} · {FAMILIES.get(fam, fam)}</th></tr>')
+                             f'{fam} · {FAMILIES[fam]}</th></tr>')
         exc = exceptions_label(r)
         lv = {t: level(r, t) for t in TIERS}
         cells = [f'<a class="id" href="/rules/{r["id"].lower()}/">{r["id"]}</a>', inline_md(r["title"]),

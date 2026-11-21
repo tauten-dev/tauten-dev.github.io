@@ -14,6 +14,7 @@ SITE_PAGES = {
     "docs/MAPPING.md": "/enforcement/",
     "docs/STATUS.md": "/status/",
     "docs/RULES.md": "/rules/",
+    "CHANGELOG.md": "/changelog/",
     "bench/README.md": "/benchmark/",
     "bench/PREREGISTRATION.md": "/benchmark/#preregistration",
     "crates/tauten-check/agents.md": "/agents/",

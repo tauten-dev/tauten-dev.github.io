@@ -149,9 +149,10 @@ class Site:
         gh = f"https://github.com/{self.config['repository']}"
         if self.repo_public:
             nav.append(f'<li><a href="{gh}">GitHub</a></li>')
-        footer = ["<li>MIT</li>"]
+        footer = ["<li>MIT</li>", '<li><a href="/changelog/">Changelog</a></li>']
         if self.repo_public:
             footer.append(f'<li><a href="{gh}">GitHub</a></li>')
+            footer.append(f'<li><a href="{gh}/issues/new/choose">Feedback</a></li>')
         if self.published:
             footer.append('<li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li>')
             footer.append(f'<li><a href="{self.docs_url}">docs.rs</a></li>')

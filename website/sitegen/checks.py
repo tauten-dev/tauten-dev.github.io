@@ -29,7 +29,10 @@ BANNED = [
 UNRELEASED = ["effects.lock"]
 
 # Exact sentences reproduced from core files that use those words in a
-# negative sense. They are removed before the grep; nothing else is excused.
+# negative sense, or (CHANGELOG.md on /changelog/) in a technical sense that
+# makes no claim about what tauten does for its users: a filesystem
+# guarantee assumed by a proof, a Lean gate or library that proves a named
+# theorem. They are removed before the grep; nothing else is excused.
 ALLOWED = [
     # docs/MAPPING.md
     'Not confinement: dependencies, unsafe, FFI, build scripts and unlisted crates keep ambient access. Claim "discipline", never "sandbox".',
@@ -42,6 +45,11 @@ ALLOWED = [
     "it does not sandbox anything.",
     # crates/tauten-check/rules.toml, TAU-U001
     "Every guarantee in this profile assumes safe Rust.",
+    # CHANGELOG.md, 0.0.6 and 0.0.5 (rendered on /changelog/)
+    "It stays the TAU-R002 baseline until a gate on a snapshot of the merge commit (its parents checked against the record) proves every claim.",
+    "proofs/Tauten/Durable.lean runs the publish machine against a filesystem model with crashes; each filesystem guarantee is a switchable flag and a named assumption (proofs/assumptions.toml): FS.rename-atomic, FS.sync-file, FS.sync-dir, FS.exclusive-create.",
+    "One profile satisfies every assumption (posix_satisfies) and reaches Done; three necessity theorems show each property failing with its guarantee switched off.",
+    "The Lean library Tauten.Machine (shipped in the proofs template as Proofs/TautenMachine.lean) proves the induction once: inv_of_step, inv_run, rinv_of_step for extracted steps that return a Result, sys_inv_of_step against a world that interprets commands and takes adversary steps, and discharged_of_inv.",
 ]
 
 
