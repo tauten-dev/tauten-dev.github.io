@@ -1,7 +1,7 @@
 {
-  "core_commit": "719d4e982a4e6d0d778d6fea2c71025323d638a1",
-  "core_date": "2026-11-21",
-  "built_at": "2026-11-21T23:46:20+00:00",
+  "core_commit": "bac9fdd1f4f2390f8c7fe2d95a6bc878e6149f42",
+  "core_date": "2026-11-22",
+  "built_at": "2026-11-22T04:15:23+00:00",
   "rules": 42,
   "fixtures": {
     "reject": 43,

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Changelog · tauten</title>
-<meta name="description" content="What each tauten release changed, up to 0.1.0.">
+<meta name="description" content="What each tauten release changed, up to 0.2.0.">
 <link rel="canonical" href="https://tauten.dev/changelog/">
 <meta property="og:title" content="Changelog · tauten">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tauten.dev/changelog/">
-<meta property="og:description" content="What each tauten release changed, up to 0.1.0.">
+<meta property="og:description" content="What each tauten release changed, up to 0.2.0.">
 <meta property="og:image" content="https://tauten.dev/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -29,10 +29,49 @@
 </div></header>
 <main id="main">
 <div class="wrap page-head"><h1>Changelog</h1>
-<p class="lede">What each release changed, from <a href="https://github.com/tauten-dev/tauten/blob/719d4e982a4e6d0d778d6fea2c71025323d638a1/CHANGELOG.md"><code>CHANGELOG.md</code></a> at <code>719d4e9</code>.</p></div>
+<p class="lede">What each release changed, from <a href="https://github.com/tauten-dev/tauten/blob/bac9fdd1f4f2390f8c7fe2d95a6bc878e6149f42/CHANGELOG.md"><code>CHANGELOG.md</code></a> at <code>bac9fdd</code>.</p></div>
 <div class="wrap">
-<nav aria-label="Releases"><ol class="releases"><li><a href="#v0.1.0">0.1.0</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.6">0.0.6</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.5">0.0.5</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.4">0.0.4</a> <time datetime="2026-11-20">2026-11-20</time></li><li><a href="#v0.0.3">0.0.3</a> <time datetime="2026-11-19">2026-11-19</time></li><li><a href="#v0.0.2">0.0.2</a> <time datetime="2026-11-18">2026-11-18</time></li><li><a href="#v0.0.1">0.0.1</a> <time datetime="2026-11-18">2026-11-18</time></li></ol></nav>
-<section class="release" id="v0.1.0" aria-labelledby="v0.1.0-h"><h2 id="v0.1.0-h"><a class="anchor" href="#v0.1.0">0.1.0</a></h2><p class="release-meta small muted"><time datetime="2026-11-21">2026-11-21</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.1.0">Release v0.1.0</a> · <a href="https://docs.rs/tauten/0.1.0/tauten/">docs.rs</a></p><p>Milestone 0.1.0: #54, #55, #58, #14 and #38. The publish driver (#13), the
+<nav aria-label="Releases"><ol class="releases"><li><a href="#v0.2.0">0.2.0</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.1.0">0.1.0</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.6">0.0.6</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.5">0.0.5</a> <time datetime="2026-11-21">2026-11-21</time></li><li><a href="#v0.0.4">0.0.4</a> <time datetime="2026-11-20">2026-11-20</time></li><li><a href="#v0.0.3">0.0.3</a> <time datetime="2026-11-19">2026-11-19</time></li><li><a href="#v0.0.2">0.0.2</a> <time datetime="2026-11-18">2026-11-18</time></li><li><a href="#v0.0.1">0.0.1</a> <time datetime="2026-11-18">2026-11-18</time></li></ol></nav>
+<section class="release" id="v0.2.0" aria-labelledby="v0.2.0-h"><h2 id="v0.2.0-h"><a class="anchor" href="#v0.2.0">0.2.0</a></h2><p class="release-meta small muted"><time datetime="2026-11-21">2026-11-21</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.2.0">Release v0.2.0</a> · <a href="https://docs.rs/tauten/0.2.0/tauten/">docs.rs</a></p><p>Milestone 0.2: #65, #64 and #60 (release issue #70). #61, #62, #66 and #68
+carry forward; adopter trials never gate a release.</p>
+<h5 id="v0.2.0-breaking">Breaking</h5>
+<ul>
+<li><strong><code>ReadDir</code> reads take a byte limit</strong> (#64, RFC
+  <code>2026-11-21-bounded-capability-reads</code>). <code>ReadDir::read</code> and
+  <code>ReadDir::read_to_string</code> now require a <code>Limit&lt;Bytes&gt;</code> and return
+  <code>Result&lt;_, ReadError&gt;</code>. The unbounded 0.1 calls no longer compile, so a
+  <code>ReadDir</code> bounds how much a call can return as well as where it can read.</li>
+</ul>
+<p><code>rust
+  // 0.1
+  let text = dir.read_to_string("app.toml")?;
+  // 0.2
+  use tauten::cap::{Bytes, Limit};
+  let text = dir.read_to_string("app.toml", Limit::&lt;Bytes&gt;::new(64 * 1024))?;</code></p>
+<p>A file of exactly the limit fits (a zero limit admits an empty file). One
+  byte more is <code>ReadError::TooLarge { limit }</code>, found by reading at most one
+  byte past the limit, and no prefix is returned. <code>ReadError</code> is
+  <code>#[non_exhaustive]</code> and converts into <code>std::io::Error</code> (too large becomes
+  <code>InvalidData</code>), so <code>?</code> still works in <code>io::Result</code> functions. Invalid UTF-8
+  within the limit is still <code>InvalidData</code>. Each chunk is charged through the
+  proved <code>tauten_check_kernel::budget::charge</code>. The IO adapter itself is
+  tested, not proved. The <code>fs</code> feature now depends on
+  <code>tauten-check-kernel</code>.</p>
+<h5 id="v0.2.0-added">Added</h5>
+<ul>
+<li><code>rsys_inv_of_step</code> in <code>Tauten.Machine</code> (and the shipped
+  <code>Proofs/TautenMachine.lean</code> template) (#60, RFC
+  <code>2026-11-21-result-world-induction</code>): invariant induction for an
+  extracted step that may fail, run against a world, with no total model.
+  <code>proofs/Tauten/MachineWorld.lean</code> is a worked miniature. It shows a
+  success that changes state and world, a refused input, and a corrupting
+  adversary that breaks the invariant. All of these are in the axiom audit.</li>
+<li><code>Env::only(names)</code> narrows an environment snapshot to the listed
+  variables without reading the process environment again. A removed name
+  cannot come back (#64).</li>
+<li>The CI gate builds the API docs of every crate with rustdoc warnings
+  denied; the five existing warnings are fixed (#65).</li>
+</ul></section><section class="release" id="v0.1.0" aria-labelledby="v0.1.0-h"><h2 id="v0.1.0-h"><a class="anchor" href="#v0.1.0">0.1.0</a></h2><p class="release-meta small muted"><time datetime="2026-11-21">2026-11-21</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.1.0">Release v0.1.0</a></p><p>Milestone 0.1.0: #54, #55, #58, #14 and #38. The publish driver (#13), the
 shared proof gate (#35) and bounded capability reads (#64) moved to 0.2.</p>
 <ul>
 <li>
@@ -482,10 +521,10 @@ shared proof gate (#35) and bounded capability reads (#64) moved to 0.2.</p>
 <li>Rule tables missing a rule the checker emits are rejected.</li>
 <li>Releases use crates.io trusted publishing.</li>
 </ul></section><section class="release" id="v0.0.1" aria-labelledby="v0.0.1-h"><h2 id="v0.0.1-h"><a class="anchor" href="#v0.0.1">0.0.1</a></h2><p class="release-meta small muted"><time datetime="2026-11-18">2026-11-18</time> · <a href="https://github.com/tauten-dev/tauten/releases/tag/v0.0.1">Release v0.0.1</a></p><p>First release.</p></section>
-<p class="small muted">Reproduced from <a href="https://github.com/tauten-dev/tauten/blob/719d4e982a4e6d0d778d6fea2c71025323d638a1/CHANGELOG.md"><code>CHANGELOG.md</code></a> at <code>719d4e9</code>. 1 clause naming an adopting project is left out.</p>
+<p class="small muted">Reproduced from <a href="https://github.com/tauten-dev/tauten/blob/bac9fdd1f4f2390f8c7fe2d95a6bc878e6149f42/CHANGELOG.md"><code>CHANGELOG.md</code></a> at <code>bac9fdd</code>. 1 clause naming an adopting project is left out.</p>
 </div>
 </main>
-<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="/changelog/">Changelog</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://github.com/tauten-dev/tauten/issues/new/choose">Feedback</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.1.0/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/719d4e982a4e6d0d778d6fea2c71025323d638a1"><code>719d4e9</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
+<footer class="site-footer"><div class="wrap"><ul><li>MIT</li><li><a href="/changelog/">Changelog</a></li><li><a href="https://github.com/tauten-dev/tauten">GitHub</a></li><li><a href="https://github.com/tauten-dev/tauten/issues/new/choose">Feedback</a></li><li><a href="https://crates.io/crates/cargo-tauten">crates.io</a></li><li><a href="https://docs.rs/tauten/0.2.0/tauten/">docs.rs</a></li><li>built from tauten@<a href="https://github.com/tauten-dev/tauten/tree/bac9fdd1f4f2390f8c7fe2d95a6bc878e6149f42"><code>bac9fdd</code></a></li><li><label class="theme" hidden>Theme <select id="theme-select"><option value="system">System</option><option value="light">Paper</option><option value="dark">Paper dark</option></select></label></li></ul></div></footer>
 <script src="/assets/copy.js?v=9977e598" defer></script>
 </body>
 </html>
