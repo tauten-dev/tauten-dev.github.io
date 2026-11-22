@@ -20,7 +20,9 @@ from __future__ import annotations
 
 import argparse
 import os
+import hashlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -51,6 +53,12 @@ def write_capture(name: str, ref: str, cmd: str, cwd: str, code: int, body: str,
     print(f"captured {name} (exit {code})")
 
 
+def tree_digest(root: Path) -> dict[str, str]:
+    """sha256 of every file under root (target/ excluded), by relative path."""
+    return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(root.rglob("*")) if p.is_file() and "target" not in p.relative_to(root).parts}
+
+
 def run(argv: list[str], cwd: Path, env: dict) -> tuple[int, str]:
     proc = subprocess.run(argv, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     return proc.returncode, proc.stdout
@@ -79,9 +87,10 @@ def main() -> None:
         env["PATH"] = f"{tmp / 'target' / 'debug'}{os.pathsep}{env['PATH']}"
         toolchain = src / "rust-toolchain.toml"
 
-        def cap(name: str, args: list[str], cwd: Path, shown_cwd: str, notes: list[str] | None = None) -> None:
+        def cap(name: str, args: list[str], cwd: Path, shown_cwd: str, notes: list[str] | None = None) -> int:
             code, out = run(["cargo", "tauten", *args], cwd, env)
-            write_capture(name, ref, "cargo tauten " + " ".join(args), shown_cwd, code, out, notes or [])
+            write_capture(name, ref, "cargo tauten " + shlex.join(args), shown_cwd, code, out, notes or [])
+            return code
 
         fixtures = src / "fixtures" / "cases"
         cap("check-fixtures", ["check"], fixtures, "fixtures/cases")
@@ -97,6 +106,20 @@ def main() -> None:
         for rule in rules:
             cap(f"explain-rule-{rule['id'].lower()}", ["explain", rule["id"]], src, ".")
         cap("profile-kernel", ["profile", "kernel"], src, ".")
+
+        # The advisory trial of docs/ADOPTING.md on fixtures/adopt (no tiers,
+        # no baseline): preview the tier plan, then the structure-only check
+        # with trial tiers. Both must leave every file byte for byte as it was.
+        adopt = src / "fixtures" / "adopt"
+        before = tree_digest(adopt)
+        cap("adopt-init", ["init"], adopt, "fixtures/adopt")
+        if tree_digest(adopt) != before:
+            sys.exit("cargo tauten init without --write changed fixtures/adopt")
+        cap("adopt-trial", ["check", "--structure-only", "--no-baseline", "--assume-tier", "*=core",
+                            "--assume-tier", "app=edge", "--format", "json"], adopt, "fixtures/adopt",
+            ["every file of fixtures/adopt compared before and after the run: unchanged"])
+        if tree_digest(adopt) != before:
+            sys.exit("the advisory trial changed fixtures/adopt")
 
         # init: a three-crate workspace with no tiers declared.
         ws = tmp / "init"
@@ -115,6 +138,7 @@ def main() -> None:
         shutil.copy(crate / "step1.rs", lib)
         cap("ratchet-1-baseline", ["baseline", "--output", "tauten-baseline.json"], ws, shown,
             ["src/lib.rs is step1.rs: one unwrap"])
+        cap("ratchet-1-check", ["check"], ws, shown, ["src/lib.rs is step1.rs; the baseline was just recorded"])
         shutil.copy(crate / "step2.rs", lib)
         cap("ratchet-2-check", ["check"], ws, shown, ["src/lib.rs is step2.rs: a second unwrap added"])
         cap("ratchet-3-refused", ["baseline", "--output", "tauten-baseline.json"], ws, shown,

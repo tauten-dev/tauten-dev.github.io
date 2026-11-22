@@ -1,0 +1,11 @@
+# core: bac9fdd1f4f2390f8c7fe2d95a6bc878e6149f42
+# cmd: cargo tauten init
+# cwd: fixtures/adopt
+# exit: 0
+# ---
+parse                        tier = "core"   (library; crates/parse/Cargo.toml)
+app                          tier = "edge"   (binary only; crates/app/Cargo.toml)
+Cargo.toml                   [profile.release] overflow-checks = true
+AGENTS.tauten.md             agent instructions
+
+Nothing written. Re-run with --write to apply; change any tier afterwards by hand.

@@ -47,6 +47,12 @@ the release switches live in `website/config.toml`:
    made at the pinned SHA and its `= rule:` / `= fix:` text equals `rules.toml`;
    every status row in `website/status-map.toml` resolves to exactly one
    STATUS.md row with a known state.
+   The adoption routes: the advisory route installs exactly
+   `latest_release` with the core's `rust-toolchain.toml` channel; the
+   `adopt-trial` capture records that `fixtures/adopt` was unchanged; the
+   Lean recipe's pin is an ancestor of `core_ref` whose workspace version is
+   the release it names, each checksum is the sha256 of the downloaded file
+   at that pin, and the vendored module equals `proofs/Tauten/Machine.lean`.
 5. `website/data/results.json` validates (a pending file must have no runs;
    every run needs model, date, n, CI, commit and raw data link).
 6. Banned wording (prevents, sandbox, formally verified, significant, any
@@ -85,9 +91,11 @@ Also checked: WCAG AA contrast of every colour pair in both themes
   design and reports stay in the core repository.
 - The site describes tauten, not any adopting project.
 - Pages, one column each: `/` (pitch, install, three examples, what it does
-  not do), `/start/` (install, tiers, check, baseline, proofs, agent profile,
-  commands), `/proofs/` (what "proved" means, the gate, the claims table,
-  what is trusted), `/rules/` with one page per rule, `/status/` (benchmark,
+  not do), `/start/` (install; the three adoption routes of
+  `docs/ADOPTING.md`: advisory trial, opt-in CI check, Lean module only;
+  tiers, check, proofs, agent profile, commands), `/proofs/` (what "proved"
+  means, the gate, the claims table, reusing one pinned Lean module, what
+  is trusted), `/rules/` with one page per rule, `/status/` (benchmark,
   known gaps, links to STATUS.md, ROADMAP.md, the changelog and
   `bench/README.md`), `/changelog/` (`CHANGELOG.md` at the pinned commit,
   one anchored section per release, linked to its GitHub release; a section

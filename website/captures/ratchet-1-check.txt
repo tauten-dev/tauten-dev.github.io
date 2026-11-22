@@ -1,0 +1,9 @@
+# core: bac9fdd1f4f2390f8c7fe2d95a6bc878e6149f42
+# cmd: cargo tauten check
+# cwd: website/scratch/ratchet
+# exit: 0
+# note: src/lib.rs is step1.rs; the baseline was just recorded
+# ---
+warnings (run with --warnings to list them):
+       1  TAU-D001  Documented public API
+tauten: 0 error(s), 1 warning(s), 2 accepted by the baseline
